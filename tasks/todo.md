@@ -135,7 +135,9 @@ Lead review complete: source/renderer checks and direct browser visual review pa
 - [x] Confirm explicit user authorization, destination and independent file ownership.
 - [x] Prepare PCV 0.1.4 and compatible MP 0.1.12 candidate packages and metadata.
 - [x] Write and review the collection README and detailed PCV operating/developer guide.
-- [ ] Review intended changes, clean-source deterministic packages and required evidence.
-- [ ] Commit, push and publish verified versioned assets, then advance main and verify public manifests.
+- [x] Review intended changes, clean-source deterministic packages and required evidence.
+- [x] Commit, push and publish verified versioned assets, then advance main and verify public manifests.
 
 Review and verification are recorded in release-v0.1.4-plan.md and the final publication report. Installed/game/provider behavior remains outside this release task.
+
+Review complete: two clean builds, exact nested ACK fixture and all eight downloaded release assets passed. Both PRE-ALPHA releases and public source/manifests verified. See the collection tasks/world-of-drama-llama-publication-2026-09-30.md. No live gameplay claim.

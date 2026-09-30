@@ -8,9 +8,9 @@ User authorized commit, push and publication to Francisco-boop-001/CHIM-Plugins.
 - [x] Write an informative, sarcastic World of Drama-Llama collection README and full PCV guide (lead; documentation only).
 - [x] Copy reviewed PCV source into plugins/private_conversation without moving MP's existing layout.
 - [x] Review every intended diff and call path, focused verification output, archive contents and documentation links.
-- [ ] Commit intended source, tag new versions, rebuild from clean committed source and compare bytes.
-- [ ] Push tags; upload draft assets, download and verify; publish releases before advancing main.
-- [ ] Verify public source, per-plugin update manifests, release status and hashes; record final review.
+- [x] Commit intended source, tag new versions, rebuild from clean committed source and compare bytes.
+- [x] Push tags; upload draft assets, download and verify; publish releases before advancing main.
+- [x] Verify public source, per-plugin update manifests, release status and hashes; record final review.
 
 Two existing gpt-6-luna Max coding owners are reused, each with Ponytail FULL and exclusive file ownership. A third independent documentation agent was attempted but the harness refused it with 'agent thread limit reached'; the lead writes documentation and reviews, not product code.
 
@@ -20,4 +20,4 @@ Both candidates remain PRE-ALPHA. Preserve old tags/assets and PCV companion pac
 
 ## Review
 
-Source, local package checks, documentation and independent README review accepted. External Stop All Dialogue wording qualified to match the evidence. Clean-source rebuild and public publication gates remain pending.
+All release gates completed. Source commit f1ab5191f65c0c5304467e041b48f037ada9b8b7; clean exports and all downloaded draft assets match. Both public PRE-ALPHA releases verified before main advanced. See the collection publication report. Live installation, provider/database and gameplay certification remain outside this task.
