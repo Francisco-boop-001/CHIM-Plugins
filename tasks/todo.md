@@ -188,7 +188,8 @@ Review: current PCV development source already uses the new observer API. Both f
 
 - [x] Confirm PCV-only authorization and isolate reviewed source from separate MP publication.
 - [x] Prepare and review PRE-ALPHA metadata, guides and explicit package expectations.
-- [ ] Verify focused release gates and deterministic clean-source artifacts; commit and tag.
-- [ ] Verify downloaded draft assets, publish before updating main and record public evidence.
+- [x] Verify focused release gates and deterministic clean-source artifacts; commit and tag.
+- [x] Verify downloaded draft assets, publish before updating main and record public evidence.
 
 Plan: tasks/release-v0.1.5-plan.md. No installation or gameplay certification is claimed.
+Review: 0.1.5 PRE-ALPHA published after focused checks, clean commit/tag exports and exact draft/public download equality. Public hub and PCV manifest now point at 0.1.5; separately published MP 0.1.13 remains unchanged. Source tag is immutable; tasks/release-v0.1.5-evidence.md and package review retain hashes, gates and runtime limits.

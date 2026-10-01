@@ -6,10 +6,10 @@ The user authorizes commit, push and publication. Prepare PCV 0.1.5 as PRE-ALPHA
 - [x] Freeze only reviewed nested PCV source and task evidence; verify copy hashes.
 - [x] Delegate version/docs/release notes and bounded packaging changes with exclusive ownership.
 - [x] Lead review every release diff and current behavior evidence; preserve limitations. Package gate is recorded below.
-- [ ] Commit only intended files; clean-source rebuild, tag and verify deterministic assets.
-- [ ] Push immutable tag, upload draft assets, download and compare hashes; publish before advancing main.
-- [ ] Merge any independently published main changes without overwriting MP; push main without force.
-- [ ] Verify public release/manifest/source, record final evidence and complete task checklist.
+- [x] Commit only intended files; clean-source rebuild, tag and verify deterministic assets.
+- [x] Push immutable tag, upload draft assets, download and compare hashes; publish before advancing main.
+- [x] Merge any independently published main changes without overwriting MP; push main without force.
+- [x] Verify public release/manifest/source, record final evidence and complete task checklist.
 
 Use an isolated worktree so the original work/mind-poisoning index remains untouched. The source release tag stays immutable. If main advances from the other publication, integrate it by a normal merge before the final fast-forward push; do not force push or reset the other checkout.
 
@@ -23,3 +23,4 @@ Reviewed the source-freeze inventory and accepted logging/bug-run call-path repo
 
 Fresh focused checks on the isolated source: Node ui_refresh_check.mjs 9/9; PHP log_check.php, ui_diagnostics_http_check.php and reflection_registry_check.php all exit 0. WSL fixtures required sandbox escalation after E_ACCESSDENIED and use isolated temporary stores. The reflection fixture resolved the already published MP 0.1.13 from the collection base. These are fixture behavior results, not installed CHIM/provider/database/gameplay evidence. The package owner runs the four existing package checks before commit. Canonical assets will be built twice from clean Git exports after commit; uploaded bytes will be downloaded and compared before publication and main advancement.
 Package owner gate accepted: python tests/package_check.py, four tests, exit 0 (2.443s). Payload allowlist/checksums/CRC, explicit versioned routes, tar extraction, MO2 nesting, determinism and refusal to overwrite existing output passed. Lead verified no diff in protected MP server/tests/docs/release-notes paths. Sixty frozen inventory files still match exact hashes after excluding the six assigned release metadata/test/todo paths. Remaining steps are clean-source canonical assets and remote publication.
+Final review: source and tag export gate, exact draft/public download comparison, published prerelease status and public manifest/hub checks all passed. Main advanced by normal fast-forward only after verified publication; MP 0.1.13 remains published and unchanged. Final evidence and completed checklist are separate documentation commits, preserving immutable tagged runtime payloads.
