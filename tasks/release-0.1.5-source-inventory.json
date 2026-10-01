@@ -1,0 +1,346 @@
+{
+  "format": 1,
+  "release_branch": "release/private-conversation-0.1.5",
+  "release_base": "f0784bcb1462d2c8d9ad06614c52a999c3731c37",
+  "collection_head": "adf741548462bf196c87a19edc0fde2e604d4e0c",
+  "collection_selection": "git ls-files -c -o --exclude-standard -- plugins/private_conversation",
+  "authoring_overrides": [
+    "tasks/mp-api-check-2026-09-30.md",
+    "latest tasks/todo.md"
+  ],
+  "copied_file_count": 66,
+  "inventory_excludes_self": true,
+  "files": [
+    {
+      "path": "plugins/private_conversation/docs/logging-revision-2.md",
+      "origin": "collection",
+      "sha256": "28bd59f542450bb9cbf6c6ff9e11934931ed38cd15969521888b9d0891a281f7"
+    },
+    {
+      "path": "plugins/private_conversation/server/log_reader.php",
+      "origin": "collection",
+      "sha256": "20e43e24c6ae51cd552aa447de99454b89d2af4b8e55ad0dc879e3f151b315a0"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging-bug-run/baseline-sha256.json",
+      "origin": "collection",
+      "sha256": "a666f6f2cf026ffce309284823c22430d3449b4d53f230fbda0a8b8a3cd0bc63"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging-bug-run/final-review.md",
+      "origin": "collection",
+      "sha256": "10ddfac92331b645612048c5740510d56900d7c23759919352994fd694944569"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging-bug-run/logger-review.md",
+      "origin": "collection",
+      "sha256": "6c151a322a14530262d50660de59838ffde2d9b4fa2761df14df4f3ca14b853b"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging-bug-run/protected-external-work-sha256.json",
+      "origin": "collection",
+      "sha256": "750c170c57c787d817c6dbeacc1fd66ca9a213c635009d489409949d132a623e"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging-bug-run/ui-review.md",
+      "origin": "collection",
+      "sha256": "18650b7affb867c0170a323e39b47e211ef1602112be225781e3ee3a856e4968"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging/final-review.md",
+      "origin": "collection",
+      "sha256": "b9b183844cd4e885fdc93ad17776f4e5d8ddac6918d0508eaa1866f47738738f"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging/logger-review.md",
+      "origin": "collection",
+      "sha256": "21f43510c7fd678fc8d449992261f18712d0d2b1b18c8002c28237a9466da07a"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/logging/ui-review.md",
+      "origin": "collection",
+      "sha256": "7b1f632b9cc78fd0d507f7753578f9b105185baec5eb06184bff72189ac591da"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/instrumentation-review.md",
+      "origin": "collection",
+      "sha256": "411cd29857df3f7d75856652fa18bd007067f0353add30d4998201268b02736c"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/lessons.md",
+      "origin": "collection",
+      "sha256": "507c17308c984678c462ce23b102eab2324639e7848d61240dae2eeaabb2e433"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/logging-bug-run-2026-09-30.md",
+      "origin": "collection",
+      "sha256": "d859b886d606dbd7fd015156e5b2d2e6ab6dd0d4fc7953cd8dc650d5d3848b0b"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/logging-improvements-plan.md",
+      "origin": "collection",
+      "sha256": "93125ca439851affdcb38aa59ccb08db5f16970022f101edc636b6ed6477c4bf"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/mind-poisoning-logging-prompt.md",
+      "origin": "collection",
+      "sha256": "668d80f69d3e98828a65c7a51da9567ceebaf13786ff874386afcd0f1aa4cd3c"
+    },
+    {
+      "path": "plugins/private_conversation/tests/postrequest_terminal_check.php",
+      "origin": "collection",
+      "sha256": "8a02259fe7a49b74309ddfd4b98b6a2ecc86f4c0d7c16c5bdddc05557b8532b0"
+    },
+    {
+      "path": "plugins/private_conversation/tests/ui_diagnostics_http_check.php",
+      "origin": "collection",
+      "sha256": "f84e6bb5b50f6f734b1d78c7693007dc309b71b5385e583df3ae594b03cda1c0"
+    },
+    {
+      "path": "plugins/private_conversation/README.md",
+      "origin": "collection",
+      "sha256": "f41e4cd9c7ba0de8e7ee58282ae857c3fff94a625c86c301205fb321cdfce190"
+    },
+    {
+      "path": "plugins/private_conversation/docs/background-presence.md",
+      "origin": "collection",
+      "sha256": "e46f70c448a2a981b9f745757881370266c293e8c95f5553aeb30b82018bc02c"
+    },
+    {
+      "path": "plugins/private_conversation/docs/logging.md",
+      "origin": "collection",
+      "sha256": "dba3be04f5b8822ef1e5fc884a45bda036586a27e926a86e153053f88fca9f2e"
+    },
+    {
+      "path": "plugins/private_conversation/scripts/build-package.py",
+      "origin": "collection",
+      "sha256": "8e66017f0d5c270753a76e6259793cb67d2cb8a6936687b91b0ef70b362511e1"
+    },
+    {
+      "path": "plugins/private_conversation/server/assets/private-conversation-scene.png",
+      "origin": "collection",
+      "sha256": "e104c8c2d8fec85185855eeb5026d582e9caa3795534e3720eb661173f6d76af"
+    },
+    {
+      "path": "plugins/private_conversation/server/assets/style.css",
+      "origin": "collection",
+      "sha256": "25c99aa25a2e637a91b42f2b09dd61b58cb7d1843a7a48a79a95e898fc511158"
+    },
+    {
+      "path": "plugins/private_conversation/server/assets/ui-refresh.js",
+      "origin": "collection",
+      "sha256": "640c3ec3848ed1e50bcb008afd3200aaf690bf4af02592afa1cf87129b86e89e"
+    },
+    {
+      "path": "plugins/private_conversation/server/context.php",
+      "origin": "collection",
+      "sha256": "e2c73e3c52166cc183dccd1b5b45d7f509e3d138a3413175018d85de4d34057d"
+    },
+    {
+      "path": "plugins/private_conversation/server/context_pre.php",
+      "origin": "collection",
+      "sha256": "dc9fe4f640d6916e5f932dd1186497ed95a05b7aea04f3c40f6c7f153e477816"
+    },
+    {
+      "path": "plugins/private_conversation/server/diagnostics.php",
+      "origin": "collection",
+      "sha256": "1c658fe6f51ff813e8e34633a014673e2bcfc20fd6b24ad504ee0e3cefc9cc4f"
+    },
+    {
+      "path": "plugins/private_conversation/server/index.php",
+      "origin": "collection",
+      "sha256": "d263ac9679cf94a615bda5cca7b48db8eda16a1293e41c8a299fe05592998de4"
+    },
+    {
+      "path": "plugins/private_conversation/server/json_response_custom.php",
+      "origin": "collection",
+      "sha256": "e750df7015a81c67efb00c9ea428cd9ffea8767de7f51716913b8f72bdbbcfdb"
+    },
+    {
+      "path": "plugins/private_conversation/server/log.php",
+      "origin": "collection",
+      "sha256": "834ae19254a25dee6f06f74d88a8d6bfa39831cd7fc3d4d6004efb588cc091d8"
+    },
+    {
+      "path": "plugins/private_conversation/server/manifest.json",
+      "origin": "collection",
+      "sha256": "07fa32314a70556ed5aa4f053d97caceefc7090b9ff22d8aafd5962023defdb5"
+    },
+    {
+      "path": "plugins/private_conversation/server/postrequest.php",
+      "origin": "collection",
+      "sha256": "6b56915b1ac933030a7782b45261d891e617c834502cbffd17a91c0cf74c36c8"
+    },
+    {
+      "path": "plugins/private_conversation/server/prepostrequest.php",
+      "origin": "collection",
+      "sha256": "df2f963a7300954cb01ac4b91d53bc7beffcb5be4deb0db445ba5d5ed9c139fb"
+    },
+    {
+      "path": "plugins/private_conversation/server/preprocessing.php",
+      "origin": "collection",
+      "sha256": "ce3ccec2c39f6645690fbf589176a989549e8e6659b27496b3da2d85e913c49a"
+    },
+    {
+      "path": "plugins/private_conversation/server/prerequest.php",
+      "origin": "collection",
+      "sha256": "7d110ce76bdbf5cf98a1ea8754b61cf8f1612479ea66cac32d88507aaf716f86"
+    },
+    {
+      "path": "plugins/private_conversation/server/reflection.php",
+      "origin": "collection",
+      "sha256": "7f33436258d1641dd7788fe854e830b2675231f442529479e20b86848645c3c2"
+    },
+    {
+      "path": "plugins/private_conversation/server/scope.php",
+      "origin": "collection",
+      "sha256": "95ec6f99bd5d04a818cc3c2538151d992fe661a2022d37d22d3f11c6f2ecb101"
+    },
+    {
+      "path": "plugins/private_conversation/server/state.php",
+      "origin": "collection",
+      "sha256": "ea7983e39bcdee92883ebe696ed1880d275d7449063458afcd30f3f1c0dd0dd4"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/bug-run-operations.md",
+      "origin": "collection",
+      "sha256": "d87e70715c0bc2705b8c7356f97b72a16388141c92925b17b968e5a7e161558c"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/bug-run-review.md",
+      "origin": "collection",
+      "sha256": "365d74a018911d0b38d9b09c5addfa6e68970a4da4016c8e9ba031afd63fcb2e"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/final-review.md",
+      "origin": "collection",
+      "sha256": "87d9f230c5ba5e2c2c8ebc3b1dbe0e9cfa199a9478ab6ff02fc0be1e9567f3b2"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/influence-report.md",
+      "origin": "collection",
+      "sha256": "6eb4ed7023626034e736f9145e7c7db1cfe9912f109afad0c5a063db388e8561"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/registry-report.md",
+      "origin": "collection",
+      "sha256": "136d5cb8c42a6b6bccb532972c1895801bc6fe28eb7c328a28566d2aae851f0e"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/state-report.md",
+      "origin": "collection",
+      "sha256": "b0caa5065e61a60b5016ed7d1de308370e9ef52e16e22edee58bb466b11a315f"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/implementation-2026-09-30/ui-report.md",
+      "origin": "collection",
+      "sha256": "64a04434bd9b79483f871c6a060bf8a0efe89d5979cf5c05d93e30b97ec6b8f5"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/release-v0.1.4-notes.md",
+      "origin": "collection",
+      "sha256": "58ec71c9a9a20d848196a75a708001e8ea6ec86dda0c8a6519905c0399732242"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/release-v0.1.4-packaging.md",
+      "origin": "collection",
+      "sha256": "e52fa651496cee321f964c964ba3522f277ed1e64d490eb0aedb4457b201d166"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/release-v0.1.4-plan.md",
+      "origin": "collection",
+      "sha256": "841ff99b2648eaa4177d96e69a46a1068af86338cae49b824681c77d2cf87908"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/release-v0.1.4-readme.md",
+      "origin": "collection",
+      "sha256": "26e234256b8828a948fe4027cdeace1d0183d628bd37363affdcc7977716202c"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/todo.md",
+      "origin": "latest-PCV-authoring-todo",
+      "sha256": "76dbe86949e027a0680495fc3e9217ee598ab5e494efc593f07a8ab9f09137e3",
+      "collection_sha256": "0fc103798422f0ac79c256440bbac0f5c52b439c721d9a0e142ad0bcd2ff89a9"
+    },
+    {
+      "path": "plugins/private_conversation/tests/autonomous_presence_check.php",
+      "origin": "collection",
+      "sha256": "ebecbedb448453cf873d6c5cc41613fa7dd3b61ce3dcb368c7d5d42f48595045"
+    },
+    {
+      "path": "plugins/private_conversation/tests/background_presence_check.php",
+      "origin": "collection",
+      "sha256": "bb03c0f2547e9481670636227f5bf93fc9548f6e335fbfc981f4e3489f4cbc10"
+    },
+    {
+      "path": "plugins/private_conversation/tests/background_presence_hook_check.php",
+      "origin": "collection",
+      "sha256": "1ae241579e67c086eec77c0672a18dc6ad3f816ba17c48f8ded2a9c1355dc48d"
+    },
+    {
+      "path": "plugins/private_conversation/tests/diagnostics_check.php",
+      "origin": "collection",
+      "sha256": "122ce71dbb68782d3e16a5fbda270790d83090eadfa0083369931af769962545"
+    },
+    {
+      "path": "plugins/private_conversation/tests/eligibility_check.php",
+      "origin": "collection",
+      "sha256": "261fde8b992b0a10ad3ccae90bcda9b4646f6999542b8f38935dbaa9bdab9f77"
+    },
+    {
+      "path": "plugins/private_conversation/tests/identity_source_check.php",
+      "origin": "collection",
+      "sha256": "c0976625aac6a64fa911b893bff14a74a2f71cbf8fb3ea6b8e0549a72f13344e"
+    },
+    {
+      "path": "plugins/private_conversation/tests/log_check.php",
+      "origin": "collection",
+      "sha256": "4f547375fb01d3e8960e8f400af9a894b08c529b56ad655d62d1fd7e5bfd2d1b"
+    },
+    {
+      "path": "plugins/private_conversation/tests/package_check.py",
+      "origin": "collection",
+      "sha256": "2a7124aaef157123b673284f5e0393629b99e2ee9730c4020ad711fb2b8b3d78"
+    },
+    {
+      "path": "plugins/private_conversation/tests/page_check.php",
+      "origin": "collection",
+      "sha256": "354caaebf5b5761bdbdd8a3fdf67a5713e6b420c2cd9e7f9860e4e28b92d35b1"
+    },
+    {
+      "path": "plugins/private_conversation/tests/reflection_registry_check.php",
+      "origin": "collection",
+      "sha256": "175aad2624e4d9f84ad351c536a67924ada355fabf2cec20a86b678a7e89c86b"
+    },
+    {
+      "path": "plugins/private_conversation/tests/scope_check.php",
+      "origin": "collection",
+      "sha256": "1980f13a52abebb5845a8097e9a19878c5c33abf8309c4ecb5d9f8a859f396e9"
+    },
+    {
+      "path": "plugins/private_conversation/tests/state_check.php",
+      "origin": "collection",
+      "sha256": "8edab81dd97b2fca83a94dc5fcf24ed71d3ee4e3817cc353f2882c35c1e3213f"
+    },
+    {
+      "path": "plugins/private_conversation/tests/ui_check.php",
+      "origin": "collection",
+      "sha256": "441b13b04d0896d362815fa5afbd6c76355712d4b3cb00afc8a6b695d7ae909e"
+    },
+    {
+      "path": "plugins/private_conversation/tests/ui_preview.php",
+      "origin": "collection",
+      "sha256": "862da26b4913466c815228d243615cd94484b679a463c2bcb18a48c305b3049f"
+    },
+    {
+      "path": "plugins/private_conversation/tests/ui_refresh_check.mjs",
+      "origin": "collection",
+      "sha256": "edb225413aef8c63069e6897b27ccac6b93b4c15733c7e534271974cab2f2e06"
+    },
+    {
+      "path": "plugins/private_conversation/tasks/mp-api-check-2026-09-30.md",
+      "origin": "current-PCV-authoring",
+      "sha256": "87da1a73cbe457566ba5448df31fe0dfd2fc5aed16f8b79223d80fec1edc946c"
+    }
+  ]
+}

@@ -41,7 +41,7 @@ For a bug report, reproduce once, note settings and the observed result, then ex
 - `reflection.output_registered` means the exact fresh native output passed registration checks. It does not prove audio played.
 - `reflection.ack_skipped` explains missing, stale, mismatched or already claimed acknowledgement evidence.
 - `reflection.ack_error` records operational/integration failure. A returned MP failure never becomes a successful PCV evaluation record.
-- `reflection.evaluation_finished` means the MP adapter returned its committed status; detailed model, zero-change and transaction evidence belongs to MP unless a compatible diagnostics observer supplies it.
+- `reflection.evaluation_finished` means the MP adapter returned its committed status. A compatible observer can add bounded solo model and persistence diagnostics; without it, detailed outcomes remain in MP's own diagnostics.
 - Presence observations distinguish available, known empty, aged stale, missing, awaiting an ordering baseline, malformed and operationally unavailable. Missing evidence is never an empty room.
 - Browser refresh failures use fixed codes and are explicitly **client-reported**. They do not prove a server or game failure.
 
@@ -51,9 +51,9 @@ Routing requests that reached `routing.request_started` register a fatal shutdow
 
 ## Mind Poisoning stays in its own lane
 
-This task changes **Private Conversation only**. Published MP without an observer continues normal reflection processing and keeps its detailed outcomes in its own diagnostics. PCV records `reflection.observer_unavailable` / `observer_unsupported` for a validated ACK when that optional bridge is absent. This means unsupported unified telemetry, not failed roleplay.
+Mind Poisoning 0.1.13 introduced the optional sanitized `RequestLog` observer; 0.1.14 declares reflection API version 1. PCV 0.1.6 checks for exactly that version before invoking the evaluator, and treats a missing or unsupported API as `reflection_api_incompatible`. This companion check is separate from CHIM core compatibility. Scene direction works without Mind Poisoning.
 
-PCV is prepared to accept a bounded sanitized reflection observer from a future compatible MP implementation. The importer retains exact validated correlation, fixed causes, model/persistence timing, bounded opinion changes and confirmed/unconfirmed/not-attempted commit state. Unknown commit stays unknown; zero change remains a legitimate result. Until MP supplies the adapter, these imported records are unavailable. A separate prompt covers that project.
+When the compatible observer is available, PCV imports allowlisted solo model and persistence records with exact validated correlation IDs, fixed causes, bounded timings and opinion changes, and confirmed/unconfirmed/not-attempted commit state. The observer does not change Mind Poisoning's ordinary evaluation or sink delivery. If a compatible request log has no observer, PCV records `reflection.observer_unavailable`; this means unified telemetry is unavailable, not failed evaluation. Unknown commit stays unknown; zero change remains a legitimate result. These source and fixture checks do not establish live adapter, database, provider or gameplay behavior.
 
 Pair gossip has no verified PCV registration tuple tying its separate MP hook to the scene. PCV logs the pair's routing lifecycle; inspect MP for the opinion evaluation. No newest-row guessing or pretend end-to-end trace.
 

@@ -175,3 +175,21 @@ Lead accepted logger/reader, instrumentation and dependent UI after returning de
 Plan: tasks/logging-bug-run-2026-09-30.md. No installed or release changes.
 
 Review: malformed-refresh draft loss, FIFO lock blocking and optional-observer correlation were reproduced and fixed. Lead returned the missing fresh-ACK binding to the same logger owner; the final real in-memory ACK boundary check passes. Focused Node (9/9), logger and registry checks pass. Exactly six current-run product/test files match source and repository mirror by SHA256; manifest/release pin unchanged. Limits and a narrow externally removed-state logging gap are recorded in tasks/implementation-2026-09-30/logging-bug-run/final-review.md.
+
+## Mind Poisoning API check - 2026-09-30
+
+- [x] Inspect current documented evaluator/observer contract and PCV callers.
+- [x] Verify five evaluator-to-importer cases and PCV fresh-ACK registry behavior with existing isolated checks.
+- [x] Record compatibility and source/publication/runtime limits in tasks/mp-api-check-2026-09-30.md.
+
+Review: current PCV development source already uses the new observer API. Both focused commands exited 0. No product, installed environment, release or collaborator edits were made.
+
+## Private Conversation 0.1.5 publication
+
+- [x] Confirm PCV-only authorization and isolate reviewed source from separate MP publication.
+- [x] Prepare and review PRE-ALPHA metadata, guides and explicit package expectations.
+- [x] Verify focused release gates and deterministic clean-source artifacts; commit and tag.
+- [x] Verify downloaded draft assets, publish before updating main and record public evidence.
+
+Plan: tasks/release-v0.1.5-plan.md. No installation or gameplay certification is claimed.
+Review: 0.1.5 PRE-ALPHA published after focused checks, clean commit/tag exports and exact draft/public download equality. Public hub and PCV manifest now point at 0.1.5; separately published MP 0.1.13 remains unchanged. Source tag is immutable; tasks/release-v0.1.5-evidence.md and package review retain hashes, gates and runtime limits.
