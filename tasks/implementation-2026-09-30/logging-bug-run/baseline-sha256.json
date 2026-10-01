@@ -1,0 +1,154 @@
+[
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\context_pre.php",
+    "sha256": "DC9FE4F640D6916E5F932DD1186497ED95A05B7AEA04F3C40F6C7F153E477816"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\context.php",
+    "sha256": "E2C73E3C52166CC183DCCD1B5B45D7F509E3D138A3413175018D85DE4D34057D"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\diagnostics.php",
+    "sha256": "1C658FE6F51FF813E8E34633A014673E2BCFC20FD6B24AD504EE0E3CEFC9CC4F"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\index.php",
+    "sha256": "D263AC9679CF94A615BDA5CCA7B48DB8EDA16A1293E41C8A299FE05592998DE4"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\json_response_custom.php",
+    "sha256": "E750DF7015A81C67EFB00C9EA428CD9FFEA8767DE7F51716913B8F72BDBBCFDB"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\log_reader.php",
+    "sha256": "20E43E24C6AE51CD552AA447DE99454B89D2AF4B8E55AD0DC879E3F151B315A0"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\log.php",
+    "sha256": "076CDE4C89ED23D69E1BFB12AD5D4E2B04FEC21264D2BADA7866257441276D03"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\manifest.json",
+    "sha256": "07FA32314A70556ED5AA4F053D97CACEEFC7090B9FF22D8AAFD5962023DEFDB5"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\postrequest.php",
+    "sha256": "6B56915B1AC933030A7782B45261D891E617C834502CBFFD17A91C0CF74C36C8"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\prepostrequest.php",
+    "sha256": "DF2F963A7300954CB01AC4B91D53BC7BEFFCB5BE4DEB0DB445BA5D5ED9C139FB"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\preprocessing.php",
+    "sha256": "CE3CCEC2C39F6645690FBF589176A989549E8E6659B27496B3DA2D85E913C49A"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\prerequest.php",
+    "sha256": "7D110CE76BDBF5CF98A1EA8754B61CF8F1612479EA66CAC32D88507AAF716F86"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\preview.html",
+    "sha256": "1EE142B2C594848BAA3F40F258D0B0BECECE8762955B61FFE4878423FEB30797"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\reflection.php",
+    "sha256": "447EECABEBBF6E6049881AF1CB1A979F35951CEC78120DB0F34D7E3FBCC09D67"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\scope.php",
+    "sha256": "95EC6F99BD5D04A818CC3C2538151D992FE661A2022D37D22D3F11C6F2ECB101"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\state.php",
+    "sha256": "EA7983E39BCDEE92883EBE696ED1880D275D7449063458AFCD30F3F1C0DD0DD4"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\assets\\private-conversation-scene.png",
+    "sha256": "E104C8C2D8FEC85185855EEB5026D582E9CAA3795534E3720EB661173F6D76AF"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\assets\\style.css",
+    "sha256": "25C99AA25A2E637A91B42F2B09DD61B58CB7D1843A7A48A79A95E898FC511158"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\server\\assets\\ui-refresh.js",
+    "sha256": "EE83C942D7E8FFB5AD8BBD2A45BFE472F0D862DE4DFE676BC163A80D43396399"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\autonomous_presence_check.php",
+    "sha256": "EBECBEDB448453CF873D6C5CC41613FA7DD3B61CE3DCB368C7D5D42F48595045"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\background_presence_check.php",
+    "sha256": "BB03C0F2547E9481670636227F5BF93FC9548F6E335FBFC981F4E3489F4CBC10"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\background_presence_hook_check.php",
+    "sha256": "1AE241579E67C086EEC77C0672A18DC6AD3F816BA17C48F8DED2A9C1355DC48D"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\diagnostics_check.php",
+    "sha256": "122CE71DBB68782D3E16A5FBDA270790D83090EADFA0083369931AF769962545"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\eligibility_check.php",
+    "sha256": "261FDE8B992B0A10AD3CCAE90BCDA9B4646F6999542B8F38935DBAA9BDAB9F77"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\identity_source_check.php",
+    "sha256": "C0976625AAC6A64FA911B893BFF14A74A2F71CBF8FB3EA6B8E0549A72F13344E"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\log_check.php",
+    "sha256": "C05903CF9183D04678906F393293EBCEC1E7F7825303E97A9B954526C9B505B2"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\package_check.py",
+    "sha256": "2A7124AAEF157123B673284F5E0393629B99E2EE9730C4020AD711FB2B8B3D78"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\page_check.php",
+    "sha256": "354CAAEBF5B5761BDBDD8A3FDF67A5713E6B420C2CD9E7F9860E4E28B92D35B1"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\postrequest_terminal_check.php",
+    "sha256": "8A02259FE7A49B74309DDFD4B98B6A2ECC86F4C0D7C16C5BDDDC05557B8532B0"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\reflection_registry_check.php",
+    "sha256": "CB642289AD7F46A0371E595CFA4D581E446B33D381145BCD4DF76B6CF345A2DD"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\scope_check.php",
+    "sha256": "1980F13A52ABEBB5845A8097E9A19878C5C33ABF8309C4ECB5D9F8A859F396E9"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\state_check.php",
+    "sha256": "8EDAB81DD97B2FCA83A94DC5FCF24ED71D3EE4E3817CC353F2882C35C1E3213F"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\ui_check.php",
+    "sha256": "441B13B04D0896D362815FA5AFBD6C76355712D4B3CB00AFC8A6B695D7AE909E"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\ui_diagnostics_http_check.php",
+    "sha256": "F84E6BB5B50F6F734B1D78C7693007DC309B71B5385E583DF3AE594B03CDA1C0"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\ui_preview.php",
+    "sha256": "862DA26B4913466C815228D243615CD94484B679A463C2BCB18A48C305B3049F"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\tests\\ui_refresh_check.mjs",
+    "sha256": "D51945D88D88C3C3D92BD66D089B7814FC1274B0929C08C96D305894E021F280"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\scripts\\build-companion.py",
+    "sha256": "435143400658E28F20A7B751C201AE244480F0929024FDAD2E42ECEFD3BC9FF4"
+  },
+  {
+    "path": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation\\scripts\\build-package.py",
+    "sha256": "8E66017F0D5C270753A76E6259793CB67D2CB8A6936687B91B0EF70B362511E1"
+  }
+]

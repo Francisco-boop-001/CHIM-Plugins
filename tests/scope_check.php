@@ -226,6 +226,7 @@ require_once $scopeSource;
 
 $postrequestFixtureScope = $logTestDirectory . DIRECTORY_SEPARATOR . 'scope.php';
 $postrequestFixtureReflection = $logTestDirectory . DIRECTORY_SEPARATOR . 'reflection.php';
+$prepostrequestFixtureHook = $logTestDirectory . DIRECTORY_SEPARATOR . 'prepostrequest.php';
 $postrequestFixtureHook = $logTestDirectory . DIRECTORY_SEPARATOR . 'postrequest.php';
 $postrequestFixtureScopeSource = "<?php\nrequire_once " . var_export($scopeSource, true) . ";\n";
 $postrequestFixtureReflectionSource = <<<'PHP'
@@ -237,8 +238,9 @@ function pcvReflectionRegisterLastOutput(array $requestScope): void
 PHP;
 if (file_put_contents($postrequestFixtureScope, $postrequestFixtureScopeSource) === false
     || file_put_contents($postrequestFixtureReflection, $postrequestFixtureReflectionSource) === false
+    || !copy(dirname(__DIR__) . '/server/prepostrequest.php', $prepostrequestFixtureHook)
     || !copy(dirname(__DIR__) . '/server/postrequest.php', $postrequestFixtureHook)) {
-    fwrite(STDERR, "FAIL: Could not prepare isolated postrequest hook fixture.\n");
+    fwrite(STDERR, "FAIL: Could not prepare isolated reflection hook fixtures.\n");
     exit(1);
 }
 
@@ -784,19 +786,42 @@ try {
     scopeCheck(!str_contains($GLOBALS['head'][0]['content'], '<actions>')
         && ($GLOBALS['head'][1]['content'] ?? null) === 'Historical player input remains in existing history.',
         'Solo reflection destroyed prior history rather than applying only the current scoped context changes.');
+    unset($GLOBALS['PCV_SOLO_RELATIONSHIP_GUARD_SET']);
     $GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] = true;
-    include $hookDir . '/prepostrequest.php';
-    scopeCheck(($GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] ?? null) === false,
-        'Solo sentinel reached core postrequest without suppressing the fictitious NPC/NPC relationship queue.');
-    $GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] = true;
-    include $postrequestFixtureHook;
+    $GLOBALS['pcv_fixture_reflection_register_calls'] = [];
+    include $prepostrequestFixtureHook;
     $reflectionCalls = $GLOBALS['pcv_fixture_reflection_register_calls'] ?? [];
     scopeCheck(count($reflectionCalls) === 1
         && ($reflectionCalls[0]['route'] ?? null) === 'solo_reflection'
         && ($reflectionCalls[0]['baseline_utterance_id'] ?? null) === 'utt_baseline_12345678'
         && ($reflectionCalls[0]['baseline_output_log'] ?? null) === 'pre-generation log marker'
+        && ($GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] ?? null) === false,
+        'The prepostrequest hook did not register the current solo output while preserving the relationship guard.');
+
+    unset($GLOBALS['PCV_SOLO_RELATIONSHIP_GUARD_SET']);
+    $GLOBALS['HERIKA_NAME'] = 'Nazeem';
+    $GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] = true;
+    include $prepostrequestFixtureHook;
+    scopeCheck(count($GLOBALS['pcv_fixture_reflection_register_calls']) === 1
+        && ($GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] ?? null) === true,
+        'An out-of-scope generated speaker must not register a solo reflection or disable relationship processing.');
+    $GLOBALS['HERIKA_NAME'] = 'Aela';
+    unset($GLOBALS['PCV_SOLO_RELATIONSHIP_GUARD_SET']);
+    $GLOBALS['CHIM_EXECUTION_MODE'] = 'AUTOCHAT';
+    $GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] = true;
+    include $prepostrequestFixtureHook;
+    scopeCheck(count($GLOBALS['pcv_fixture_reflection_register_calls']) === 1
+        && ($GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] ?? null) === false,
+        'A late mode mismatch must skip registration while retaining the solo relationship-queue guard.');
+    unset($GLOBALS['PCV_SOLO_RELATIONSHIP_GUARD_SET']);
+    $GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] = true;
+    $registrationSkipsBeforePostrequest = scopeCheckEventCount('reflection.registration_skipped', 'scope_ineligible');
+    include $postrequestFixtureHook;
+    scopeCheck(count($GLOBALS['pcv_fixture_reflection_register_calls']) === 1
+        && scopeCheckEventCount('reflection.registration_skipped', 'scope_ineligible') === $registrationSkipsBeforePostrequest
         && scopeCheckEventCount('reflection.output_registered') === 0,
-        'The postrequest hook did not call the registry boundary with the current solo scope and private baseline.');
+        'The postrequest hook must not repeat registration diagnostics after the prepost attempt.');
+    $GLOBALS['CHIM_EXECUTION_MODE'] = 'STANDARD';
     $GLOBALS['pcv_fixture_state'] = ['status' => 'active', 'scope' => $storedScope, 'pending' => false, 'config_id' => $fixtureConfigId];
 
     scopeCheckBeginSimulatedRequest();

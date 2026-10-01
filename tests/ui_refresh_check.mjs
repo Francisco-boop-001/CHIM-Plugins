@@ -12,6 +12,7 @@ function makeOption(value) {
 function makeSelect(values, selected = '') {
     const listeners = new Map();
     return {
+        tagName: 'SELECT',
         options: values.map(makeOption),
         value: selected,
         disabled: false,
@@ -71,9 +72,10 @@ function responseFor(fixtures, id, snapshot) {
     return { ok: true, text: async () => id };
 }
 
-function createHarness(fetchQueue) {
+function createHarness(fetchQueue, { reportQueue = [] } = {}) {
     const fixtures = new Map();
     const calls = [];
+    const reports = [];
     const timeouts = [];
     let intervalCallback;
     const listeners = new Map();
@@ -99,7 +101,7 @@ function createHarness(fetchQueue) {
         ['input[name="exclude_player"]', { checked: true }],
     ]);
     const documentRef = {
-        body: { dataset: { playthroughRef: 'same-playthrough', refreshUrl: '?refresh=1' } },
+        body: { dataset: { playthroughRef: 'same-playthrough', refreshUrl: '?refresh=1', logsUrl: '?view=logs' } },
         visibilityState: 'visible',
         querySelector: (selector) => nodes.get(selector) ?? null,
         querySelectorAll: (selector) => selector === 'input[name="csrf"]' ? csrfInputs : [],
@@ -108,6 +110,11 @@ function createHarness(fetchQueue) {
     const sandbox = {
         document: documentRef,
         fetch(url, options) {
+            if (url === '?view=logs') {
+                reports.push({ url, options });
+                const next = reportQueue.shift();
+                return typeof next === 'function' ? next(options) : Promise.resolve({ ok: true });
+            }
             calls.push({ url, options });
             const next = fetchQueue.shift();
             if (!next) {
@@ -128,6 +135,7 @@ function createHarness(fetchQueue) {
             }
         },
         AbortController,
+        URLSearchParams,
         setTimeout(callback, delay) {
             const timer = { callback, delay, cleared: false };
             timeouts.push(timer);
@@ -146,6 +154,7 @@ function createHarness(fetchQueue) {
         document: documentRef,
         nodes,
         calls,
+        reports,
         timeouts,
         csrfInputs,
         poll: () => intervalCallback(),
@@ -208,6 +217,21 @@ test('refresh updates status and CSRF while preserving eligible drafts and clear
     harness.nodes.get('#actor-b').value = '101';
     harness.nodes.get('#actor-b').dispatchChange();
     assert.equal(harness.nodes.get('#arm-button').disabled, true);
+});
+
+test('malformed refresh controls preserve both actor drafts and fail closed', async () => {
+    const snapshot = makeSnapshot({ ref: 'new-playthrough' });
+    const querySelector = snapshot.querySelector;
+    snapshot.querySelector = (selector) => selector === '#actor-b' ? {} : querySelector(selector);
+    const harness = createHarness([{ snapshot }]);
+
+    await flushPromises();
+
+    assert.equal(harness.nodes.get('#actor-a').value, '101');
+    assert.equal(harness.nodes.get('#actor-b').value, '202');
+    assert.equal(harness.document.body.dataset.playthroughRef, 'same-playthrough');
+    assert.equal(harness.nodes.get('#arm-button').disabled, true);
+    assert.deepEqual(harness.reports.map(({ options }) => new URLSearchParams(options.body).get('code')), ['invalid_response']);
 });
 
 test('solo mode arms one eligible actor, preserves an eligible B draft across polling, and restores only a distinct B', async () => {
@@ -355,6 +379,7 @@ test('timeout fails closed and the next poll can recover', async () => {
     await flushPromises();
     assert.equal(harness.nodes.get('#arm-button').disabled, true);
     assert.match(harness.nodes.get('#picker-status').textContent, /ARM is disabled/);
+    assert.equal(new URLSearchParams(harness.reports[0]?.options.body).get('code'), 'timeout');
     harness.nodes.get('#actor-a').value = '202';
     harness.nodes.get('#actor-a').dispatchChange();
     harness.nodes.get('#actor-b').value = '101';
@@ -366,4 +391,70 @@ test('timeout fails closed and the next poll can recover', async () => {
     assert.equal(harness.nodes.get('#arm-button').disabled, false);
     assert.equal(harness.nodes.get('#picker-status').textContent, 'Recovered eligibility');
     assert.deepEqual(harness.csrfInputs.map((input) => input.value), ['recovered-token', 'recovered-token']);
+});
+
+test('refresh failure telemetry uses fixed codes, current CSRF, and never retries its own failure', async () => {
+    const cases = [
+        [() => Promise.reject(Object.assign(new TypeError('private network detail'), { name: 'TypeError' })), 'network'],
+        [() => Promise.reject(Object.assign(new Error('private abort detail'), { name: 'AbortError' })), 'timeout'],
+        [() => Promise.resolve({ ok: false }), 'http'],
+        [() => Promise.resolve({ ok: true, text: async () => 'invalid response detail' }), 'invalid_response'],
+        [() => Promise.reject(Object.assign(new Error('private unknown detail'), { name: 'UnexpectedError' })), 'unknown'],
+    ];
+
+    for (const [refresh, expectedCode] of cases) {
+        const harness = createHarness([refresh]);
+        await flushPromises();
+        assert.equal(harness.reports.length, 1, `${expectedCode} should be reported once`);
+        const [{ url, options }] = harness.reports;
+        assert.equal(url, '?view=logs');
+        assert.equal(options.method, 'POST');
+        assert.equal(options.credentials, 'same-origin');
+        const body = new URLSearchParams(options.body);
+        assert.deepEqual([...body.entries()].sort(), [
+            ['action', 'client_report'],
+            ['code', expectedCode],
+            ['csrf', 'old-token'],
+        ].sort());
+        assert.doesNotMatch(options.body, /private|invalid response detail/);
+    }
+
+    const harness = createHarness([
+        () => Promise.reject(Object.assign(new TypeError('private network detail'), { name: 'TypeError' })),
+        () => Promise.reject(Object.assign(new TypeError('private network detail'), { name: 'TypeError' })),
+    ], { reportQueue: [() => Promise.reject(new Error('report endpoint unavailable'))] });
+    await flushPromises();
+    harness.poll();
+    await flushPromises();
+    assert.equal(harness.calls.length, 2, 'a failed telemetry request must not restart scene polling');
+    assert.equal(harness.reports.length, 1, 'the same browser failure code is reported once per page');
+    assert.equal(harness.nodes.get('#arm-button').disabled, true, 'refresh failure must keep ARM disabled');
+
+    const synchronousFailure = createHarness([
+        () => Promise.reject(Object.assign(new TypeError('private network detail'), { name: 'TypeError' })),
+    ], { reportQueue: [() => { throw new Error('synchronous telemetry transport failure'); }] });
+    await flushPromises();
+    assert.equal(synchronousFailure.calls.length, 1, 'a synchronous telemetry failure must not restart scene polling');
+    assert.equal(synchronousFailure.reports.length, 1, 'a synchronous telemetry failure must not be retried');
+    assert.equal(synchronousFailure.nodes.get('#arm-button').disabled, true, 'telemetry failure must preserve fail-closed ARM state');
+});
+
+test('a successful refresh re-arms telemetry for a new failure episode', async () => {
+    const harness = createHarness([
+        () => Promise.reject(Object.assign(new TypeError('first private failure'), { name: 'TypeError' })),
+        { snapshot: makeSnapshot({ label: 'Recovered' }) },
+        () => Promise.reject(Object.assign(new TypeError('second private failure'), { name: 'TypeError' })),
+        () => Promise.reject(Object.assign(new TypeError('same episode failure'), { name: 'TypeError' })),
+    ]);
+    await flushPromises();
+    harness.poll();
+    await flushPromises();
+    harness.poll();
+    await flushPromises();
+    harness.poll();
+    await flushPromises();
+
+    assert.deepEqual(harness.reports.map(({ options }) => new URLSearchParams(options.body).get('code')), ['network', 'network']);
+    assert.equal(harness.calls.length, 4);
+    assert.equal(harness.nodes.get('#arm-button').disabled, true, 'the later refresh failure must still disable ARM');
 });

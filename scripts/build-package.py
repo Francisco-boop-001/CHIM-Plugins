@@ -26,6 +26,7 @@ SERVER_FILES = (
     "index.php",
     "json_response_custom.php",
     "log.php",
+    "log_reader.php",
     "manifest.json",
     "postrequest.php",
     "prepostrequest.php",

@@ -84,6 +84,7 @@ if ($mode !== 'STANDARD') {
         }
     }
     $GLOBALS['PCV_REQUEST_SCOPE'] = ['status' => 'ignored', 'scope' => null, 'start' => false];
+    pcv_log_set_terminal('skipped', 'unsupported_mode', ['phase' => 'preprocessing']);
     pcv_log_event('routing.request_skipped', 'info', 'skipped', 'unsupported_mode', [
         'phase' => 'preprocessing',
         'request_type' => pcvRoutingLogType($requestType),
@@ -127,6 +128,7 @@ pcvRoutingLogSetState($state);
 if ($status === 'identity_unavailable') {
     // With no validated playthrough key, no stored scope can be matched to this character.
     $GLOBALS['PCV_REQUEST_SCOPE'] = ['status' => 'identity_unavailable', 'scope' => null, 'start' => false];
+    pcv_log_set_terminal('skipped', 'identity_unavailable', ['phase' => 'preprocessing']);
     pcv_log_event('routing.request_skipped', 'info', 'skipped', 'identity_unavailable', [
         'phase' => 'preprocessing',
         'request_type' => pcvRoutingLogType($requestType),
@@ -141,6 +143,7 @@ if ($status === 'identity_unavailable') {
 if ($status === 'off' || $status === 'pending') {
     $GLOBALS['PCV_REQUEST_SCOPE'] = ['status' => $status, 'scope' => null, 'start' => false];
     $reason = $status === 'pending' ? 'scope_pending' : 'scope_off';
+    pcv_log_set_terminal('skipped', $reason, ['phase' => 'preprocessing']);
     pcv_log_event('routing.request_skipped', 'info', 'skipped', $reason, [
         'phase' => 'preprocessing',
         'request_type' => pcvRoutingLogType($requestType),

@@ -20,7 +20,7 @@ function pcvReflectionRegisterLastOutput(array $requestScope): void
         return;
     }
     if (!$mindPoisoningAvailable) {
-        pcv_reflection_log('reflection.registration_skipped', 'registration', 'mind_poisoning_unavailable', $requestScope);
+        pcv_reflection_log('reflection.registration_skipped', 'registration', pcv_reflection_mind_poisoning_unavailable_reason(), $requestScope);
         return;
     }
 
@@ -44,6 +44,7 @@ function pcvReflectionEvaluateAck(array $gameRequest): void
     $probe = pcv_reflection_registry_probe();
     if ($probe['kind'] === 'missing'
         || ($probe['kind'] === 'ready' && $probe['record']['registration']['utterance_id'] !== $utteranceId)) {
+        pcv_reflection_log_unmatched_ack($gameRequest);
         return;
     }
     if ($probe['kind'] === 'invalid' || $probe['kind'] === 'unavailable') {
@@ -65,7 +66,7 @@ function pcvReflectionEvaluateAck(array $gameRequest): void
         return;
     }
     if (!$mindPoisoningAvailable) {
-        pcv_reflection_log('reflection.ack_error', 'ack', 'mind_poisoning_unavailable', $probe['record']);
+        pcv_reflection_log('reflection.ack_error', 'ack', pcv_reflection_mind_poisoning_unavailable_reason(), $probe['record']);
         return;
     }
 
@@ -75,6 +76,64 @@ function pcvReflectionEvaluateAck(array $gameRequest): void
     } catch (Throwable $error) {
         pcv_reflection_log('reflection.ack_error', 'ack', 'database_unavailable', $probe['record'], $error);
     }
+}
+
+function pcv_reflection_log_unmatched_ack(array $gameRequest): void
+{
+    $scope = pcv_reflection_current_solo_scope();
+    if ($scope !== null && pcv_reflection_ack_matches_solo_scope($gameRequest, $scope)) {
+        pcv_reflection_log('reflection.ack_skipped', 'ack', 'registration_missing', $scope);
+    }
+}
+
+function pcv_reflection_current_solo_scope(): ?array
+{
+    $scope = pcv_reflection_fresh_scope(null);
+    $resolved = is_array($scope) ? ($scope['scope'] ?? null) : null;
+    if (!is_array($scope) || ($scope['status'] ?? null) !== 'active' || !is_array($resolved)
+        || ($resolved['scene_mode'] ?? null) !== 'solo' || ($resolved['actor_b'] ?? null) !== null
+        || ($resolved['exclude_player'] ?? null) !== true || !is_string($resolved['actor_a'] ?? null)
+        || trim($resolved['actor_a']) === '' || !is_string($scope['config_id'] ?? null)
+        || !pcv_log_valid_uuid($scope['config_id']) || !pcv_log_valid_actor_id($scope['actor_a_id'] ?? null)) {
+        return null;
+    }
+    return $scope;
+}
+
+function pcv_reflection_ack_matches_solo_scope(array $gameRequest, array $scope): bool
+{
+    $raw = $gameRequest[3] ?? null;
+    if (($gameRequest[0] ?? null) !== '_speech' || !is_string($raw) || strlen($raw) > 16384 || preg_match('//u', $raw) !== 1) {
+        return false;
+    }
+    try {
+        $payload = json_decode($raw, false, 32, JSON_THROW_ON_ERROR);
+    } catch (JsonException) {
+        return false;
+    }
+    if (!$payload instanceof stdClass) {
+        return false;
+    }
+    $speaker = $payload->speaker ?? null;
+    $listener = $payload->listener ?? null;
+    $speech = $payload->speech ?? null;
+    $utteranceId = $payload->utterance_id ?? null;
+    if (!is_string($speaker) || !is_string($listener) || !is_string($speech) || !is_string($utteranceId)
+        || strlen($speaker) > 256 || strlen($listener) > 256 || strlen($speech) > 12000
+        || trim($speaker) === '' || trim($listener) === '' || trim($speech) === ''
+        || preg_match('//u', $speaker) !== 1 || preg_match('//u', $listener) !== 1 || preg_match('//u', $speech) !== 1
+        || preg_match('/\Autt_[A-Za-z0-9_-]{8,128}\z/D', trim($utteranceId)) !== 1
+        || pcv_scope_name_key($speaker) !== pcv_scope_name_key($scope['scope']['actor_a'])) {
+        return false;
+    }
+    $playerName = function_exists('pcv_current_player_name') ? pcv_current_player_name() : null;
+    foreach ([$playerName, 'Player', 'the Player', 'Dragonborn', 'the Dragonborn'] as $candidate) {
+        if (is_string($candidate) && trim($candidate) !== ''
+            && pcv_scope_name_key($listener) === pcv_scope_name_key($candidate)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function pcvReflectionRevalidate(array $registration, string $phase, string $claimToken): bool
@@ -89,9 +148,28 @@ function pcv_reflection_load_mind_poisoning(): bool
         return false;
     }
     require_once $path;
-    return function_exists('ChimMindPoisoning\\mindPoisoningEvaluateReflection')
+    return pcv_reflection_mind_poisoning_api_compatible();
+}
+
+function pcv_reflection_mind_poisoning_api_compatible(): bool
+{
+    return defined('ChimMindPoisoning\\MIND_POISONING_REFLECTION_API_VERSION')
+        && constant('ChimMindPoisoning\\MIND_POISONING_REFLECTION_API_VERSION') === 1
+        && function_exists('ChimMindPoisoning\\mindPoisoningEvaluateReflection')
         && function_exists('ChimMindPoisoning\\reflectionSourceParts')
         && class_exists('ChimMindPoisoning\\PostgresStoreDb');
+}
+
+function pcv_reflection_mind_poisoning_unavailable_reason(): string
+{
+    $path = dirname(__DIR__, 2) . '/ext/mind_poisoning/reflection.php';
+    if (is_link($path) || !is_file($path)) {
+        return 'mind_poisoning_unavailable';
+    }
+    if (!pcv_reflection_mind_poisoning_api_compatible()) {
+        return 'reflection_api_incompatible';
+    }
+    return 'mind_poisoning_unavailable';
 }
 
 function pcv_reflection_log(
@@ -107,6 +185,16 @@ function pcv_reflection_log(
     $configId = is_string($scope['config_id'] ?? null) && pcv_log_valid_uuid($scope['config_id'])
         ? $scope['config_id'] : null;
     pcv_log_set_config_id($configId);
+    if (is_array($scope) && pcv_reflection_valid_record($scope)) {
+        $registration = $scope['registration'];
+        pcv_log_set_correlation([
+            'config_id' => $scope['config_id'],
+            'event_id' => (string)$registration['event_id'],
+            'utterance_id' => $registration['utterance_id'],
+        ]);
+    } else {
+        pcv_log_set_correlation([]);
+    }
     $actorId = $scope['actor_a_id'] ?? $scope['actor_id'] ?? ($scope['registration']['actor_id'] ?? null);
     if (!is_string($actorId) && is_int($actorId) && $actorId > 0) {
         $actorId = (string)$actorId;
@@ -131,7 +219,30 @@ function pcv_reflection_log(
         pcv_log_event($event, 'info', 'accepted', null, $context);
         return;
     }
+    if ($event === 'reflection.observer_unavailable') {
+        pcv_log_event($event, 'info', 'unavailable', $reason, $context);
+        return;
+    }
     pcv_log_event($event, 'info', 'skipped', $reason, $context);
+}
+
+function pcv_reflection_attach_mp_observer(object $requestLog): bool
+{
+    if (!method_exists($requestLog, 'observe')) {
+        return false;
+    }
+    try {
+        $requestLog->observe(static function (array $record, string $level): void {
+            try {
+                pcv_log_import_mp_record($record, $level);
+            } catch (Throwable) {
+                // Diagnostics must never alter Mind Poisoning's evaluation or persistence.
+            }
+        });
+        return true;
+    } catch (Throwable) {
+        return false;
+    }
 }
 
 function pcv_reflection_fresh_scope(?callable $reader): ?array
@@ -400,7 +511,7 @@ function pcv_reflection_register_with_store(
         return 'registry_unavailable';
     }
 
-    pcv_reflection_log('reflection.output_registered', 'registration', '', $requestScope);
+    pcv_reflection_log('reflection.output_registered', 'registration', '', $record);
     return 'registered';
 }
 
@@ -523,8 +634,16 @@ function pcv_reflection_evaluate_with_store(
     }
 
     $revalidationReason = null;
+    pcv_log_set_config_id($record['config_id']);
+    pcv_log_set_correlation([
+        'event_id' => (string)$record['registration']['event_id'],
+        'utterance_id' => $record['registration']['utterance_id'],
+    ]);
     try {
         $requestLog ??= new \ChimMindPoisoning\RequestLog();
+        if (!pcv_reflection_attach_mp_observer($requestLog)) {
+            pcv_reflection_log('reflection.observer_unavailable', 'ack', 'observer_unsupported', $record);
+        }
         $status = \ChimMindPoisoning\mindPoisoningEvaluateReflection(
             $record['registration'],
             $gameRequest,
@@ -542,6 +661,9 @@ function pcv_reflection_evaluate_with_store(
             $requestModel,
             $requestLog
         );
+        if ($status === 'committed') {
+            pcv_reflection_log('reflection.evaluation_finished', 'ack', '', $record);
+        }
     } catch (Throwable $error) {
         pcv_reflection_log('reflection.ack_error', 'ack', 'internal_error', $record, $error);
         $status = 'failed';
@@ -553,18 +675,16 @@ function pcv_reflection_evaluate_with_store(
         }
     }
 
-    if ($status !== 'committed') {
+    if ($status !== 'committed' && !($errorLogged ?? false)) {
         if (in_array($revalidationReason, ['registry_corrupt', 'registry_unavailable'], true)) {
             pcv_reflection_log('reflection.ack_error', 'ack', $revalidationReason, $record);
-        } elseif ($status === 'failed' && !($errorLogged ?? false)) {
-            pcv_reflection_log('reflection.ack_error', 'ack', 'internal_error', $record);
+        } elseif ($status === 'failed') {
+            pcv_reflection_log('reflection.ack_error', 'ack', 'evaluation_failed', $record);
         } else {
             $reason = in_array($revalidationReason, ['identity_changed', 'scope_changed'], true)
                 ? $revalidationReason : 'evaluation_rejected';
             pcv_reflection_log('reflection.ack_skipped', 'ack', $reason, $record);
         }
-    } else {
-        pcv_reflection_log('reflection.evaluation_finished', 'ack', '', $record);
     }
     return $status;
 }

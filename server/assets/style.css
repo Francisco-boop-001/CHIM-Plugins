@@ -438,3 +438,142 @@ input:focus-visible {
         font-size: 2.5rem;
     }
 }
+
+.logs-link,
+.logs-page .topbar a {
+    color: #f3ddb2;
+    font-family: Arial, sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.logs-page {
+    max-width: 1320px;
+}
+
+.logs-panel {
+    padding: clamp(22px, 4vw, 52px);
+    background: var(--paper-light);
+}
+
+.logs-panel h1 {
+    margin: 4px 0 10px;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+}
+
+.logs-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    gap: 14px;
+    margin: 24px 0;
+    padding: 20px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+}
+
+.logs-field {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    color: var(--muted-ink);
+    font-family: Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.logs-field input,
+.logs-field select {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    color: var(--ink);
+    background: #fffdf7;
+    border: 1px solid var(--line);
+    font: 0.9rem Arial, sans-serif;
+}
+
+.logs-actions {
+    display: flex;
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.logs-health {
+    margin: 26px 0;
+    padding: 18px;
+    background: #e8dcc0;
+    border-left: 4px solid var(--teal);
+}
+
+.logs-health h2 {
+    margin: 0 0 10px;
+}
+
+.logs-health p {
+    margin: 8px 0;
+}
+
+.logs-omissions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, max-content));
+    gap: 4px 12px;
+    margin: 14px 0 0;
+    font-family: Arial, sans-serif;
+    font-size: 0.78rem;
+}
+
+.logs-omissions dt {
+    color: var(--muted-ink);
+}
+
+.logs-omissions dd {
+    margin: 0;
+    font-weight: 700;
+}
+
+.logs-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fffdf7;
+    font: 0.78rem Arial, sans-serif;
+}
+
+.logs-table th,
+.logs-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+}
+
+.logs-table th {
+    white-space: nowrap;
+    background: var(--paper);
+}
+
+.logs-table td:last-child {
+    min-width: 260px;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+    .logs-page .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .logs-omissions {
+        grid-template-columns: repeat(2, minmax(0, max-content));
+    }
+
+    .logs-actions {
+        flex-direction: column;
+    }
+}

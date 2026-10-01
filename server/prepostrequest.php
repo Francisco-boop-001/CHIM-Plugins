@@ -28,3 +28,29 @@ register_shutdown_function(static function () use ($hadSetting, $previousSetting
         unset($GLOBALS['RELATIONSHIP_SYSTEM_ENABLED']);
     }
 });
+
+$eventContext = [
+    'phase' => 'registration',
+    'route' => 'solo_reflection',
+    'actor_a_id' => $requestScope['actor_a_id'] ?? null,
+];
+if (!pcvRequestScopeModeMatches($requestScope)) {
+    pcv_log_event('reflection.registration_skipped', 'info', 'skipped', 'scope_ineligible', $eventContext);
+    return;
+}
+$reflectionPath = __DIR__ . '/reflection.php';
+if (!is_file($reflectionPath) || is_link($reflectionPath)) {
+    pcv_log_event('reflection.registration_error', 'error', 'failed', 'mind_poisoning_unavailable', $eventContext);
+    return;
+}
+require_once $reflectionPath;
+if (!function_exists('pcvReflectionRegisterLastOutput')) {
+    pcv_log_event('reflection.registration_error', 'error', 'failed', 'mind_poisoning_unavailable', $eventContext);
+    return;
+}
+
+try {
+    pcvReflectionRegisterLastOutput($requestScope);
+} catch (Throwable $error) {
+    pcv_log_exception('reflection.registration_error', 'error', 'failed', 'internal_error', $error, $eventContext);
+}

@@ -1,0 +1,47 @@
+# Thorough operational diagnostics - 2026-09-30
+
+User authorizes implementation by independent gpt-6-luna Max owners with Ponytail FULL. Lead reviews only; no product code by lead. Preserve unrelated work and immutable releases. Installed CHIM, game, provider and live database remain unchanged. Extend existing logger/reader; no logging SDK, daemon or core patch.
+
+## Acceptance
+
+- Each meaningful scene action explains time, version, request/config correlation, stage, known actor IDs, decision, fixed reason and outcome. Unknown identities remain unknown; no human-authentication or audio-hearing claims.
+- Solo output registration and exact ACK can be correlated with Mind Poisoning model/persistence results without adding dialogue, prompts, digests, secrets, arbitrary errors or claim tokens to logs. Distinguish skipped, rejected, failed, zero/no-change, confirmed commit and uncertain commit.
+- Exceptions and failed operations provide safe location/class metadata. A terminal request record distinguishes blocked, skipped, scoped output, failed and unobserved completion. Fatal diagnostics are bounded and do not hijack CHIM's global error handler.
+- Private bounded storage and rotation survive unchanged; retention mode, unavailable/busy/degraded storage and reader omissions/caps are visible. Durable storage requires a safe administrator-owned external directory; do not silently pretend temporary storage is durable or bounded history is complete.
+- Reuse a common sanitized reader for CLI and protected browser viewing/export. Validate all filters, escape HTML, enforce limits, require real local/trusted access and session/CSRF checks; forwarding headers and a CSRF token alone are not authentication. Web unavailable must not block ordinary scene controls.
+- Browser refresh failures have bounded, fixed-code telemetry identified as client-reported, with no caller text/URL/stack collection and no request-flood loop.
+- Every changed runtime line serves diagnostics, preserves scene/affinity semantics and remains readable. Tests answer named failure/correlation/access/resource questions. Source/static/fixtures are not installed-game proof.
+
+## Pins and exclusive ownership
+
+- [x] Pin 0: read existing call paths and current OWASP/OpenTelemetry guidance; settle shared API and ownership before dependent coding.
+- [x] Pin 1 logger slice: logger/storage/shared reader (review_modes): PCV server/log.php, diagnostics.php, log_reader.php; focused tests and minimal reader package membership. Evidence: tasks/implementation-2026-09-30/logging/logger-review.md. Pin 1 remains open until the independent instrumentation slice is accepted.
+- [x] Pin 1 independent slice: runtime/integration instrumentation (review_operations): five changed PCV runtime files and three focused checks; reviewed unchanged sibling hooks. MP source/tests restored to task baseline per user boundary. No log.php or UI edits. Evidence: tasks/instrumentation-review.md.
+- [x] Pin 2 after accepted reader API: UI/client diagnostics (logging_ui): PCV server/index.php, assets/ui-refresh.js and style.css; focused UI/refresh tests. Report ui-review.md. Depends on Pin 1 APIs; no concurrent same-file edits.
+- [x] Pin 3: lead review all diffs, failure paths and outputs; return defects to original owners; mirror accepted owned PCV files to public nested source. Update package allowlist only if a new runtime reader file is added, with a focused membership check by original logger owner.
+- [x] Pin 3: update docs/todo and final review with exact checks and limits. No version/tag/publication pin advancement without separately completed release evidence.
+
+## Research
+
+- OWASP Logging Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html (checked 2026-09-30): useful interaction identifiers, reasons/results, safe encoding/access, bounded resources, failure testing and detection of logging stopping.
+- OpenTelemetry Logs Data Model: https://opentelemetry.io/docs/specs/otel/logs/data-model/ (checked 2026-09-30): stable timestamps/severity/event identity/correlation. Preserve existing JSONL schema compatibility; do not claim full OTel exporter compliance.
+
+## Execution/review ledger
+
+Started with read-only discovery by logger and UI owners. A simultaneous runtime owner resume was refused by harness thread limit; dispatch it when discovery releases capacity. No dependency is bypassed to increase parallelism.
+
+Pin 0 accepted: shared API reuses schema v1, context.correlation for validated config/event/utterance links, variable outcomes with fixed severity/reason maps, terminal shutdown observation and sanitized MP import. No reflection registry key/schema changes for tracing. Reader opens bounded regular-file snapshots under lock and parses captured lengths after release on Linux. New web diagnostic actions must separately require direct exact loopback without forwarding headers or server REMOTE_USER, plus CSRF; source guard tests do not certify deployed authentication. Durable external PCV_LOG_DIR remains explicit, temporary/fallback storage is visibly labeled. Logger owns minimal new reader membership in builder/test allowlist.
+
+Failure-mode review for UI: diagnostic actions must run before NPC/catalog/database loading so those failures cannot prevent log retrieval. Prefer a gated standalone Logs view reachable from the scene page; GET renders a bounded safe viewer/form, POST read/export/client-report validates session CSRF. Denied diagnostics must not disable ordinary scene controls. Deployed auth and WSL forwarding remain separately unverified. Only direct exact loopback without forwarding headers or server REMOTE_USER is accepted; arbitrary user/address headers never authorize.
+
+User boundary correction: finish Private Conversation only. Mind Poisoning changes belong to the user's separate task; the integration owner must undo only its current-task MP edits and retain a checkable follow-up prompt. PCV must tolerate published MP without an observer API. Exact PCV registration/ACK correlation remains available; unified model/persistence results require the future compatible adapter and must be labeled unavailable meanwhile. Pair evaluation remains in MP diagnostics. No MP release/source promotion in this task.
+
+Logger slice review accepted: inspected event rules, correlation/redaction, optional importer, terminal/fatal observer, storage failure health, shared snapshot/reader/CLI, focused checks and builder membership. Returned and resolved contradictory reason/outcome combinations, before-affinity bounds, uncertain-commit severity drops, collapsed fixed MP causes, fallback masking later failures, non-regular-file blocking, normal filter/omission conflation and terminal failure masking. Verified owner output: logger/reader checks exit 0, four package checks OK, five PHP lints clean. Real PHP fatal/shutdown fixtures are isolated process proof, not deployed CHIM proof. UI remains gated on complete Pin 1 acceptance.
+
+Pin 1 complete: instrumentation source/call-path review and focused outputs accepted. Returned missing-versus-empty confusion, baseline-versus-age confusion, public presence-result drift, false scoped-output claim, accepted summaries on failed/stale MP returns, missing safe postrequest exception metadata and incomplete fixture cleanup. Final registry/background/postrequest checks exit 0; changed PHP lint clean; tracked MP files have no task diff. Proceed to dependent UI implementation using the reviewed reader contract.
+
+UI API addendum accepted before dependent server coding: `ui.diagnostics_rejected` has four fixed rejection reasons and requires its closed browser operation/source context. Original logger owner updated both writer and shared reader validation; isolated reason/context/projection checks and two PHP lints passed. UI resumed against the accepted additive contract. Lead returned client per-page dedupe that would suppress a distinct later failure after recovery; clear only after successful refresh, retaining server throttling and no recursive reporting.
+
+Pin 2 accepted: lead inspected the standalone route before CHIM dependencies, access/CSRF boundaries, strict filters, escaped rendering, shared-reader projection, fixed-code throttle, reporter, styling and focused test diffs. Returned misleading successful empty export on busy/unavailable reads, absent partial-export health, missing session exception metadata, a forged-header fixture that accidentally authorized through genuine loopback, and unisolated PHP test session storage. Original owner resolved these. PHP UI and HTTP checks exit 0, changed PHP lints clean, Node 8/8; final fixture-only isolation edit reran only HTTP, exit 0. Source access guards and fixtures do not certify deployed proxy/authentication. Pin 3 controlled allowlist mirror now authorized; no release advancement.
+
+Pin 3 source review complete: original logger owner copied the exact 21-file accepted runtime/test/build allowlist. Independent lead SHA256 comparison passed for all 21. Lead mirrored only the logging guide/README and task evidence; no unrelated authoring-only preview, companion or historical drafts were promoted. Scoped whitespace, protected-file/HEAD and documentation-byte checks form the final handoff gate recorded in final-review.md. The release version and old archives remain unchanged; only development source was updated.

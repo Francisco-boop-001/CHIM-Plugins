@@ -262,6 +262,7 @@ function pcvRoutingLogException(string $phase, Throwable $error, ?array $scopeSt
         + pcvRoutingLogActorContext($scopeState);
     if (empty($GLOBALS['PCV_ROUTING_LOG_TERMINAL'])) {
         $GLOBALS['PCV_ROUTING_LOG_TERMINAL'] = true;
+        pcv_log_set_terminal('failed', 'hook_exception', $context);
         pcv_log_exception('routing.request_error', 'error', 'failed', 'hook_exception', $error, $context);
     }
 }
@@ -730,6 +731,8 @@ function pcvBuildScopeContext(array $resolvedScope, string $speaker, string $lis
 /** Stop generation with a non-success response when private routing cannot be guaranteed. */
 function pcvBlockRequest(string $message, string $reason, string $phase, ?array $scopeState = null, bool $error = false): void
 {
+    $outcome = $reason === 'scene_not_eligible' ? 'skipped' : ($error ? 'failed' : 'blocked');
+    pcv_log_set_terminal($outcome, $reason, ['phase' => $phase] + pcvRoutingLogActorContext($scopeState));
     if (empty($GLOBALS['PCV_ROUTING_LOG_TERMINAL'])) {
         $GLOBALS['PCV_ROUTING_LOG_TERMINAL'] = true;
         if ($reason === 'scene_not_eligible') {
