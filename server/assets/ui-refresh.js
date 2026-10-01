@@ -4,6 +4,7 @@
     const POLL_INTERVAL_MS = 15_000;
     const REQUEST_TIMEOUT_MS = 8_000;
     const ERROR_MESSAGE = 'Automatic refresh failed. ARM is disabled until a current eligibility check succeeds.';
+    const FAILURE_CODES = ['timeout', 'network', 'http', 'invalid_response', 'unknown'];
     const documentRef = globalThis.document;
     if (!documentRef || !documentRef.body || !documentRef.body.dataset.refreshUrl) {
         return;
@@ -15,9 +16,38 @@
     let rememberedActorB = '';
     let rememberedPlayerExclusion = null;
     let lastSoloMode = false;
+    const reportedFailures = new Set();
+
+    function reportRefreshFailure(code) {
+        const logsUrl = documentRef.body.dataset.logsUrl;
+        const csrf = documentRef.querySelectorAll('input[name="csrf"]')[0]?.value;
+        if (!FAILURE_CODES.includes(code) || !logsUrl || typeof csrf !== 'string' || csrf === '' || reportedFailures.has(code)) {
+            return;
+        }
+        reportedFailures.add(code);
+        const body = new globalThis.URLSearchParams({ action: 'client_report', code, csrf });
+        try {
+            void globalThis.fetch(logsUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: { Accept: 'text/plain', 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                body: body.toString(),
+                keepalive: true,
+            }).catch(() => {});
+        } catch {
+        }
+    }
 
     function available(select, value) {
         return value !== '' && Array.from(select.options).some((option) => option.value === value);
+    }
+
+    function isSelectElement(element) {
+        const options = element?.options;
+        return element?.tagName === 'SELECT' && options !== undefined && options !== null
+            && Number.isInteger(options.length) && typeof element.value === 'string'
+            && typeof element.replaceChildren === 'function';
     }
 
     function updateArmButton() {
@@ -146,13 +176,16 @@
         const nextCsrfInputs = snapshot.querySelectorAll('input[name="csrf"]');
         const currentCsrfInputs = documentRef.querySelectorAll('input[name="csrf"]');
 
-        if (!currentA || !currentB || !currentSoloMode || !nextA || !nextB || !nextBadge || !nextStatus
+        if (!isSelectElement(currentA) || !isSelectElement(currentB) || !currentSoloMode || !isSelectElement(nextA)
+            || !isSelectElement(nextB) || !nextBadge || !nextStatus
             || !nextNote || !nextNotice || !currentBadge || !currentStatus || !currentNote
             || !currentNotice || !currentArm || !nextArm || nextCsrfInputs.length === 0
             || currentCsrfInputs.length === 0 || typeof snapshot.body.dataset.playthroughRef !== 'string') {
             throw new Error('Incomplete refresh response.');
         }
 
+        const actorAOptions = Array.from(nextA.options, (option) => option.cloneNode(true));
+        const actorBOptions = Array.from(nextB.options, (option) => option.cloneNode(true));
         const identityChanged = documentRef.body.dataset.playthroughRef !== snapshot.body.dataset.playthroughRef;
         if (identityChanged) {
             if (currentSoloMode.checked) {
@@ -168,8 +201,8 @@
         }
         const selectedA = identityChanged ? '' : currentA.value;
         const selectedB = identityChanged || currentSoloMode.checked ? '' : currentB.value;
-        currentA.replaceChildren(...Array.from(nextA.options, (option) => option.cloneNode(true)));
-        currentB.replaceChildren(...Array.from(nextB.options, (option) => option.cloneNode(true)));
+        currentA.replaceChildren(...actorAOptions);
+        currentB.replaceChildren(...actorBOptions);
         currentA.value = available(currentA, selectedA) ? selectedA : '';
         currentB.value = available(currentB, selectedB) && selectedB !== currentA.value ? selectedB : '';
 
@@ -206,6 +239,7 @@
         inFlight = true;
         const controller = new AbortController();
         const timeout = globalThis.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+        let phase = 'network';
         try {
             const response = await globalThis.fetch(documentRef.body.dataset.refreshUrl, {
                 method: 'GET',
@@ -214,15 +248,25 @@
                 headers: { Accept: 'text/html' },
                 signal: controller.signal,
             });
+            phase = 'response';
             if (!response.ok) {
+                phase = 'http';
                 throw new Error('Refresh request failed.');
             }
+            phase = 'invalid_response';
             const html = await response.text();
             const snapshot = new DOMParser().parseFromString(html, 'text/html');
             applySnapshot(snapshot);
-        } catch {
+            reportedFailures.clear();
+        } catch (error) {
             if (documentRef.visibilityState === 'visible') {
                 setRefreshError();
+                const code = controller.signal.aborted || error?.name === 'AbortError'
+                    ? 'timeout'
+                    : phase === 'http' ? 'http'
+                        : phase === 'network' ? (error?.name === 'TypeError' ? 'network' : 'unknown')
+                            : 'invalid_response';
+                reportRefreshFailure(code);
             }
         } finally {
             globalThis.clearTimeout(timeout);

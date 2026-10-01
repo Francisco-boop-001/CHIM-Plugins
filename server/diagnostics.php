@@ -8,44 +8,41 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-require_once __DIR__ . '/log.php';
-
-const PCV_DIAGNOSTICS_MAX_LIMIT = 1000;
+require_once __DIR__ . '/log_reader.php';
 
 function pcv_diagnostics_usage(): string
 {
-    return "Usage: php server/diagnostics.php [--request ID] [--config UUID] [--limit N] [--jsonl]\n"
+    return "Usage: php server/diagnostics.php [--request ID] [--config UUID] [--event NAME] [--severity LEVEL] [--event-id ID] [--utterance-id ID] [--linked-request-id ID] [--limit N] [--jsonl]\n"
         . "       php server/diagnostics.php --help\n\n"
-        . "Show recent operational events from the private extension log. The default limit is 100; N must be 1 through 1000.\n"
-        . "Run as the same effective user as the CHIM PHP worker. --jsonl writes sanitized matching events to stdout.\n";
+        . "Show sanitized operational events from the private extension log. The default limit is 100; N must be 1 through 1000.\n"
+        . "Run as the same effective user as the CHIM PHP worker. --jsonl writes matching events to stdout.\n";
 }
 
 function pcv_diagnostics_parse_arguments(array $arguments): array
 {
-    $options = ['request' => null, 'config' => null, 'limit' => 100, 'jsonl' => false, 'help' => false];
+    $options = ['request' => null, 'config' => null, 'event' => null, 'severity' => null,
+        'event_id' => null, 'utterance_id' => null, 'linked_request_id' => null,
+        'limit' => 100, 'jsonl' => false, 'help' => false];
+    $valueOptions = [
+        '--request' => 'request', '--config' => 'config', '--event' => 'event', '--severity' => 'severity',
+        '--event-id' => 'event_id', '--utterance-id' => 'utterance_id', '--linked-request-id' => 'linked_request_id',
+        '--limit' => 'limit',
+    ];
     $seen = [];
     for ($index = 1; $index < count($arguments); $index++) {
         $argument = $arguments[$index];
-        if ($argument === '--help') {
-            if (isset($seen['help'])) {
+        if ($argument === '--help' || $argument === '--jsonl') {
+            $key = $argument === '--help' ? 'help' : 'jsonl';
+            if (isset($seen[$key])) {
                 throw new InvalidArgumentException('duplicate option');
             }
-            $seen['help'] = true;
-            $options['help'] = true;
+            $seen[$key] = true;
+            $options[$key] = true;
             continue;
         }
-        if ($argument === '--jsonl') {
-            if (isset($seen['jsonl'])) {
-                throw new InvalidArgumentException('duplicate option');
-            }
-            $seen['jsonl'] = true;
-            $options['jsonl'] = true;
-            continue;
-        }
-
         $equals = strpos($argument, '=');
         $name = $equals === false ? $argument : substr($argument, 0, $equals);
-        if (!in_array($name, ['--request', '--config', '--limit'], true) || isset($seen[$name])) {
+        if (!isset($valueOptions[$name]) || isset($seen[$name])) {
             throw new InvalidArgumentException('invalid option');
         }
         if ($equals === false) {
@@ -60,216 +57,25 @@ function pcv_diagnostics_parse_arguments(array $arguments): array
             throw new InvalidArgumentException('empty option value');
         }
         $seen[$name] = true;
-
-        if ($name === '--request') {
-            if (preg_match('/\A(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})\z/D', $value) !== 1) {
-                throw new InvalidArgumentException('invalid request id');
-            }
-            $options['request'] = $value;
-        } elseif ($name === '--config') {
-            if (!pcv_log_valid_uuid($value)) {
-                throw new InvalidArgumentException('invalid config id');
-            }
-            $options['config'] = $value;
-        } else {
+        $key = $valueOptions[$name];
+        if ($key === 'limit') {
             if (preg_match('/\A[0-9]{1,4}\z/D', $value) !== 1 || (int)$value < 1 || (int)$value > PCV_DIAGNOSTICS_MAX_LIMIT) {
                 throw new InvalidArgumentException('invalid limit');
             }
-            $options['limit'] = (int)$value;
+            $options[$key] = (int)$value;
+        } else {
+            $options[$key] = $value;
         }
+    }
+    if ($options['help']) {
+        return $options;
+    }
+    try {
+        pcv_diagnostics_normalize_filters($options);
+    } catch (InvalidArgumentException $error) {
+        throw new InvalidArgumentException('invalid filter', 0, $error);
     }
     return $options;
-}
-
-function pcv_diagnostics_private_handle($handle): bool
-{
-    if (!is_resource($handle)) {
-        return false;
-    }
-    $stat = @fstat($handle);
-    $uid = pcv_log_effective_uid();
-    return is_array($stat) && $uid !== null && ($stat['uid'] ?? null) === $uid
-        && (($stat['mode'] ?? 0) & 0170000) === 0100000
-        && (($stat['mode'] ?? 0) & 0077) === 0
-        && (($stat['mode'] ?? 0) & 0600) === 0600;
-}
-
-/** @return array{status:string,handle:mixed} */
-function pcv_diagnostics_acquire_snapshot(string $logPath): array
-{
-    if (basename($logPath) !== 'events.jsonl') {
-        return ['status' => 'unavailable', 'handle' => null];
-    }
-    $directoryPath = dirname($logPath);
-    clearstatcache(true, $directoryPath);
-    if (!file_exists($directoryPath) && !is_link($directoryPath)) {
-        return ['status' => 'empty', 'handle' => null];
-    }
-    $directory = realpath($directoryPath);
-    if ($directory === false) {
-        return ['status' => 'unavailable', 'handle' => null];
-    }
-
-    $hasLogs = false;
-    foreach (['events.jsonl', 'events.1.jsonl', 'events.2.jsonl', 'events.3.jsonl', 'events.4.jsonl'] as $name) {
-        $path = $directory . DIRECTORY_SEPARATOR . $name;
-        if (is_link($path)) {
-            return ['status' => 'unavailable', 'handle' => null];
-        }
-        $hasLogs = $hasLogs || file_exists($path);
-    }
-
-    $lockPath = $directory . DIRECTORY_SEPARATOR . 'events.lock';
-    if (!file_exists($lockPath) && !is_link($lockPath)) {
-        return ['status' => $hasLogs ? 'unavailable' : 'empty', 'handle' => null];
-    }
-    if (is_link($lockPath) || !pcv_log_private_file($lockPath)) {
-        return ['status' => 'unavailable', 'handle' => null];
-    }
-    $handle = @fopen($lockPath, 'rb');
-    if (!pcv_diagnostics_private_handle($handle)) {
-        if (is_resource($handle)) {
-            fclose($handle);
-        }
-        return ['status' => 'unavailable', 'handle' => null];
-    }
-    if (!@flock($handle, LOCK_SH | LOCK_NB)) {
-        fclose($handle);
-        return ['status' => 'busy', 'handle' => null];
-    }
-    return ['status' => 'locked', 'handle' => $handle];
-}
-
-function pcv_diagnostics_project_entry($row): ?array
-{
-    if (!is_array($row) || ($row['schema_version'] ?? null) !== PCV_LOG_SCHEMA_VERSION) {
-        return null;
-    }
-    $event = $row['event'] ?? null;
-    if (!is_string($event) || !isset(pcv_log_event_rules()[$event])) {
-        return null;
-    }
-    $rule = pcv_log_event_rules()[$event];
-    $timestamp = $row['timestamp'] ?? null;
-    $pluginVersion = $row['plugin_version'] ?? null;
-    $requestId = $row['request_id'] ?? null;
-    $configId = $row['config_id'] ?? null;
-    $playthroughRef = $row['playthrough_ref'] ?? null;
-    $elapsed = $row['elapsed_ms'] ?? null;
-    $reason = $row['reason'] ?? null;
-    $context = $row['context'] ?? null;
-    if (!is_string($timestamp) || preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z\z/D', $timestamp) !== 1
-        || !is_string($pluginVersion) || preg_match('/\A[A-Za-z0-9][A-Za-z0-9.+-]{0,31}\z/D', $pluginVersion) !== 1
-        || !is_string($requestId) || preg_match('/\A(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})\z/D', $requestId) !== 1
-        || ($configId !== null && (!is_string($configId) || !pcv_log_valid_uuid($configId)))
-        || ($playthroughRef !== null && (!is_string($playthroughRef) || preg_match('/\A[a-f0-9]{16}\z/D', $playthroughRef) !== 1))
-        || ($elapsed !== null && (!is_int($elapsed) || $elapsed < 0))
-        || !is_string($row['severity'] ?? null) || $row['severity'] !== $rule['severity']
-        || !is_string($row['outcome'] ?? null) || $row['outcome'] !== $rule['outcome']
-        || ($reason !== null && !is_string($reason))
-        || !is_array($context) || !pcv_log_reason_allowed($event, $reason)) {
-        return null;
-    }
-
-    return [
-        'schema_version' => PCV_LOG_SCHEMA_VERSION,
-        'plugin_version' => $pluginVersion,
-        'timestamp' => $timestamp,
-        'event' => $event,
-        'severity' => $rule['severity'],
-        'outcome' => $rule['outcome'],
-        'reason' => $reason,
-        'request_id' => $requestId,
-        'config_id' => $configId,
-        'playthrough_ref' => $playthroughRef,
-        'elapsed_ms' => $elapsed,
-        'context' => pcv_log_clean_context($event, $context),
-    ];
-}
-
-/** @return array{status:string,entries:list<array<string,mixed>>} */
-function pcv_diagnostics_read(string $logPath, array $filters): array
-{
-    $snapshot = pcv_diagnostics_acquire_snapshot($logPath);
-    if ($snapshot['status'] !== 'locked') {
-        return ['status' => $snapshot['status'], 'entries' => []];
-    }
-
-    $handle = $snapshot['handle'];
-    $directory = (string)realpath(dirname($logPath));
-    $paths = [];
-    for ($index = 4; $index >= 1; $index--) {
-        $paths[] = $directory . DIRECTORY_SEPARATOR . 'events.' . $index . '.jsonl';
-    }
-    $paths[] = $directory . DIRECTORY_SEPARATOR . 'events.jsonl';
-    $entries = [];
-
-    try {
-        foreach ($paths as $path) {
-            clearstatcache(true, $path);
-            if (!file_exists($path) && !is_link($path)) {
-                continue;
-            }
-            if (is_link($path) || !pcv_log_private_file($path)) {
-                return ['status' => 'unavailable', 'entries' => []];
-            }
-            $size = @filesize($path);
-            if (!is_int($size) || $size > PCV_LOG_MAX_FILE_BYTES) {
-                return ['status' => 'unavailable', 'entries' => []];
-            }
-            $file = @fopen($path, 'rb');
-            if (!pcv_diagnostics_private_handle($file)) {
-                if (is_resource($file)) {
-                    fclose($file);
-                }
-                return ['status' => 'unavailable', 'entries' => []];
-            }
-
-            $bytesRead = 0;
-            while (!feof($file)) {
-                $line = '';
-                $lineComplete = false;
-                do {
-                    $chunk = fgets($file, PCV_LOG_MAX_ENTRY_BYTES + 1);
-                    if ($chunk === false) {
-                        break;
-                    }
-                    $bytesRead += strlen($chunk);
-                    if ($bytesRead > PCV_LOG_MAX_FILE_BYTES) {
-                        fclose($file);
-                        return ['status' => 'unavailable', 'entries' => []];
-                    }
-                    if (strlen($line) <= PCV_LOG_MAX_ENTRY_BYTES) {
-                        $line .= $chunk;
-                    }
-                    $lineComplete = str_ends_with($chunk, "\n") || feof($file);
-                } while (!$lineComplete);
-
-                if ($chunk === false) {
-                    break;
-                }
-                if (!$lineComplete || strlen($line) > PCV_LOG_MAX_ENTRY_BYTES) {
-                    continue;
-                }
-                $decoded = json_decode(rtrim($line, "\r\n"), true);
-                $entry = pcv_diagnostics_project_entry($decoded);
-                if ($entry === null
-                    || ($filters['request'] !== null && $entry['request_id'] !== $filters['request'])
-                    || ($filters['config'] !== null && $entry['config_id'] !== $filters['config'])) {
-                    continue;
-                }
-                $entries[] = $entry;
-                if (count($entries) > $filters['limit']) {
-                    array_shift($entries);
-                }
-            }
-            fclose($file);
-        }
-    } finally {
-        @flock($handle, LOCK_UN);
-        fclose($handle);
-    }
-    return ['status' => 'ok', 'entries' => $entries];
 }
 
 function pcv_diagnostics_json(array $value): string
@@ -277,8 +83,33 @@ function pcv_diagnostics_json(array $value): string
     return json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
 }
 
-function pcv_diagnostics_write(array $entries, bool $jsonl): void
+function pcv_diagnostics_health_line(array $health): string
 {
+    $storage = $health['storage'] ?? [];
+    $omissions = $health['omissions'] ?? [];
+    $omissions = is_array($omissions) ? $omissions : [];
+    $dataOmissions = 0;
+    foreach (['malformed', 'oversized', 'unknown_schema', 'unsupported_revision', 'read_failed'] as $key) {
+        $dataOmissions += max(0, (int)($omissions[$key] ?? 0));
+    }
+    return 'Diagnostic reader: status=' . (string)($health['read_status'] ?? 'unavailable')
+        . ' storage=' . (string)($storage['storage_mode'] ?? 'unavailable')
+        . ' write_status=' . (string)($storage['write_status'] ?? 'not_verified')
+        . ' history=' . (string)($health['completeness'] ?? 'bounded_history')
+        . ' captured_segments=' . (int)($health['captured_segments'] ?? 0)
+        . ' data_omitted=' . $dataOmissions
+        . ' filtered=' . max(0, (int)($omissions['filtered'] ?? 0))
+        . ' capped=' . max(0, (int)($omissions['capped'] ?? 0));
+}
+
+function pcv_diagnostics_write(array $entries, bool $jsonl, array $health): void
+{
+    $healthLine = pcv_diagnostics_health_line($health);
+    if ($jsonl) {
+        fwrite(STDERR, $healthLine . "\n");
+    } else {
+        fwrite(STDOUT, $healthLine . "\n");
+    }
     if ($entries === []) {
         if (!$jsonl) {
             fwrite(STDOUT, "No matching diagnostic events.\n");
@@ -314,7 +145,6 @@ function pcv_diagnostics_main(array $arguments): int
         fwrite(STDOUT, pcv_diagnostics_usage());
         return 0;
     }
-
     $logPath = pcv_log_path();
     if (!is_string($logPath)) {
         fwrite(STDERR, "Diagnostic logs are unavailable. Run as the CHIM PHP worker user.\n");
@@ -329,7 +159,11 @@ function pcv_diagnostics_main(array $arguments): int
         fwrite(STDERR, "Diagnostic logs are unavailable.\n");
         return 1;
     }
-    pcv_diagnostics_write($result['entries'], $options['jsonl']);
+    if ($result['status'] === 'invalid') {
+        fwrite(STDERR, "Invalid diagnostics filter. Use --help.\n");
+        return 2;
+    }
+    pcv_diagnostics_write($result['entries'], $options['jsonl'], $result['health']);
     return 0;
 }
 

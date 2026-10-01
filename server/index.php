@@ -297,7 +297,7 @@ function pcv_render_page(
 <title>CHIM Private Conversation — Part of the World of Drama-llama</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="page" data-playthrough-ref="' . pcv_html($playthroughRef) . '" data-refresh-url="?refresh=1">
+<body class="page" data-playthrough-ref="' . pcv_html($playthroughRef) . '" data-refresh-url="?refresh=1" data-logs-url="?view=logs">
 <div class="page-frame">
 <header class="topbar">
 <p class="wordmark"><span class="wordmark-mark" aria-hidden="true">✦</span> CHIM <span class="wordmark-divider">/</span> SCENE NOTES</p>
@@ -359,7 +359,7 @@ function pcv_render_page(
 </div>
 </div>
 </main>
-<footer class="footer-note">The selected scene changes at the next eligible ordinary input. It does not interrupt speech already in the queue.</footer>
+<footer class="footer-note">The selected scene changes at the next eligible ordinary input. It does not interrupt speech already in the queue. <a class="logs-link" href="?view=logs">Operational logs</a></footer>
 </div>
 <script src="assets/ui-refresh.js" defer></script>
 </body>
@@ -384,6 +384,362 @@ function pcv_send_text(int $statusCode, string $body, array $extraHeaders = []):
         header($name . ': ' . $value);
     }
     echo $body;
+}
+
+function pcv_ui_logs_access_allowed(array $server): bool
+{
+    $forwarded = array_key_exists('HTTP_FORWARDED', $server)
+        || array_key_exists('HTTP_X_FORWARDED_FOR', $server)
+        || array_key_exists('HTTP_X_REAL_IP', $server);
+    $remoteAddress = $server['REMOTE_ADDR'] ?? null;
+    $loopback = !$forwarded && is_string($remoteAddress) && in_array($remoteAddress, ['127.0.0.1', '::1'], true);
+    $remoteUser = $server['REMOTE_USER'] ?? null;
+    $authenticatedUser = is_string($remoteUser) && trim($remoteUser) !== '';
+    return $loopback || $authenticatedUser;
+}
+
+function pcv_ui_diagnostics_rejected(string $reason, string $operation): void
+{
+    if (!in_array($reason, ['access_denied', 'csrf_failed', 'invalid_filter', 'invalid_failure_code'], true)
+        || !in_array($operation, ['logs_read', 'log_export', 'browser_report'], true)) {
+        return;
+    }
+    pcv_log_event('ui.diagnostics_rejected', 'warning', 'rejected', $reason,
+        ['operation' => $operation, 'source' => 'browser']);
+}
+
+function pcv_ui_logs_operation($action): string
+{
+    return match ($action) {
+        'export' => 'log_export',
+        'client_report' => 'browser_report',
+        default => 'logs_read',
+    };
+}
+
+function pcv_ui_logs_filters(array $post): array
+{
+    $allowed = ['action', 'csrf', 'request', 'config', 'event', 'severity', 'event_id', 'utterance_id', 'linked_request_id', 'limit'];
+    foreach (array_keys($post) as $key) {
+        if (!is_string($key) || !in_array($key, $allowed, true)) {
+            throw new InvalidArgumentException('invalid filter');
+        }
+    }
+
+    $filters = [];
+    foreach (['request', 'config', 'event', 'severity', 'event_id', 'utterance_id', 'linked_request_id'] as $key) {
+        $value = $post[$key] ?? null;
+        if ($value !== null && !is_string($value)) {
+            throw new InvalidArgumentException('invalid filter');
+        }
+        $filters[$key] = $value === '' ? null : $value;
+    }
+    $limit = $post['limit'] ?? '100';
+    if (!is_string($limit)) {
+        throw new InvalidArgumentException('invalid filter');
+    }
+    if ($limit === '') {
+        $limit = '100';
+    }
+    if (preg_match('/\A[1-9][0-9]{0,3}\z/D', $limit) !== 1) {
+        throw new InvalidArgumentException('invalid filter');
+    }
+    $filters['limit'] = (int)$limit;
+    require_once __DIR__ . '/log_reader.php';
+    return pcv_diagnostics_normalize_filters($filters);
+}
+
+function pcv_ui_logs_session_token(): string
+{
+    pcv_start_session();
+    if (!isset($_SESSION['pcv_csrf']) || !is_string($_SESSION['pcv_csrf'])
+        || preg_match('/\A[a-f0-9]{64}\z/', $_SESSION['pcv_csrf']) !== 1) {
+        $_SESSION['pcv_csrf'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['pcv_csrf'];
+}
+
+function pcv_ui_logs_send_html(int $statusCode, string $html): void
+{
+    http_response_code($statusCode);
+    header('Content-Type: text/html; charset=UTF-8');
+    echo $html;
+}
+
+function pcv_render_logs_locked_page(): string
+{
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<title>CHIM Private Conversation — Operational Logs</title><link rel="stylesheet" href="assets/style.css"></head>'
+        . '<body class="page"><main class="page-frame logs-page"><header class="topbar"><p class="wordmark">CHIM / SCENE NOTES</p>'
+        . '<a href="?">Return to Private Conversation</a></header><section class="logs-panel"><h1>Operational logs</h1>'
+        . '<p role="status">Logs access is locked. Open this page directly on the CHIM host or use a web server that sets a trusted REMOTE_USER.</p>'
+        . '<p>Diagnostic access accepts direct loopback requests without forwarding headers, or a nonempty server-authenticated REMOTE_USER.</p>'
+        . '</section></main></body></html>';
+}
+
+function pcv_render_logs_page(string $csrfToken, array $filters, ?array $result = null, string $notice = ''): string
+{
+    require_once __DIR__ . '/log_reader.php';
+    $fields = [
+        'request' => 'Request ID', 'config' => 'Configuration ID', 'event_id' => 'Event ID',
+        'utterance_id' => 'Utterance ID', 'linked_request_id' => 'Linked request ID',
+    ];
+    $formFields = '';
+    foreach ($fields as $name => $label) {
+        $value = is_string($filters[$name] ?? null) ? $filters[$name] : '';
+        $formFields .= '<label class="logs-field">' . pcv_html($label) . '<input name="' . pcv_html($name)
+            . '" value="' . pcv_html($value) . '" autocomplete="off"></label>';
+    }
+    $event = is_string($filters['event'] ?? null) ? $filters['event'] : '';
+    $eventOptions = '<option value="">Any event</option>';
+    foreach (array_keys(pcv_log_event_rules()) as $eventName) {
+        $selected = $event === $eventName ? ' selected' : '';
+        $eventOptions .= '<option value="' . pcv_html($eventName) . '"' . $selected . '>' . pcv_html($eventName) . '</option>';
+    }
+    $severity = is_string($filters['severity'] ?? null) ? $filters['severity'] : '';
+    $severityOptions = '<option value="">Any severity</option>';
+    foreach (['debug', 'info', 'warning', 'error'] as $severityName) {
+        $selected = $severity === $severityName ? ' selected' : '';
+        $severityOptions .= '<option value="' . $severityName . '"' . $selected . '>' . $severityName . '</option>';
+    }
+    $limit = is_int($filters['limit'] ?? null) ? $filters['limit'] : 100;
+    $csrf = pcv_html($csrfToken);
+    $noticeHtml = $notice === '' ? '' : '<p role="status">' . pcv_html($notice) . '</p>';
+    $resultHtml = '<p class="small-note">Choose filters and read when needed. The viewer does not poll or load logs on page open.</p>';
+
+    if ($result !== null) {
+        $health = is_array($result['health'] ?? null) ? $result['health'] : [];
+        $storage = is_array($health['storage'] ?? null) ? $health['storage'] : [];
+        $omissions = is_array($health['omissions'] ?? null) ? $health['omissions'] : [];
+        $readStatus = is_string($health['read_status'] ?? null) ? $health['read_status'] : 'unavailable';
+        $failureCodes = is_array($storage['failure_codes'] ?? null) ? implode(', ', array_filter($storage['failure_codes'], 'is_string')) : '';
+        $storageReason = is_string($storage['reason'] ?? null) ? $storage['reason'] : 'none';
+        $storageCompleteness = is_string($storage['completeness'] ?? null) ? $storage['completeness'] : 'unknown';
+        $resultHtml = '<section class="logs-health" aria-labelledby="logs-health-heading"><h2 id="logs-health-heading">Read and write health</h2>'
+            . '<p>Read status: <strong>' . pcv_html($readStatus) . '</strong>. Captured segments: '
+            . pcv_html((string)($health['captured_segments'] ?? 0)) . '. History completeness: '
+            . pcv_html(is_string($health['completeness'] ?? null) ? $health['completeness'] : 'unknown') . '.</p>'
+            . '<p>Current request only: storage mode ' . pcv_html(is_string($storage['storage_mode'] ?? null) ? $storage['storage_mode'] : 'unknown')
+            . ', storage reason ' . pcv_html($storageReason) . ', storage completeness ' . pcv_html($storageCompleteness)
+            . ', write status ' . pcv_html(is_string($storage['write_status'] ?? null) ? $storage['write_status'] : 'unknown')
+            . ', failure codes ' . pcv_html($failureCodes === '' ? 'none' : $failureCodes) . '.</p>'
+            . '<p>Retention: ' . pcv_html(is_string($storage['retention'] ?? null) ? $storage['retention'] : 'unknown')
+            . '; maximum files ' . pcv_html((string)($storage['max_files'] ?? 'unknown'))
+            . '; maximum file bytes ' . pcv_html((string)($storage['max_file_bytes'] ?? 'unknown'))
+            . '; maximum entry bytes ' . pcv_html((string)($storage['max_entry_bytes'] ?? 'unknown')) . '.</p>'
+            . '<p>Filtered and capped rows are normal bounded-read counts, not corruption. Malformed, oversized, unknown-schema, unsupported-revision, and read-failed rows are omissions.</p>'
+            . '<dl class="logs-omissions">';
+        foreach (['malformed', 'oversized', 'unknown_schema', 'unsupported_revision', 'read_failed', 'filtered', 'capped'] as $omission) {
+            $count = is_int($omissions[$omission] ?? null) ? $omissions[$omission] : 0;
+            $resultHtml .= '<dt>' . pcv_html($omission) . '</dt><dd>' . pcv_html((string)$count) . '</dd>';
+        }
+        $resultHtml .= '</dl></section>';
+
+        $entries = is_array($result['entries'] ?? null) ? $result['entries'] : [];
+        $rows = '';
+        foreach ($entries as $entry) {
+            $entry = pcv_diagnostics_project_entry($entry);
+            if ($entry === null) {
+                continue;
+            }
+            $context = json_encode($entry['context'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            $rows .= '<tr><td>' . pcv_html($entry['timestamp']) . '</td><td>' . pcv_html($entry['event']) . '</td><td>'
+                . pcv_html($entry['severity'] . ' / ' . $entry['outcome']) . '</td><td>'
+                . pcv_html(is_string($entry['reason']) ? $entry['reason'] : '—') . '</td><td>'
+                . pcv_html($entry['request_id']) . '</td><td>'
+                . pcv_html(is_string($entry['config_id']) ? $entry['config_id'] : '—') . '</td><td>'
+                . pcv_html($context === false ? '{}' : $context) . '</td></tr>';
+        }
+        $resultHtml .= $rows === '' ? '<p>No entries matched these filters.</p>'
+            : '<div class="logs-table-wrap"><table class="logs-table"><thead><tr><th>Timestamp (UTC)</th><th>Event</th><th>Severity / outcome</th>'
+                . '<th>Reason</th><th>Request ID</th><th>Configuration ID</th><th>Sanitized context</th></tr></thead><tbody>' . $rows . '</tbody></table></div>';
+    }
+
+    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<title>CHIM Private Conversation — Operational Logs</title><link rel="stylesheet" href="assets/style.css"></head>'
+        . '<body class="page"><main class="page-frame logs-page"><header class="topbar"><p class="wordmark">CHIM / SCENE NOTES</p>'
+        . '<a href="?">Return to Private Conversation</a></header><section class="logs-panel"><p class="eyebrow">Private Conversation diagnostics</p>'
+        . '<h1>Operational logs</h1><p>Entries are filtered, sanitized projections of bounded JSONL history. Timestamps are UTC.</p>' . $noticeHtml
+        . '<form method="post" class="logs-form"><input type="hidden" name="csrf" value="' . $csrf . '">'
+        . $formFields . '<label class="logs-field">Event<select name="event">' . $eventOptions . '</select></label>'
+        . '<label class="logs-field">Severity<select name="severity">' . $severityOptions . '</select></label>'
+        . '<label class="logs-field">Maximum rows<input type="number" name="limit" min="1" max="1000" value="' . $limit . '"></label>'
+        . '<div class="logs-actions"><button class="primary-button" type="submit" name="action" value="read">Read filtered logs</button>'
+        . '<button class="quiet-button" type="submit" name="action" value="export">Export JSONL</button></div></form>'
+        . $resultHtml . '</section></main></body></html>';
+}
+
+function pcv_run_logs_route(string $method): void
+{
+    if (!pcv_ui_logs_access_allowed($_SERVER)) {
+        pcv_ui_diagnostics_rejected('access_denied', pcv_ui_logs_operation($_POST['action'] ?? null));
+        http_response_code(403);
+        header('Content-Type: text/html; charset=UTF-8');
+        echo pcv_render_logs_locked_page();
+        return;
+    }
+    require_once __DIR__ . '/log_reader.php';
+
+    try {
+        $csrfToken = pcv_ui_logs_session_token();
+    } catch (Throwable $error) {
+        pcv_log_exception('ui.unavailable', 'error', 'unavailable', 'session_unavailable', $error, ['operation' => 'session']);
+        pcv_send_text(503, "Diagnostics session is unavailable.\n");
+        return;
+    }
+
+    if ($method === 'GET') {
+        session_write_close();
+        pcv_ui_logs_send_html(200, pcv_render_logs_page($csrfToken, pcv_diagnostics_normalize_filters([])));
+        return;
+    }
+
+    $action = $_POST['action'] ?? null;
+    $operation = pcv_ui_logs_operation($action);
+    $submittedToken = $_POST['csrf'] ?? null;
+    if (!is_string($submittedToken) || $csrfToken === '' || !hash_equals($csrfToken, $submittedToken)) {
+        session_write_close();
+        pcv_ui_diagnostics_rejected('csrf_failed', $operation);
+        pcv_send_text(403, "The diagnostics form token is invalid.\n");
+        return;
+    }
+
+    if (!in_array($action, ['read', 'export', 'client_report'], true)) {
+        session_write_close();
+        pcv_ui_diagnostics_rejected('invalid_filter', 'logs_read');
+        pcv_send_text(400, "Invalid diagnostics request.\n");
+        return;
+    }
+
+    if ($action === 'client_report') {
+        foreach (array_keys($_POST) as $key) {
+            if (!in_array($key, ['action', 'csrf', 'code'], true)) {
+                session_write_close();
+                pcv_ui_diagnostics_rejected('invalid_filter', 'browser_report');
+                pcv_send_text(400, "Invalid browser report.\n");
+                return;
+            }
+        }
+        $code = $_POST['code'] ?? null;
+        $codes = ['timeout', 'network', 'http', 'invalid_response', 'unknown'];
+        if (!is_string($code) || !in_array($code, $codes, true)) {
+            session_write_close();
+            pcv_ui_diagnostics_rejected('invalid_failure_code', 'browser_report');
+            pcv_send_text(400, "Invalid browser failure code.\n");
+            return;
+        }
+        $now = time();
+        $throttle = is_array($_SESSION['pcv_browser_report_throttle'] ?? null) ? $_SESSION['pcv_browser_report_throttle'] : [];
+        $lastReported = $throttle[$code] ?? null;
+        $shouldReport = !is_int($lastReported) || $lastReported <= $now - 60;
+        if ($shouldReport) {
+            $throttle[$code] = $now;
+            $_SESSION['pcv_browser_report_throttle'] = $throttle;
+        }
+        session_write_close();
+        if ($shouldReport) {
+            $reason = 'browser_refresh_' . $code;
+            pcv_log_event('ui.browser_refresh_failed', 'warning', 'reported', $reason, ['source' => 'browser']);
+        }
+        http_response_code(204);
+        header('Content-Length: 0');
+        return;
+    }
+
+    session_write_close();
+    try {
+        $filters = pcv_ui_logs_filters($_POST);
+    } catch (InvalidArgumentException) {
+        pcv_ui_diagnostics_rejected('invalid_filter', $operation);
+        pcv_ui_logs_send_html(400, pcv_render_logs_page($csrfToken, pcv_diagnostics_normalize_filters([]), null,
+            'One or more diagnostic filters are invalid.'));
+        return;
+    }
+
+    require_once __DIR__ . '/log_reader.php';
+    $result = pcv_diagnostics_load($filters);
+    $entries = is_array($result['entries'] ?? null) ? $result['entries'] : [];
+    $safeEntries = [];
+    foreach ($entries as $entry) {
+        $safe = pcv_diagnostics_project_entry($entry);
+        if ($safe !== null) {
+            $safeEntries[] = $safe;
+        }
+    }
+    $result['entries'] = $safeEntries;
+    $health = is_array($result['health'] ?? null) ? $result['health'] : [];
+    $omissions = is_array($health['omissions'] ?? null) ? $health['omissions'] : [];
+    $omittedCount = 0;
+    foreach (['malformed', 'oversized', 'unknown_schema', 'unsupported_revision', 'read_failed'] as $lossCategory) {
+        $count = $omissions[$lossCategory] ?? 0;
+        if (is_int($count) && $count > 0) {
+            $omittedCount += $count;
+        }
+    }
+    $readStatus = $result['status'] ?? 'unavailable';
+    if (!in_array($readStatus, ['ok', 'empty', 'busy', 'unavailable'], true)) {
+        $readStatus = 'unavailable';
+        $result['status'] = 'unavailable';
+        $health['read_status'] = 'unavailable';
+    }
+    $outcome = in_array($readStatus, ['busy', 'unavailable'], true) ? $readStatus
+        : ($omittedCount > 0 ? 'limited' : (count($safeEntries) > 0 ? ($action === 'export' ? 'exported' : 'returned') : 'empty'));
+    $event = $action === 'export' ? 'ui.log_export' : 'ui.logs_read';
+    $reason = match ($outcome) {
+        'limited' => 'logs_read_limited',
+        'unavailable' => $action === 'export' ? 'log_export_failed' : 'logs_read_failed',
+        default => null,
+    };
+    $severity = match ($outcome) {
+        'busy', 'limited' => 'warning',
+        'unavailable' => 'error',
+        default => 'info',
+    };
+    pcv_log_event($event, $severity, $outcome, $reason, [
+        'source' => 'browser', 'returned_count' => count($safeEntries), 'omitted_count' => $omittedCount,
+    ]);
+    $health['storage'] = pcv_log_storage_health();
+    $result['health'] = $health;
+
+    if ($action === 'export') {
+        if (in_array($readStatus, ['busy', 'unavailable'], true)) {
+            $message = $readStatus === 'busy' ? "The log is busy. Retry the export later.\n"
+                : "The log is unavailable. Check the configured diagnostics storage.\n";
+            pcv_send_text(503, $message, ['X-PCV-Diagnostics-Read-Status' => $readStatus,
+                'X-PCV-Log-Write-Status' => is_string($health['storage']['write_status'] ?? null)
+                    && in_array($health['storage']['write_status'], ['not_verified', 'written', 'degraded'], true)
+                    ? $health['storage']['write_status'] : 'unknown']);
+            return;
+        }
+        $lines = [];
+        foreach ($safeEntries as $entry) {
+            $lines[] = json_encode($entry, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR);
+        }
+        $omissionHeader = [];
+        foreach (['malformed', 'oversized', 'unknown_schema', 'unsupported_revision', 'read_failed', 'filtered', 'capped'] as $category) {
+            $count = $omissions[$category] ?? 0;
+            $omissionHeader[] = $category . '=' . (is_int($count) && $count >= 0 ? $count : 0);
+        }
+        $completeness = ($health['completeness'] ?? null) === 'bounded_history' ? 'bounded_history' : 'unknown';
+        $writeStatus = is_string($health['storage']['write_status'] ?? null)
+            && in_array($health['storage']['write_status'], ['not_verified', 'written', 'degraded'], true)
+            ? $health['storage']['write_status'] : 'unknown';
+        http_response_code(200);
+        header('Content-Type: application/x-ndjson; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="private-conversation-logs.jsonl"');
+        header('X-PCV-Diagnostics-Read-Status: ' . $readStatus);
+        header('X-PCV-Diagnostics-Completeness: ' . $completeness);
+        header('X-PCV-Diagnostics-Omissions: ' . implode(',', $omissionHeader));
+        header('X-PCV-Log-Write-Status: ' . $writeStatus);
+        echo $lines === [] ? '' : implode("\n", $lines) . "\n";
+        return;
+    }
+
+    $responseStatus = in_array($readStatus, ['busy', 'unavailable'], true) ? 503 : 200;
+    $notice = $readStatus === 'busy' ? 'The log is busy; retry a manual read later.'
+        : ($readStatus === 'unavailable' ? 'The log reader is unavailable. Check current request health below.' : '');
+    pcv_ui_logs_send_html($responseStatus, pcv_render_logs_page($csrfToken, $filters, $result, $notice));
 }
 
 function pcv_unavailable_state(): array
@@ -455,6 +811,10 @@ function pcv_run_page(): void
     $method = $_SERVER['REQUEST_METHOD'] ?? '';
     if (!in_array($method, ['GET', 'POST'], true)) {
         pcv_send_text(405, "Method not allowed.\n", ['Allow' => 'GET, POST']);
+        return;
+    }
+    if (($_GET['view'] ?? null) === 'logs') {
+        pcv_run_logs_route($method);
         return;
     }
 

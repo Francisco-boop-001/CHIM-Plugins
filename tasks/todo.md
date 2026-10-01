@@ -141,3 +141,54 @@ Lead review complete: source/renderer checks and direct browser visual review pa
 Review and verification are recorded in release-v0.1.4-plan.md and the final publication report. Installed/game/provider behavior remains outside this release task.
 
 Review complete: two clean builds, exact nested ACK fixture and all eight downloaded release assets passed. Both PRE-ALPHA releases and public source/manifests verified. See the collection tasks/world-of-drama-llama-publication-2026-09-30.md. No live gameplay claim.
+
+## Thorough operational logging - 2026-09-30
+
+- [x] Settle contract and exclusive file ownership.
+- [x] Implement and review logger/reader and independent instrumentation.
+- [x] Implement protected viewer/export and client refresh diagnostics after API gate.
+- [x] Verify focused failures, mirror accepted source, update documentation and final review.
+
+### Pin 2 UI implementation checklist
+
+- [x] Add a standalone diagnostics route with exact loopback/server-user access checks and session CSRF, before CHIM dependency loading.
+- [x] Add bounded filtered read/export rendering and fixed-code, throttled browser refresh reports.
+- [x] Add focused HTTP and refresh tests for access, CSRF, sanitization, throttling, and unchanged scene controls.
+- [x] Run only the focused checks and PHP lint; record outputs and runtime limits in the owned review.
+
+Plan and evidence: logging-improvements-plan.md. No release or installed-runtime certification advances.
+
+### Pin 2 UI review
+
+The protected viewer/export and fixed-code refresh reporter pass the focused HTTP, PHP UI, and Node refresh checks. The diagnostic route runs before CHIM dependency loading; access, CSRF, invalid input, limited history, current-request write status, and safe export behavior are covered. See tasks/implementation-2026-09-30/logging/ui-review.md. Mirror and release work remain unadvanced pending lead review.
+
+### Logging handoff review
+
+Lead accepted logger/reader, instrumentation and dependent UI after returning defects to their original owners. Focused checks and final fixture isolation passed; 21 accepted runtime/test/build files match the controlled repository mirror by SHA256. Guides and task evidence accompany the source. Mind Poisoning product files, installed CHIM, versions and published archives remain unchanged. Full judgment and limits: tasks/implementation-2026-09-30/logging/final-review.md. Separate MP prompt: tasks/mind-poisoning-logging-prompt.md.
+
+## Logging integration bug run - 2026-09-30
+
+- [x] Inspect current diagnostics and their routing/presence/reflection/UI boundaries with exclusive original owners.
+- [x] Reproduce confirmed defects, return minimal fixes to their owners and review focused evidence.
+- [x] Complete current-run diff/scope/mirror checks and record limitations in the lead report.
+
+Plan: tasks/logging-bug-run-2026-09-30.md. No installed or release changes.
+
+Review: malformed-refresh draft loss, FIFO lock blocking and optional-observer correlation were reproduced and fixed. Lead returned the missing fresh-ACK binding to the same logger owner; the final real in-memory ACK boundary check passes. Focused Node (9/9), logger and registry checks pass. Exactly six current-run product/test files match source and repository mirror by SHA256; manifest/release pin unchanged. Limits and a narrow externally removed-state logging gap are recorded in tasks/implementation-2026-09-30/logging-bug-run/final-review.md.
+
+## Mind Poisoning API check - 2026-09-30
+
+- [x] Inspect current documented evaluator/observer contract and PCV callers.
+- [x] Verify five evaluator-to-importer cases and PCV fresh-ACK registry behavior with existing isolated checks.
+- [x] Record compatibility and source/publication/runtime limits in tasks/mp-api-check-2026-09-30.md.
+
+Review: current PCV development source already uses the new observer API. Both focused commands exited 0. No product, installed environment, release or collaborator edits were made.
+
+## Private Conversation 0.1.5 publication
+
+- [x] Confirm PCV-only authorization and isolate reviewed source from separate MP publication.
+- [x] Prepare and review PRE-ALPHA metadata, guides and explicit package expectations.
+- [ ] Verify focused release gates and deterministic clean-source artifacts; commit and tag.
+- [ ] Verify downloaded draft assets, publish before updating main and record public evidence.
+
+Plan: tasks/release-v0.1.5-plan.md. No installation or gameplay certification is claimed.

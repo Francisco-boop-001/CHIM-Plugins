@@ -42,6 +42,30 @@ function backgroundCleanup(string $directory, string $logDirectory): void
     @rmdir($logDirectory);
 }
 
+function backgroundLogEntries(string $logDirectory): array
+{
+    $path = $logDirectory . DIRECTORY_SEPARATOR . 'events.jsonl';
+    if (!is_file($path) || is_link($path)) {
+        return [];
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    return is_array($lines)
+        ? array_map(static fn(string $line): array => json_decode($line, true, 32, JSON_THROW_ON_ERROR), $lines)
+        : [];
+}
+
+function backgroundObservation(array $entries, string $source, string $outcome): ?array
+{
+    foreach (array_reverse($entries) as $entry) {
+        if (($entry['event'] ?? null) === 'state.presence_observed'
+            && ($entry['context']['source'] ?? null) === $source
+            && ($entry['outcome'] ?? null) === $outcome) {
+            return $entry;
+        }
+    }
+    return null;
+}
+
 $stateDirectory = sys_get_temp_dir() . '/pcv-background-' . bin2hex(random_bytes(8));
 $logDirectory = sys_get_temp_dir() . '/pcv-background-log-' . bin2hex(random_bytes(8));
 $exitCode = 0;
@@ -60,11 +84,24 @@ try {
 
     $first = backgroundCapture($key, $report, $h0, $stateDirectory);
     backgroundCheck(($first['status'] ?? null) === 'baseline', 'first heartbeat should establish a clock baseline only');
+    $baselineObservation = backgroundObservation(backgroundLogEntries($logDirectory), 'background_capture', 'unavailable');
+    backgroundCheck(($baselineObservation['reason'] ?? null) === 'presence_baseline'
+        && ($baselineObservation['context']['actor_count'] ?? null) === 2,
+        'A first roster baseline should be visible as awaiting ordering with a bounded count, not advertised as available or stale.');
     $read = pcv_read_eligible_npcs($key, backgroundCatalog(['Aela' => $h0 - 1, 'Faendal' => $h0 - 1]), 'Runa', $stateDirectory);
-    backgroundCheck(($read['status'] ?? null) === 'stale', 'metadata predating the baseline must not establish managed membership');
+    backgroundCheck(($read['status'] ?? null) === 'stale'
+        && ($read['reason'] ?? null) === 'presence_stale',
+        'The diagnostic distinction must not change the public stale-baseline result.');
+    $staleReadObservation = backgroundObservation(backgroundLogEntries($logDirectory), 'background_read', 'unavailable');
+    backgroundCheck(($staleReadObservation['reason'] ?? null) === 'presence_baseline',
+        'A baseline read must expose its fixed reason without presenting the NPC roster as available.');
 
     $advanced = backgroundCapture($key, $report, $h1, $stateDirectory);
     backgroundCheck(($advanced['status'] ?? null) === 'ready', 'strictly advancing heartbeat should refresh the report');
+    $availableObservation = backgroundObservation(backgroundLogEntries($logDirectory), 'background_capture', 'available');
+    backgroundCheck(($availableObservation['reason'] ?? null) === null
+        && ($availableObservation['context']['actor_count'] ?? null) === 2,
+        'A fresh bounded roster should be reported as available by count only.');
     $read = pcv_read_eligible_npcs($key, backgroundCatalog(['Aela' => $h0 + 50_000_000, 'Faendal' => $h0 - 1]), 'Runa', $stateDirectory);
     backgroundCheck(($read['status'] ?? null) === 'ready'
         && ($read['known_npcs'] ?? null) === ['101' => 'Aela'],
@@ -117,6 +154,10 @@ try {
 
     $empty = backgroundCapture($key, 'Runa', $h3 + 100_000_000, $stateDirectory);
     backgroundCheck(($empty['status'] ?? null) === 'empty', 'player-only surroundings should be a valid known-empty report');
+    $emptyObservation = backgroundObservation(backgroundLogEntries($logDirectory), 'background_capture', 'empty');
+    backgroundCheck(($emptyObservation['reason'] ?? null) === null
+        && ($emptyObservation['context']['actor_count'] ?? null) === 0,
+        'A known-empty roster should be distinguished from stale or unavailable data.');
     backgroundCheck(pcv_read_eligible_npcs($key, backgroundCatalog([]), 'Runa', $stateDirectory)['status'] === 'empty',
         'fresh player-only report should remain distinct from missing or stale');
 
@@ -165,6 +206,14 @@ try {
     ], JSON_THROW_ON_ERROR));
     $backgroundOnly = pcv_read_eligible_npcs($key, backgroundCatalog([]), 'Runa', $legacyDirectory);
     backgroundCheck(($backgroundOnly['status'] ?? null) === 'missing', 'legacy request and companion caches must not stand in for the background feed');
+    $missingObservation = backgroundObservation(backgroundLogEntries($logDirectory), 'background_read', 'unavailable');
+    backgroundCheck(($missingObservation['reason'] ?? null) === 'presence_missing'
+        && ($missingObservation['context']['actor_count'] ?? null) === 0,
+        'A missing feed must be reported as unavailable, distinct from an observed empty roster.');
+    $presenceLogText = (string)@file_get_contents($logDirectory . DIRECTORY_SEPARATOR . 'events.jsonl');
+    backgroundCheck(!str_contains($presenceLogText, 'Aela') && !str_contains($presenceLogText, 'Faendal')
+        && !str_contains($presenceLogText, 'Runa'),
+        'Presence diagnostics may report bounded counts and reasons but never roster or player names.');
 
     echo "PASS: heartbeat baseline, monotonic receipt, bounded status join, empty versus stale, identity reset, and no legacy fallback\n";
 } catch (Throwable $error) {

@@ -408,6 +408,37 @@ function pcv_presence_result(string $status, array $actors = [], ?float $radius 
     return ['status' => $status, 'actors' => $actors, 'radius' => $radius, 'observed_at' => $observedAt, 'reason' => $reason];
 }
 
+function pcv_presence_observed_result(string $source, array $result): array
+{
+    $observation = is_array($result['_pcv_observation'] ?? null) ? $result['_pcv_observation'] : [];
+    unset($result['_pcv_observation']);
+    $sourceStatus = $observation['status'] ?? $result['status'] ?? null;
+    $status = match ($sourceStatus) {
+        'ready' => 'available',
+        'empty' => 'empty',
+        'stale' => 'stale',
+        default => 'unavailable',
+    };
+    $reason = null;
+    if (is_string($observation['reason'] ?? null)) {
+        $reason = $observation['reason'];
+    } elseif ($sourceStatus === 'baseline'
+        || ($sourceStatus === 'stale' && ($result['reason'] ?? null) === 'presence_baseline')) {
+        $status = 'unavailable';
+        $reason = 'presence_baseline';
+    } elseif ($sourceStatus === 'missing') {
+        $reason = 'presence_missing';
+    } elseif (in_array($status, ['stale', 'unavailable'], true)) {
+        $reason = $result['reason'] ?? null;
+        if (!in_array($reason, ['presence_stale', 'presence_unavailable', 'presence_missing', 'presence_baseline', 'presence_invalid', 'presence_key_mismatch', 'identity_unavailable'], true)) {
+            $reason = $status === 'stale' ? 'presence_stale' : 'presence_unavailable';
+        }
+    }
+    $actors = $result['known_npcs'] ?? $result['actors'] ?? [];
+    pcv_log_presence_observed($source, $status, is_array($actors) ? count($actors) : 0, $reason);
+    return $result;
+}
+
 function pcv_presence_read_failure(array $empty, string $reason): array
 {
     pcv_log_event('state.unavailable', 'error', 'unavailable', $reason, ['operation' => 'presence_read']);
@@ -737,12 +768,12 @@ function pcv_store_presence_snapshot(
     if (!is_string($key) || !pcv_valid_key($key) || !in_array($parsed['status'], ['ready', 'empty'], true)) {
         $cleared = pcv_invalidate_ordinary_presence_snapshot($stateDirectory);
         if (($cleared['status'] ?? null) === 'unavailable') {
-            return pcv_presence_result('unavailable', reason: 'presence_unavailable');
+            return pcv_presence_observed_result($autonomous ? 'autonomous_capture' : 'ordinary_capture', pcv_presence_result('unavailable', reason: 'presence_unavailable'));
         }
         if (!is_string($key) || !pcv_valid_key($key)) {
-            return pcv_presence_result('unavailable', reason: 'identity_unavailable');
+            return pcv_presence_observed_result($autonomous ? 'autonomous_capture' : 'ordinary_capture', pcv_presence_result('unavailable', reason: 'identity_unavailable'));
         }
-        return $parsed;
+        return pcv_presence_observed_result($autonomous ? 'autonomous_capture' : 'ordinary_capture', $parsed);
     }
 
     $handle = null;
@@ -758,7 +789,7 @@ function pcv_store_presence_snapshot(
         if ($autonomous && $previousOrder !== null && $requestTimestamp !== null
             && $requestTimestamp <= $previousOrder['request_timestamp']) {
             pcv_log_event('state.presence_rejected', 'warning', 'rejected', 'presence_stale', ['operation' => 'presence_capture']);
-            return pcv_presence_result('stale', reason: 'presence_stale');
+            return pcv_presence_observed_result('autonomous_capture', pcv_presence_result('stale', reason: 'presence_stale'));
         }
         $document = [
             'version' => 1,
@@ -800,10 +831,10 @@ function pcv_store_presence_snapshot(
                 'actor_count' => count($parsed['actors']),
             ]);
         }
-        return pcv_presence_result($parsed['status'], $parsed['actors'], $parsed['radius'], $observedAt);
+        return pcv_presence_observed_result($autonomous ? 'autonomous_capture' : 'ordinary_capture', pcv_presence_result($parsed['status'], $parsed['actors'], $parsed['radius'], $observedAt));
     } catch (Throwable $error) {
         pcv_log_exception('state.unavailable', 'error', 'unavailable', 'presence_unavailable', $error, ['operation' => 'presence_capture']);
-        return pcv_presence_result('unavailable', reason: 'presence_unavailable');
+        return pcv_presence_observed_result($autonomous ? 'autonomous_capture' : 'ordinary_capture', pcv_presence_result('unavailable', reason: 'presence_unavailable'));
     } finally {
         pcv_unlock_state($handle);
     }
@@ -821,12 +852,12 @@ function pcv_capture_presence_snapshot(
     if (!in_array($parsed['status'], ['ready', 'empty'], true)) {
         $cleared = pcv_invalidate_ordinary_presence_snapshot($stateDirectory);
         if (($cleared['status'] ?? null) === 'unavailable') {
-            return pcv_presence_result('unavailable', reason: 'presence_unavailable');
+            return pcv_presence_observed_result('ordinary_capture', pcv_presence_result('unavailable', reason: 'presence_unavailable'));
         }
         if (!is_string($key) || !pcv_valid_key($key)) {
-            return pcv_presence_result('unavailable', reason: 'identity_unavailable');
+            return pcv_presence_observed_result('ordinary_capture', pcv_presence_result('unavailable', reason: 'identity_unavailable'));
         }
-        return $parsed;
+        return pcv_presence_observed_result('ordinary_capture', $parsed);
     }
     return pcv_store_presence_snapshot($key, $parsed, $stateDirectory, $requestTimestamp);
 }
@@ -866,7 +897,7 @@ function pcv_capture_autonomous_presence_report(
             $reason = 'presence_unavailable';
         }
         pcv_log_event('state.unavailable', 'error', 'unavailable', $reason, ['operation' => 'presence_capture']);
-        return pcv_presence_result('unavailable', reason: $reason);
+        return pcv_presence_observed_result('autonomous_capture', pcv_presence_result('unavailable', reason: $reason));
     }
 
     return pcv_store_presence_snapshot($key, $parsed, $stateDirectory, $timestamp, true);
@@ -911,10 +942,10 @@ function pcv_capture_background_presence_report(
             }
         } catch (Throwable $error) {
             pcv_log_exception('state.unavailable', 'error', 'unavailable', 'presence_unavailable', $error, ['operation' => 'presence_capture']);
-            return pcv_presence_result('unavailable', reason: 'presence_unavailable');
+            return pcv_presence_observed_result('background_capture', pcv_presence_result('unavailable', reason: 'presence_unavailable'));
         }
         pcv_log_event('state.unavailable', 'error', 'unavailable', $reason, ['operation' => 'presence_capture']);
-        return pcv_presence_result('unavailable', reason: $reason);
+        return pcv_presence_observed_result('background_capture', pcv_presence_result('unavailable', reason: $reason));
     }
 
     $handle = null;
@@ -964,13 +995,13 @@ function pcv_capture_background_presence_report(
                 pcv_log_event('state.presence_rejected', 'warning', 'rejected', 'presence_stale', [
                     'operation' => 'presence_capture',
                 ]);
-                return pcv_presence_result('stale', observedAt: $previousReceipt, reason: 'presence_stale');
+                return pcv_presence_observed_result('background_capture', pcv_presence_result('stale', observedAt: $previousReceipt, reason: 'presence_stale'));
             }
             if ($timestamp < $previousTimestamp && !$leaseExpired && !$serverClockRewound) {
                 pcv_log_event('state.presence_rejected', 'warning', 'rejected', 'presence_stale', [
                     'operation' => 'presence_capture',
                 ]);
-                return pcv_presence_result('stale', observedAt: $previousReceipt, reason: 'presence_stale');
+                return pcv_presence_observed_result('background_capture', pcv_presence_result('stale', observedAt: $previousReceipt, reason: 'presence_stale'));
             }
             if ($timestamp > $previousTimestamp && !$leaseExpired && !$serverClockRewound) {
                 $baseline = $previous['baseline_timestamp'];
@@ -995,7 +1026,7 @@ function pcv_capture_background_presence_report(
         pcv_log_event('state.presence_refreshed', 'debug', 'accepted', null, [
             'actor_count' => count($parsed['actors']),
         ]);
-        return pcv_presence_result($state, $parsed['actors'], observedAt: $now);
+        return pcv_presence_observed_result('background_capture', pcv_presence_result($state, $parsed['actors'], observedAt: $now));
     } catch (Throwable $error) {
         if (is_resource($handle)) {
             try {
@@ -1005,7 +1036,7 @@ function pcv_capture_background_presence_report(
             }
         }
         pcv_log_exception('state.unavailable', 'error', 'unavailable', 'presence_unavailable', $error, ['operation' => 'presence_capture']);
-        return pcv_presence_result('unavailable', reason: 'presence_unavailable');
+        return pcv_presence_observed_result('background_capture', pcv_presence_result('unavailable', reason: 'presence_unavailable'));
     } finally {
         pcv_unlock_state($handle);
     }
@@ -1013,6 +1044,11 @@ function pcv_capture_background_presence_report(
 
 /** Re-resolve snapshot names against the current catalog on every caller read. */
 function pcv_read_eligible_npcs(?string $key, array $catalogRows, ?string $playerName, ?string $stateDirectory = null): array
+{
+    return pcv_presence_observed_result('background_read', pcv_read_eligible_npcs_unobserved($key, $catalogRows, $playerName, $stateDirectory));
+}
+
+function pcv_read_eligible_npcs_unobserved(?string $key, array $catalogRows, ?string $playerName, ?string $stateDirectory = null): array
 {
     $empty = ['status' => 'missing', 'known_npcs' => [], 'observed_at' => null, 'reason' => 'presence_missing'];
     if (!is_string($key) || !pcv_valid_key($key) || !is_string($playerName) || trim($playerName) === '') {
@@ -1024,7 +1060,9 @@ function pcv_read_eligible_npcs(?string $key, array $catalogRows, ?string $playe
         $directory = pcv_state_directory($stateDirectory);
         $handle = pcv_lock_state($directory, false, LOCK_SH);
         if ($handle === null) {
-            return $empty;
+            return array_replace($empty, [
+                '_pcv_observation' => ['status' => 'unavailable', 'reason' => 'presence_unavailable'],
+            ]);
         }
         $path = $directory . DIRECTORY_SEPARATOR . 'background_presence.json';
         if (is_link($path)) {
@@ -1101,6 +1139,7 @@ function pcv_read_eligible_npcs(?string $key, array $catalogRows, ?string $playe
                 'status' => 'stale',
                 'observed_at' => $document['observed_at'],
                 'reason' => 'presence_stale',
+                '_pcv_observation' => ['status' => 'unavailable', 'reason' => 'presence_baseline'],
             ]);
         }
 

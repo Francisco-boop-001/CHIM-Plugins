@@ -107,6 +107,16 @@ function pcv_reflection_log(
     $configId = is_string($scope['config_id'] ?? null) && pcv_log_valid_uuid($scope['config_id'])
         ? $scope['config_id'] : null;
     pcv_log_set_config_id($configId);
+    if (is_array($scope) && pcv_reflection_valid_record($scope)) {
+        $registration = $scope['registration'];
+        pcv_log_set_correlation([
+            'config_id' => $scope['config_id'],
+            'event_id' => (string)$registration['event_id'],
+            'utterance_id' => $registration['utterance_id'],
+        ]);
+    } else {
+        pcv_log_set_correlation([]);
+    }
     $actorId = $scope['actor_a_id'] ?? $scope['actor_id'] ?? ($scope['registration']['actor_id'] ?? null);
     if (!is_string($actorId) && is_int($actorId) && $actorId > 0) {
         $actorId = (string)$actorId;
@@ -131,7 +141,30 @@ function pcv_reflection_log(
         pcv_log_event($event, 'info', 'accepted', null, $context);
         return;
     }
+    if ($event === 'reflection.observer_unavailable') {
+        pcv_log_event($event, 'info', 'unavailable', $reason, $context);
+        return;
+    }
     pcv_log_event($event, 'info', 'skipped', $reason, $context);
+}
+
+function pcv_reflection_attach_mp_observer(object $requestLog): bool
+{
+    if (!method_exists($requestLog, 'observe')) {
+        return false;
+    }
+    try {
+        $requestLog->observe(static function (array $record, string $level): void {
+            try {
+                pcv_log_import_mp_record($record, $level);
+            } catch (Throwable) {
+                // Diagnostics must never alter Mind Poisoning's evaluation or persistence.
+            }
+        });
+        return true;
+    } catch (Throwable) {
+        return false;
+    }
 }
 
 function pcv_reflection_fresh_scope(?callable $reader): ?array
@@ -400,7 +433,7 @@ function pcv_reflection_register_with_store(
         return 'registry_unavailable';
     }
 
-    pcv_reflection_log('reflection.output_registered', 'registration', '', $requestScope);
+    pcv_reflection_log('reflection.output_registered', 'registration', '', $record);
     return 'registered';
 }
 
@@ -523,8 +556,16 @@ function pcv_reflection_evaluate_with_store(
     }
 
     $revalidationReason = null;
+    pcv_log_set_config_id($record['config_id']);
+    pcv_log_set_correlation([
+        'event_id' => (string)$record['registration']['event_id'],
+        'utterance_id' => $record['registration']['utterance_id'],
+    ]);
     try {
         $requestLog ??= new \ChimMindPoisoning\RequestLog();
+        if (!pcv_reflection_attach_mp_observer($requestLog)) {
+            pcv_reflection_log('reflection.observer_unavailable', 'ack', 'observer_unsupported', $record);
+        }
         $status = \ChimMindPoisoning\mindPoisoningEvaluateReflection(
             $record['registration'],
             $gameRequest,
@@ -542,6 +583,9 @@ function pcv_reflection_evaluate_with_store(
             $requestModel,
             $requestLog
         );
+        if ($status === 'committed') {
+            pcv_reflection_log('reflection.evaluation_finished', 'ack', '', $record);
+        }
     } catch (Throwable $error) {
         pcv_reflection_log('reflection.ack_error', 'ack', 'internal_error', $record, $error);
         $status = 'failed';
@@ -553,18 +597,16 @@ function pcv_reflection_evaluate_with_store(
         }
     }
 
-    if ($status !== 'committed') {
+    if ($status !== 'committed' && !($errorLogged ?? false)) {
         if (in_array($revalidationReason, ['registry_corrupt', 'registry_unavailable'], true)) {
             pcv_reflection_log('reflection.ack_error', 'ack', $revalidationReason, $record);
-        } elseif ($status === 'failed' && !($errorLogged ?? false)) {
-            pcv_reflection_log('reflection.ack_error', 'ack', 'internal_error', $record);
+        } elseif ($status === 'failed') {
+            pcv_reflection_log('reflection.ack_error', 'ack', 'evaluation_failed', $record);
         } else {
             $reason = in_array($revalidationReason, ['identity_changed', 'scope_changed'], true)
                 ? $revalidationReason : 'evaluation_rejected';
             pcv_reflection_log('reflection.ack_skipped', 'ack', $reason, $record);
         }
-    } else {
-        pcv_reflection_log('reflection.evaluation_finished', 'ack', '', $record);
     }
     return $status;
 }

@@ -6,6 +6,7 @@ const PCV_LOG_MAX_FILES = 5;
 const PCV_LOG_MAX_FILE_BYTES = 10485760;
 const PCV_LOG_MAX_ENTRY_BYTES = 8192;
 const PCV_LOG_DEBUG_MAX_SECONDS = 3600;
+const PCV_LOG_INSTRUMENTATION_REVISION = 2;
 
 function pcv_log_new_uuid(): ?string
 {
@@ -49,9 +50,17 @@ function &pcv_log_request_context(): array
             'request_id' => $requestId ?? pcv_log_request_id_fallback(),
             'started_ns' => is_int($start) ? $start : null,
             'config_id' => null,
+            'correlation' => [],
             'debug_enabled' => pcv_log_debug_setting_is_active(),
-            'fallback_reported' => false,
+            'fallback_codes' => [],
+            'failure_codes' => [],
             'test_directory' => null,
+            'storage_mode' => null,
+            'storage_reason' => null,
+            'write_status' => 'not_verified',
+            'terminal' => null,
+            'terminal_emitted' => false,
+            'shutdown_registered' => false,
         ];
     }
     return $request;
@@ -75,6 +84,49 @@ function pcv_log_set_config_id(?string $configId): void
 {
     $request =& pcv_log_request_context();
     $request['config_id'] = is_string($configId) && pcv_log_valid_uuid($configId) ? $configId : null;
+}
+
+function pcv_log_set_correlation(array $trustedFields): void
+{
+    $request =& pcv_log_request_context();
+    $correlation = [];
+    foreach (['event_id', 'utterance_id', 'linked_request_id'] as $key) {
+        if (!array_key_exists($key, $trustedFields)) {
+            continue;
+        }
+        $value = $trustedFields[$key];
+        if ($key === 'event_id') {
+            if (is_int($value) && $value > 0) {
+                $correlation[$key] = (string)$value;
+            } elseif (is_string($value) && preg_match('/\\A[1-9][0-9]{0,18}\\z/D', $value) === 1) {
+                $correlation[$key] = $value;
+            } else {
+                unset($correlation[$key]);
+            }
+        } elseif ($key === 'utterance_id') {
+            if (pcv_log_valid_utterance_id($value)) {
+                $correlation[$key] = $value;
+            } else {
+                unset($correlation[$key]);
+            }
+        } elseif (is_string($value) && preg_match('/\\A[a-f0-9]{24}\\z/D', $value) === 1) {
+            $correlation[$key] = $value;
+        } else {
+            unset($correlation[$key]);
+        }
+    }
+    $request['correlation'] = $correlation;
+}
+
+function pcv_log_valid_utterance_id($value): bool
+{
+    if (!is_string($value)) {
+        return false;
+    }
+    if (preg_match('/\\Autt_[A-Za-z0-9_-]{8,128}\\z/D', $value) === 1) {
+        return true;
+    }
+    return preg_match('/\\Ainput_[1-9][0-9]{0,18}\\z/D', $value) === 1;
 }
 
 function pcv_log_set_playthrough_ref(?string $playthroughKey): void
@@ -119,6 +171,70 @@ function pcv_log_event_rules(): array
         'reflection.ack_error' => ['severity' => 'error', 'outcome' => 'failed', 'context' => ['phase', 'route', 'actor_a_id']],
         'reflection.output_registered' => ['severity' => 'info', 'outcome' => 'accepted', 'context' => ['phase', 'route', 'actor_a_id']],
         'reflection.evaluation_finished' => ['severity' => 'info', 'outcome' => 'accepted', 'context' => ['phase', 'route', 'actor_a_id']],
+        'reflection.observer_unavailable' => ['severity' => 'info', 'outcome' => 'unavailable', 'context' => ['phase', 'route', 'actor_a_id']],
+        'routing.request_finished' => [
+            'outcomes' => ['postrequest_observed' => 'info', 'skipped' => 'info', 'blocked' => 'warning', 'failed' => 'error', 'unobserved' => 'warning'],
+            'reason_by_outcome' => [
+                'postrequest_observed' => [],
+                'skipped' => ['scope_off', 'scope_pending', 'identity_unavailable', 'unsupported_mode', 'scene_not_eligible', 'scope_ineligible'],
+                'blocked' => ['unsupported_special_mode', 'invalid_input_prefix', 'invalid_input_encoding', 'empty_input', 'malformed_rechat',
+                    'rechat_speaker_outside_pair', 'speaker_outside_pair', 'solo_rechat_unsupported', 'solo_unrouted_request', 'pair_continuation_player_excluded', 'mode_changed', 'scene_not_eligible'],
+                'failed' => ['state_unavailable', 'actors_unavailable', 'player_identity_unavailable', 'profile_switch_failed', 'actions_unavailable', 'context_unavailable', 'hook_exception', 'fatal_error'],
+                'unobserved' => ['request_unobserved'],
+            ],
+            'reason_required' => ['skipped', 'blocked', 'failed', 'unobserved'],
+            'context' => ['phase', 'route', 'request_type', 'actor_a_id', 'actor_b_id'],
+        ],
+        'state.presence_observed' => [
+            'outcomes' => ['available' => 'info', 'empty' => 'info', 'stale' => ['presence_stale' => 'info'],
+            'unavailable' => ['presence_baseline' => 'info', 'presence_missing' => 'info', 'identity_unavailable' => 'info', 'presence_invalid' => 'warning',
+                    'presence_key_mismatch' => 'warning', 'presence_unavailable' => 'error']],
+            'reason_by_outcome' => ['available' => [], 'empty' => [], 'stale' => ['presence_stale'],
+                'unavailable' => ['presence_baseline', 'presence_missing', 'identity_unavailable', 'presence_invalid', 'presence_key_mismatch', 'presence_unavailable']],
+            'reason_required' => ['stale', 'unavailable'],
+            'context' => ['source', 'actor_count'],
+        ],
+        'reflection.model_finished' => [
+            'outcomes' => ['valid' => 'info', 'invalid' => 'warning', 'failed' => 'error'],
+            'reason_by_outcome' => ['valid' => [], 'invalid' => ['model_invalid'], 'failed' => ['model_failed']],
+            'reason_required' => ['invalid', 'failed'],
+            'context' => ['phase', 'route', 'actor_a_id', 'model_outcome', 'model_ms', 'source_reason'],
+        ],
+        'reflection.persistence_finished' => [
+            'outcomes' => ['committed' => 'info', 'zero_change' => 'info', 'unconfirmed' => 'error', 'rejected' => 'warning',
+                'skipped' => 'info', 'failed' => 'error', 'cleanup_failed' => 'error'],
+            'reason_by_outcome' => ['committed' => [], 'zero_change' => ['zero_change'], 'unconfirmed' => ['commit_unconfirmed'],
+                'rejected' => ['persistence_rejected'], 'skipped' => ['persistence_stale'], 'failed' => ['persistence_failed'], 'cleanup_failed' => ['cleanup_failed']],
+            'reason_required' => ['zero_change', 'unconfirmed', 'rejected', 'skipped', 'failed', 'cleanup_failed'],
+            'context' => ['phase', 'route', 'actor_a_id', 'persistence_outcome', 'commit_state', 'committed', 'cleanup_failed', 'changed_count', 'changes', 'model_ms', 'persistence_ms', 'source_reason'],
+        ],
+        'reflection.evaluation_result' => [
+            'outcomes' => ['committed' => 'info', 'zero_change' => 'info', 'unconfirmed' => 'error', 'rejected' => 'warning',
+                'skipped' => 'info', 'failed' => 'error', 'cleanup_failed' => 'error'],
+            'reason_by_outcome' => ['committed' => [], 'zero_change' => ['zero_change'], 'unconfirmed' => ['commit_unconfirmed'],
+                'rejected' => ['evaluation_rejected'], 'skipped' => ['evaluation_skipped'], 'failed' => ['evaluation_failed'], 'cleanup_failed' => ['cleanup_failed']],
+            'reason_required' => ['zero_change', 'unconfirmed', 'rejected', 'skipped', 'failed', 'cleanup_failed'],
+            'context' => ['phase', 'route', 'actor_a_id', 'model_outcome', 'persistence_outcome', 'commit_state', 'committed', 'cleanup_failed', 'changed_count', 'model_ms', 'persistence_ms', 'source_reason'],
+        ],
+        'ui.browser_refresh_failed' => [
+            'outcomes' => ['reported' => 'warning'],
+            'reason_by_outcome' => ['reported' => ['browser_refresh_timeout', 'browser_refresh_network', 'browser_refresh_http', 'browser_refresh_invalid_response', 'browser_refresh_unknown']],
+            'reason_required' => ['reported'],
+            'context' => ['source'],
+        ],
+        'ui.logs_read' => [
+            'outcomes' => ['returned' => 'info', 'empty' => 'info', 'busy' => 'warning', 'limited' => 'warning', 'unavailable' => 'error'],
+            'reason_by_outcome' => ['returned' => [], 'empty' => [], 'busy' => [], 'limited' => ['logs_read_limited'], 'unavailable' => ['logs_read_failed']],
+            'reason_required' => ['limited', 'unavailable'],
+            'context' => ['source', 'returned_count', 'omitted_count'],
+        ],
+        'ui.diagnostics_rejected' => ['severity' => 'warning', 'outcome' => 'rejected', 'context' => ['operation', 'source']],
+        'ui.log_export' => [
+            'outcomes' => ['exported' => 'info', 'empty' => 'info', 'busy' => 'warning', 'limited' => 'warning', 'unavailable' => 'error'],
+            'reason_by_outcome' => ['exported' => [], 'empty' => [], 'busy' => [], 'limited' => ['logs_read_limited'], 'unavailable' => ['log_export_failed']],
+            'reason_required' => ['limited', 'unavailable'],
+            'context' => ['source', 'returned_count', 'omitted_count'],
+        ],
     ];
     return $rules;
 }
@@ -131,24 +247,72 @@ function pcv_log_reason_codes(): array
         'state_read_failed', 'invalid_json', 'invalid_state', 'state_stage_failed', 'state_transition_failed', 'profile_lookup_failed',
         'session_unavailable', 'catalog_unavailable', 'readback_mismatch',
         'invalid_configuration', 'actor_unavailable', 'actor_ambiguous', 'missing_settings', 'access_denied', 'csrf_failed',
+        'invalid_filter', 'invalid_failure_code',
         'internal_error', 'playthrough_changed', 'scope_off', 'scope_pending', 'unsupported_mode', 'unsupported_special_mode',
         'invalid_input_prefix', 'invalid_input_encoding', 'empty_input', 'malformed_rechat', 'rechat_speaker_outside_pair', 'speaker_outside_pair',
         'solo_rechat_unsupported', 'solo_unrouted_request', 'pair_continuation_player_excluded', 'mode_changed',
         'scope_ineligible', 'baseline_stale', 'output_unavailable', 'output_malformed', 'sentinel_mismatch',
         'event_unmatched', 'registry_unavailable', 'registry_corrupt', 'registration_missing', 'registration_stale',
         'claim_taken', 'ack_mismatch', 'source_aborted', 'scope_changed', 'identity_changed',
-        'mind_poisoning_unavailable', 'evaluation_rejected', 'database_unavailable',
+        'mind_poisoning_unavailable', 'evaluation_rejected', 'database_unavailable', 'observer_unsupported',
         'actors_unavailable', 'player_identity_unavailable', 'profile_switch_failed', 'actions_unavailable',
         'context_unavailable', 'hook_exception', 'debug_detail', 'presence_unavailable', 'presence_stale',
-        'presence_missing', 'presence_invalid', 'presence_key_mismatch', 'pair_not_eligible', 'scene_not_eligible',
+        'presence_baseline', 'presence_missing', 'presence_invalid', 'presence_key_mismatch', 'pair_not_eligible', 'scene_not_eligible',
+        'request_unobserved', 'fatal_error', 'model_invalid', 'model_failed', 'zero_change', 'commit_unconfirmed',
+        'cleanup_failed', 'persistence_rejected', 'persistence_stale', 'persistence_failed', 'evaluation_skipped',
+        'evaluation_failed', 'browser_refresh_timeout', 'browser_refresh_network', 'browser_refresh_http',
+        'browser_refresh_invalid_response', 'browser_refresh_unknown', 'logs_read_limited', 'logs_read_failed', 'log_export_failed',
     ];
 }
 
-function pcv_log_reason_allowed(string $event, ?string $reason): bool
+function pcv_log_rule_matches(string $event, string $severity, string $outcome, ?string $reason): bool
 {
+    $rule = pcv_log_event_rules()[$event] ?? null;
+    if (!is_array($rule)) {
+        return false;
+    }
+    if (isset($rule['outcomes'])) {
+        $expected = $rule['outcomes'][$outcome] ?? null;
+        if (is_array($expected)) {
+            $expected = $reason === null ? null : ($expected[$reason] ?? null);
+        }
+        if ($expected !== $severity) {
+            return false;
+        }
+    } elseif (($rule['severity'] ?? null) !== $severity || ($rule['outcome'] ?? null) !== $outcome) {
+        return false;
+    }
+    return pcv_log_reason_allowed($event, $reason, $outcome);
+}
+
+function pcv_log_event_context_valid(string $event, array $context): bool
+{
+    if ($event !== 'ui.diagnostics_rejected') {
+        return true;
+    }
+    return in_array($context['operation'] ?? null, ['logs_read', 'log_export', 'browser_report'], true)
+        && ($context['source'] ?? null) === 'browser';
+}
+
+function pcv_log_reason_allowed(string $event, ?string $reason, ?string $outcome = null): bool
+{
+    $rule = pcv_log_event_rules()[$event] ?? null;
+    if (!is_array($rule)) {
+        return false;
+    }
+    if (isset($rule['outcomes'])) {
+        $allowed = $rule['reason_by_outcome'][$outcome] ?? null;
+        if (!is_array($allowed)) {
+            return false;
+        }
+        if ($reason === null) {
+            return !in_array($outcome, $rule['reason_required'] ?? [], true) && $allowed === [];
+        }
+        return in_array($reason, $allowed, true);
+    }
     if ($reason === null) {
         return !in_array($event, ['state.scope_expired', 'state.unavailable', 'ui.unavailable', 'ui.scope_stage_rejected', 'ui.scope_stage_failed',
-            'routing.request_skipped', 'routing.request_blocked', 'routing.request_error', 'state.scope_skipped'], true);
+            'ui.diagnostics_rejected', 'routing.request_skipped', 'routing.request_blocked', 'routing.request_error', 'state.scope_skipped'], true);
     }
 
     if (!in_array($reason, pcv_log_reason_codes(), true)) {
@@ -168,6 +332,9 @@ function pcv_log_reason_allowed(string $event, ?string $reason): bool
     }
     if ($event === 'ui.unavailable') {
         return in_array($reason, ['session_unavailable', 'identity_unavailable', 'catalog_unavailable', 'state_unavailable'], true);
+    }
+    if ($event === 'ui.diagnostics_rejected') {
+        return in_array($reason, ['access_denied', 'csrf_failed', 'invalid_filter', 'invalid_failure_code'], true);
     }
     if ($event === 'ui.scope_stage_failed') {
         return in_array($reason, ['state_unavailable', 'readback_mismatch', 'internal_error'], true);
@@ -201,7 +368,7 @@ function pcv_log_reason_allowed(string $event, ?string $reason): bool
     if (in_array($event, ['reflection.registration_error', 'reflection.ack_error'], true)) {
         return in_array($reason, [
             'registry_unavailable', 'registry_corrupt', 'database_unavailable',
-            'mind_poisoning_unavailable', 'internal_error',
+            'mind_poisoning_unavailable', 'evaluation_failed', 'internal_error',
         ], true);
     }
     if ($event === 'reflection.output_registered') {
@@ -209,6 +376,9 @@ function pcv_log_reason_allowed(string $event, ?string $reason): bool
     }
     if ($event === 'reflection.evaluation_finished') {
         return $reason === null;
+    }
+    if ($event === 'reflection.observer_unavailable') {
+        return $reason === 'observer_unsupported';
     }
     return false;
 }
@@ -220,22 +390,100 @@ function pcv_log_enum_values(string $key): array
         'scene_mode' => ['pair', 'solo'],
         'bystander_mode' => ['exclude', 'silent'],
         'target' => ['active', 'pending'],
-        'operation' => ['session', 'identity', 'catalog', 'read', 'stage', 'readback', 'begin', 'presence_capture', 'presence_read', 'presence_invalidate'],
+        'operation' => ['session', 'identity', 'catalog', 'read', 'stage', 'readback', 'begin', 'presence_capture', 'presence_read', 'presence_invalidate', 'logs_read', 'log_export', 'browser_report'],
         'status' => ['active', 'pending', 'off', 'unavailable'],
         'request_type' => ['inputtext', 'inputtext_s', 'ginputtext', 'ginputtext_s', 'rechat', 'narrator_inputtext', 'chat', 'prechat', 'continue', 'continue_group', 'instruction', 'bored', 'narration', 'other'],
-        'phase' => ['preprocessing', 'prerequest', 'context_pre', 'context', 'registration', 'ack'],
+        'phase' => ['preprocessing', 'prerequest', 'context_pre', 'context', 'postrequest', 'registration', 'ack', 'shutdown'],
         'route' => ['scene_direction', 'player_speech', 'rechat_clamped', 'pair_continuation', 'generated_event', 'solo_reflection'],
         'state_status' => ['off', 'pending', 'identity_unavailable', 'active', 'unavailable'],
         'mode' => ['standard', 'close', 'whisper', 'autochat', 'other'],
+        'source' => ['ordinary_capture', 'autonomous_capture', 'background_capture', 'ordinary_read', 'background_read', 'browser'],
+        'model_outcome' => ['valid', 'invalid', 'failed', 'not_called'],
+        'persistence_outcome' => ['committed', 'invalid', 'stale', 'failed'],
+        'commit_state' => ['confirmed', 'unconfirmed', 'not_attempted'],
         'decision' => ['non_candidate_request', 'director_excluded', 'scope_off', 'scope_pending', 'identity_unavailable', 'unsupported_mode', 'input_rewritten', 'player_speech_preserved', 'solo_reflection_routed', 'rechat_clamped', 'continuation_routed', 'responder_selected', 'context_prepared', 'action_constraints_refreshed', 'action_instructions_removed'],
     ];
+    if ($key === 'source_reason') {
+        return pcv_log_mp_reason_codes();
+    }
     return $values[$key] ?? [];
+}
+
+function pcv_log_mp_reason_codes(): array
+{
+    return [
+        'other', 'committed', 'zero-change', 'interaction_off', 'interaction_helpers_unavailable', 'interaction_state_invalid',
+        'interaction_generation_stale', 'ok', 'pause_control_invalid', 'plugin_paused', 'restore-policy', 'connector-disabled',
+        'connector-invalid', 'reflection-registration-invalid', 'reflection-scope-stale', 'reflection-ack-mismatch',
+        'reflection-source-unmatched', 'reflection-source-mismatch', 'reflection-registration-stale', 'reflection-listener-ambiguous',
+        'reflection-actor-unmatched', 'reflection-actor-stale', 'reflection-actor-state-invalid', 'relationship-locked',
+        'duplicate-event', 'ledger-invalid', 'reflection-too-many-subjects', 'reflection-no-subjects', 'relationships-invalid',
+        'player-alias-ambiguous', 'reflection-subject-stale', 'reflection-basis-unavailable', 'reflection-basis-stale',
+        'reflection-basis-duplicate', 'reflection-subject-cap', 'connector_id_invalid', 'connector_unavailable', 'connector_not_found',
+        'connector_driver_unsupported', 'connector_config_incomplete', 'connector_api_key_missing', 'model_response_empty',
+        'model_response_invalid_type', 'model_request_failed', 'invalid-event', 'invalid-opinion-owner', 'listener-busy',
+        'event-stale', 'invalid-opinion-owner', 'reflection-subjects-invalid', 'player-identity-stale', 'listener-identity-stale',
+        'listener-state-invalid', 'input-audience-stale', 'actor-catalog-stale', 'subject-catalog-stale', 'subject-stale',
+        'speaker-stale', 'relationships-invalid', 'edge-invalid', 'affinity-invalid', 'ledger-floor', 'timeline-invalid',
+        'listener-write-failed', 'listener-verification-failed', 'snapshot-verification-failed', 'commit-failed',
+        'validation-failed', 'begin-listener-failed', 'revalidate-event-failed', 'revalidate-actors-failed', 'revalidate-subject-failed',
+        'revalidate-speaker-failed', 'resolve-relationships-failed', 'validate-ledger-failed', 'update-ledger-failed',
+        'validate-timeline-failed', 'write-listener-failed', 'verify-listener-failed', 'verify-snapshot-failed', 'rollback-failed', 'release-failed',
+    ];
+}
+
+function pcv_log_mp_reason_code(string $reason): string
+{
+    return in_array($reason, pcv_log_mp_reason_codes(), true) ? $reason : 'other';
 }
 
 function pcv_log_valid_actor_id($value): bool
 {
     return is_string($value) && strlen($value) <= 20
         && preg_match('/^[1-9][0-9]*$/D', $value) === 1;
+}
+
+function pcv_log_clean_correlation(array $correlation): array
+{
+    $clean = [];
+    if (is_string($correlation['event_id'] ?? null) && preg_match('/\A[1-9][0-9]{0,18}\z/D', $correlation['event_id']) === 1) {
+        $clean['event_id'] = $correlation['event_id'];
+    }
+    if (pcv_log_valid_utterance_id($correlation['utterance_id'] ?? null)) {
+        $clean['utterance_id'] = $correlation['utterance_id'];
+    }
+    if (is_string($correlation['linked_request_id'] ?? null)
+        && preg_match('/\A[a-f0-9]{24}\z/D', $correlation['linked_request_id']) === 1) {
+        $clean['linked_request_id'] = $correlation['linked_request_id'];
+    }
+    return $clean;
+}
+
+function pcv_log_clean_changes($changes): ?array
+{
+    if (!is_array($changes) || !array_is_list($changes)) {
+        return null;
+    }
+    $clean = [];
+    foreach (array_slice($changes, 0, 8) as $change) {
+        if (!is_array($change)) {
+            continue;
+        }
+        $subject = $change['subject'] ?? null;
+        if ($subject !== 'player' && (!is_string($subject) || preg_match('/\Anpc:[1-9][0-9]{0,18}\z/D', $subject) !== 1)) {
+            continue;
+        }
+        $delta = $change['delta'] ?? null;
+        $before = $change['before'] ?? null;
+        $after = $change['after'] ?? null;
+        if (!is_int($delta) || $delta < -5 || $delta > 5
+            || (!is_int($before) && !is_float($before)) || !is_finite((float)$before) || $before < -100 || $before > 100
+            || (!is_int($after) && !is_float($after)) || !is_finite((float)$after) || $after < -100 || $after > 100) {
+            continue;
+        }
+        $clean[] = ['subject' => $subject, 'delta' => $delta, 'before' => $before, 'after' => $after];
+    }
+    return $clean;
 }
 
 function pcv_log_clean_context(string $event, array $context): array
@@ -251,15 +499,29 @@ function pcv_log_clean_context(string $event, array $context): array
             if (pcv_log_valid_actor_id($value)) {
                 $clean[$key] = $value;
             }
-        } elseif (in_array($key, ['exclude_player', 'pending'], true)) {
+        } elseif (in_array($key, ['exclude_player', 'pending', 'committed', 'cleanup_failed'], true)) {
             if (is_bool($value)) {
                 $clean[$key] = $value;
+            }
+        } elseif ($key === 'changes') {
+            $changes = pcv_log_clean_changes($value);
+            if ($changes !== null) {
+                $clean[$key] = $changes;
+            }
+        } elseif ($key === 'correlation' && is_array($value)) {
+            $correlation = pcv_log_clean_correlation($value);
+            if ($correlation !== []) {
+                $clean[$key] = $correlation;
             }
         } elseif (str_ends_with($key, '_count')) {
             if (is_int($value) && $value >= 0 && $value <= 10000) {
                 $clean[$key] = $value;
             }
-        } elseif (in_array($key, ['action', 'scene_mode', 'bystander_mode', 'target', 'operation', 'status', 'request_type', 'phase', 'route', 'state_status', 'mode', 'decision'], true)) {
+        } elseif (in_array($key, ['model_ms', 'persistence_ms'], true)) {
+            if ((is_int($value) || is_float($value)) && is_finite((float)$value) && $value >= 0 && $value <= 86400000) {
+                $clean[$key] = is_int($value) ? $value : round($value, 2);
+            }
+        } elseif (in_array($key, ['action', 'scene_mode', 'bystander_mode', 'target', 'operation', 'status', 'request_type', 'phase', 'route', 'state_status', 'mode', 'decision', 'source', 'model_outcome', 'persistence_outcome', 'commit_state', 'source_reason'], true)) {
             if (is_string($value) && in_array($value, pcv_log_enum_values($key), true)) {
                 $clean[$key] = $value;
             }
@@ -284,6 +546,12 @@ function pcv_log_clean_context(string $event, array $context): array
             $clean[$key] = $value;
         } elseif ($key === 'source_line' && is_int($value) && $value > 0) {
             $clean[$key] = $value;
+        }
+    }
+    if (is_array($context['correlation'] ?? null)) {
+        $correlation = pcv_log_clean_correlation($context['correlation']);
+        if ($correlation !== []) {
+            $clean['correlation'] = $correlation;
         }
     }
     return $clean;
@@ -462,14 +730,61 @@ function pcv_log_resolve_directory(bool $create): ?string
 {
     $request =& pcv_log_request_context();
     if (is_string($request['test_directory'])) {
+        $request['storage_mode'] = 'test';
+        $request['storage_reason'] = null;
         return pcv_log_directory_is_safe($request['test_directory'], true) ? $request['test_directory'] : null;
     }
 
     $override = getenv('PCV_LOG_DIR');
     if (is_string($override) && $override !== '' && pcv_log_directory_is_safe($override, true)) {
+        $request['storage_mode'] = 'external';
+        $request['storage_reason'] = null;
         return realpath($override) ?: null;
     }
-    return pcv_log_default_directory($create);
+    $fallback = pcv_log_default_directory($create);
+    if (is_string($override) && $override !== '') {
+        $request['storage_mode'] = $fallback === null ? 'unavailable' : 'temporary_fallback';
+        $request['storage_reason'] = $fallback === null ? 'default_unavailable' : 'override_invalid';
+        if ($fallback !== null) {
+            pcv_log_fallback_once('override_invalid');
+        }
+        return $fallback;
+    }
+    $request['storage_mode'] = $fallback === null ? 'unavailable' : 'temporary';
+    $request['storage_reason'] = $fallback === null ? 'default_unavailable' : null;
+    return $fallback;
+}
+
+function pcv_log_storage_health(): array
+{
+    $request =& pcv_log_request_context();
+    $mode = $request['storage_mode'];
+    $reason = $request['storage_reason'];
+    if (!is_string($mode)) {
+        $override = getenv('PCV_LOG_DIR');
+        if (is_string($override) && $override !== '') {
+            $mode = pcv_log_directory_is_safe($override, true) ? 'external' : 'temporary_fallback';
+            $reason = $mode === 'external' ? null : 'override_invalid';
+            if ($mode === 'temporary_fallback' && pcv_log_default_directory(false) === null) {
+                $mode = 'unavailable';
+                $reason = 'default_unavailable';
+            }
+        } else {
+            $mode = pcv_log_default_directory(false) === null ? 'unavailable' : 'temporary';
+            $reason = $mode === 'unavailable' ? 'default_unavailable' : null;
+        }
+    }
+    return [
+        'storage_mode' => $mode,
+        'reason' => $reason,
+        'write_status' => $request['write_status'],
+        'failure_codes' => array_keys($request['failure_codes']),
+        'retention' => 'bounded_rotation',
+        'max_files' => PCV_LOG_MAX_FILES,
+        'max_file_bytes' => PCV_LOG_MAX_FILE_BYTES,
+        'max_entry_bytes' => PCV_LOG_MAX_ENTRY_BYTES,
+        'completeness' => 'bounded_history',
+    ];
 }
 
 function pcv_log_path(): ?string
@@ -507,13 +822,16 @@ function pcv_log_fallback_once(string $code): void
 {
     try {
         $request =& pcv_log_request_context();
-        if ($request['fallback_reported']) {
-            return;
-        }
-        $request['fallback_reported'] = true;
-        if (!in_array($code, ['directory_unavailable', 'lock_unavailable', 'rotation_failed', 'append_failed', 'entry_too_large', 'invalid_event'], true)) {
+        $request['write_status'] = 'degraded';
+        $allowedCodes = ['directory_unavailable', 'override_invalid', 'lock_unavailable', 'rotation_failed', 'append_failed', 'entry_too_large', 'invalid_event', 'logger_failed'];
+        if (!in_array($code, $allowedCodes, true)) {
             $code = 'logger_failed';
         }
+        $request['failure_codes'][$code] = true;
+        if (isset($request['fallback_codes'][$code]) || count($request['fallback_codes']) >= count($allowedCodes)) {
+            return;
+        }
+        $request['fallback_codes'][$code] = true;
         $configId = is_string($request['config_id']) && pcv_log_valid_uuid($request['config_id'])
             ? $request['config_id']
             : 'none';
@@ -576,7 +894,7 @@ function pcv_log_write_line(string $line): bool
         return false;
     }
     $lockPath = $directory . DIRECTORY_SEPARATOR . 'events.lock';
-    if (is_link($lockPath)) {
+    if (is_link($lockPath) || (file_exists($lockPath) && !pcv_log_private_file($lockPath))) {
         pcv_log_fallback_once('lock_unavailable');
         return false;
     }
@@ -664,6 +982,11 @@ function pcv_log_write_line(string $line): bool
 
     if (!$ok) {
         pcv_log_fallback_once('append_failed');
+    } else {
+        $request =& pcv_log_request_context();
+        if ($request['failure_codes'] === []) {
+            $request['write_status'] = 'written';
+        }
     }
     return $ok;
 }
@@ -672,13 +995,16 @@ function pcv_log_event(string $event, string $severity, string $outcome, ?string
 {
     try {
         $rules = pcv_log_event_rules();
-        if (!isset($rules[$event]) || $rules[$event]['severity'] !== $severity
-            || $rules[$event]['outcome'] !== $outcome || !pcv_log_reason_allowed($event, $reason)) {
+        if (!isset($rules[$event]) || !pcv_log_rule_matches($event, $severity, $outcome, $reason)
+            || !pcv_log_event_context_valid($event, $context)) {
             pcv_log_fallback_once('invalid_event');
             return;
         }
 
         $request =& pcv_log_request_context();
+        if ($event === 'routing.request_started') {
+            pcv_log_register_shutdown_observer();
+        }
         if ($severity === 'debug' && !$request['debug_enabled']) {
             return;
         }
@@ -691,6 +1017,7 @@ function pcv_log_event(string $event, string $severity, string $outcome, ?string
             . sprintf('.%03dZ', (int)(($now - floor($now)) * 1000));
         $entry = [
             'schema_version' => PCV_LOG_SCHEMA_VERSION,
+            'logging_revision' => PCV_LOG_INSTRUMENTATION_REVISION,
             'plugin_version' => pcv_log_plugin_version(),
             'timestamp' => $timestamp,
             'event' => $event,
@@ -703,6 +1030,10 @@ function pcv_log_event(string $event, string $severity, string $outcome, ?string
             'elapsed_ms' => $elapsed,
             'context' => pcv_log_clean_context($event, $context),
         ];
+        $correlation = pcv_log_clean_correlation($request['correlation']);
+        if ($correlation !== []) {
+            $entry['context']['correlation'] = $correlation;
+        }
         $flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_THROW_ON_ERROR;
         $line = json_encode($entry, $flags) . "\n";
         if (strlen($line) > PCV_LOG_MAX_ENTRY_BYTES) {
@@ -717,6 +1048,262 @@ function pcv_log_event(string $event, string $severity, string $outcome, ?string
     } catch (Throwable) {
         pcv_log_fallback_once('append_failed');
     }
+}
+
+function pcv_log_presence_observed(string $source, string $status, int $actorCount, ?string $reason = null): void
+{
+    $severity = match ($status) {
+        'available', 'empty', 'stale' => 'info',
+        'unavailable' => match ($reason) {
+            'presence_baseline', 'presence_missing', 'identity_unavailable' => 'info',
+            'presence_invalid', 'presence_key_mismatch' => 'warning',
+            'presence_unavailable' => 'error',
+            default => '',
+        },
+        default => '',
+    };
+    if ($severity === '') {
+        pcv_log_fallback_once('invalid_event');
+        return;
+    }
+    pcv_log_event('state.presence_observed', $severity, $status, $reason, [
+        'source' => $source,
+        'actor_count' => max(0, min(10000, $actorCount)),
+    ]);
+}
+
+function pcv_log_set_terminal(string $outcome, ?string $reason, array $safeContext = []): void
+{
+    $request =& pcv_log_request_context();
+    if ($request['terminal_emitted']) {
+        return;
+    }
+    $severity = [
+        'postrequest_observed' => 'info',
+        'skipped' => 'info',
+        'blocked' => 'warning',
+        'failed' => 'error',
+        'unobserved' => 'warning',
+    ][$outcome] ?? null;
+    if (!is_string($severity) || !pcv_log_rule_matches('routing.request_finished', $severity, $outcome, $reason)) {
+        pcv_log_fallback_once('invalid_event');
+        return;
+    }
+    $previous = $request['terminal'] ?? null;
+    $severityRank = ['info' => 1, 'warning' => 2, 'error' => 3];
+    if (is_array($previous)
+        && ($severityRank[$severity] ?? 0) <= ($severityRank[$previous['severity'] ?? ''] ?? 0)) {
+        return;
+    }
+    $request['terminal'] = [
+        'severity' => $severity,
+        'outcome' => $outcome,
+        'reason' => $reason,
+        'context' => pcv_log_clean_context('routing.request_finished', $safeContext),
+    ];
+}
+
+function pcv_log_register_shutdown_observer(): void
+{
+    $request =& pcv_log_request_context();
+    if ($request['shutdown_registered']) {
+        return;
+    }
+    $request['shutdown_registered'] = true;
+    register_shutdown_function('pcv_log_shutdown_terminal');
+}
+
+function pcv_log_shutdown_terminal(): void
+{
+    $request =& pcv_log_request_context();
+    if ($request['terminal_emitted'] || !$request['shutdown_registered']) {
+        return;
+    }
+    $terminal = $request['terminal'] ?? [
+        'severity' => 'warning',
+        'outcome' => 'unobserved',
+        'reason' => 'request_unobserved',
+        'context' => ['phase' => 'shutdown'],
+    ];
+    $lastError = error_get_last();
+    if (is_array($lastError) && in_array($lastError['type'] ?? null, [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR], true)) {
+        $terminal = [
+            'severity' => 'error',
+            'outcome' => 'failed',
+            'reason' => 'fatal_error',
+            'context' => [
+                'phase' => 'shutdown',
+                'source_file' => basename((string)($lastError['file'] ?? 'unknown')),
+                'source_line' => is_int($lastError['line'] ?? null) ? $lastError['line'] : null,
+                'exception_code' => is_int($lastError['type'] ?? null) ? $lastError['type'] : null,
+            ],
+        ];
+    }
+    $request['terminal_emitted'] = true;
+    pcv_log_event('routing.request_finished', $terminal['severity'], $terminal['outcome'], $terminal['reason'], $terminal['context']);
+}
+
+function pcv_log_import_mp_record(array $record, string $level): void
+{
+    if (($record['schema_version'] ?? null) !== 1 || ($record['plugin'] ?? null) !== 'mind_poisoning'
+        || ($record['source_kind'] ?? null) !== 'reflection' || !in_array($level, ['debug', 'info', 'warning', 'error'], true)) {
+        return;
+    }
+    $event = $record['event'] ?? null;
+    if (!in_array($event, ['reflection_model_finished', 'persistence_finished', 'persistence_cleanup_failed', 'request_finished'], true)) {
+        return;
+    }
+    $requestId = $record['request_id'] ?? null;
+    $configId = $record['config_id'] ?? null;
+    $eventId = $record['event_id'] ?? null;
+    $utteranceId = $record['utterance_id'] ?? null;
+    $id = is_int($eventId) && $eventId > 0 ? (string)$eventId : $eventId;
+    if (!is_string($requestId) || preg_match('/\A[a-f0-9]{24}\z/D', $requestId) !== 1
+        || !is_string($configId) || !pcv_log_valid_uuid($configId)
+        || (!is_string($id) || preg_match('/\A[1-9][0-9]{0,18}\z/D', $id) !== 1)
+        || !pcv_log_valid_utterance_id($utteranceId)) {
+        return;
+    }
+    $request =& pcv_log_request_context();
+    if (is_string($request['config_id']) && $request['config_id'] !== $configId) {
+        return;
+    }
+    $currentCorrelation = pcv_log_clean_correlation($request['correlation']);
+    if ((isset($currentCorrelation['event_id']) && $currentCorrelation['event_id'] !== $id)
+        || (isset($currentCorrelation['utterance_id']) && $currentCorrelation['utterance_id'] !== $utteranceId)) {
+        return;
+    }
+    pcv_log_set_config_id($configId);
+    pcv_log_set_correlation(['event_id' => $id, 'utterance_id' => $utteranceId, 'linked_request_id' => $requestId]);
+
+    $actorId = null;
+    if (($record['speaker_kind'] ?? null) === 'npc' && pcv_log_valid_actor_id($record['speaker_id'] ?? null)) {
+        $actorId = $record['speaker_id'];
+    }
+    $context = ['phase' => 'ack', 'route' => 'solo_reflection'];
+    if ($actorId !== null) {
+        $context['actor_a_id'] = $actorId;
+    }
+    foreach (['model_outcome', 'persistence_outcome', 'commit_state', 'committed', 'cleanup_failed', 'changed_count', 'changes', 'model_ms', 'persistence_ms'] as $key) {
+        if (array_key_exists($key, $record)) {
+            $context[$key] = $record[$key];
+        }
+    }
+    $sourceReason = $record['reason'] ?? $record['persistence_reason'] ?? null;
+    if (is_string($sourceReason)) {
+        $context['source_reason'] = pcv_log_mp_reason_code($sourceReason);
+    }
+
+    if ($event === 'reflection_model_finished') {
+        $modelOutcome = $record['model_outcome'] ?? null;
+        $reason = match ($modelOutcome) {
+            'valid' => null,
+            'invalid' => 'model_invalid',
+            'failed' => 'model_failed',
+            default => null,
+        };
+        $severity = match ($modelOutcome) {
+            'valid' => 'info', 'invalid' => 'warning', 'failed' => 'error', default => '',
+        };
+        if ($severity !== '' && $level === $severity) {
+            pcv_log_event('reflection.model_finished', $severity, $modelOutcome, $reason, $context);
+        }
+        return;
+    }
+
+    if ($event === 'persistence_cleanup_failed') {
+        if ($level === 'error') {
+            pcv_log_event('reflection.persistence_finished', 'error', 'cleanup_failed', 'cleanup_failed', $context);
+        }
+        return;
+    }
+
+    if ($event === 'persistence_finished') {
+        $outcome = pcv_log_mp_persistence_outcome($record);
+        if ($outcome === null) {
+            return;
+        }
+        [$pcvOutcome, $severity, $reason] = $outcome;
+        $expectedSourceLevel = ($record['cleanup_failed'] ?? false) === true
+            || ($record['persistence_outcome'] ?? null) === 'failed' ? 'error'
+            : (($record['persistence_outcome'] ?? null) === 'invalid' ? 'warning' : 'info');
+        if ($level === $expectedSourceLevel) {
+            pcv_log_event('reflection.persistence_finished', $severity, $pcvOutcome, $reason, $context);
+        }
+        return;
+    }
+
+    $outcome = pcv_log_mp_evaluation_outcome($record, $level);
+    if ($outcome === null) {
+        return;
+    }
+    [$pcvOutcome, $severity, $reason] = $outcome;
+    pcv_log_event('reflection.evaluation_result', $severity, $pcvOutcome, $reason, $context);
+}
+
+function pcv_log_mp_persistence_outcome(array $record): ?array
+{
+    $status = $record['persistence_outcome'] ?? null;
+    $commit = $record['commit_state'] ?? null;
+    $committed = $record['committed'] ?? null;
+    $changed = $record['changed_count'] ?? null;
+    $cleanupFailed = ($record['cleanup_failed'] ?? false) === true;
+    if (!in_array($commit, ['confirmed', 'unconfirmed', 'not_attempted'], true) || !is_bool($committed)
+        || !is_int($changed) || $changed < 0 || $changed > 8) {
+        return null;
+    }
+    if ($cleanupFailed) {
+        return ['cleanup_failed', 'error', 'cleanup_failed'];
+    }
+    if ($commit === 'unconfirmed') {
+        return ['unconfirmed', 'error', 'commit_unconfirmed'];
+    }
+    if ($commit === 'confirmed' && $committed && $status === 'committed') {
+        return $changed === 0 ? ['zero_change', 'info', 'zero_change'] : ['committed', 'info', null];
+    }
+    if ($commit === 'not_attempted' && !$committed && $status === 'invalid') {
+        return ['rejected', 'warning', 'persistence_rejected'];
+    }
+    if ($commit === 'not_attempted' && !$committed && $status === 'stale') {
+        return ['skipped', 'info', 'persistence_stale'];
+    }
+    if ($commit === 'not_attempted' && !$committed && $status === 'failed') {
+        return ['failed', 'error', 'persistence_failed'];
+    }
+    return null;
+}
+
+function pcv_log_mp_evaluation_outcome(array $record, string $level): ?array
+{
+    $result = $record['outcome'] ?? null;
+    $commit = $record['commit_state'] ?? null;
+    $committed = $record['committed'] ?? null;
+    $changed = $record['changed_count'] ?? null;
+    $cleanupFailed = ($record['cleanup_failed'] ?? false) === true;
+    if ($cleanupFailed) {
+        return $level === 'error' ? ['cleanup_failed', 'error', 'cleanup_failed'] : null;
+    }
+    if ($commit === 'unconfirmed') {
+        return $level === 'error' ? ['unconfirmed', 'error', 'commit_unconfirmed'] : null;
+    }
+    if ($result === 'committed' && $commit === 'confirmed' && $committed === true && is_int($changed) && $changed >= 0 && $changed <= 8) {
+        return $level === 'info'
+            ? ($changed === 0 ? ['zero_change', 'info', 'zero_change'] : ['committed', 'info', null])
+            : null;
+    }
+    if ($result === 'rejected' && $level === 'warning') {
+        return ['rejected', 'warning', 'evaluation_rejected'];
+    }
+    if ($result === 'skipped' && $level === 'warning') {
+        return ['rejected', 'warning', 'evaluation_rejected'];
+    }
+    if ($result === 'skipped' && $level === 'info') {
+        return ['skipped', 'info', 'evaluation_skipped'];
+    }
+    if ($result === 'failed' && $level === 'error') {
+        return ['failed', 'error', 'evaluation_failed'];
+    }
+    return null;
 }
 
 function pcv_log_exception(string $event, string $severity, string $outcome, string $reason, Throwable $error, array $context = []): void

@@ -4,7 +4,7 @@
 
 ![Two travelers speaking quietly in an inn, with an emo llama portrait on the hanging banner behind them.](server/assets/private-conversation-scene.png)
 
-**Candidate: 0.1.4 — PRE-ALPHA.** This CHIM server extension directs ordinary Standard-mode scenes. Source, isolated behavioral fixtures and browser artwork have been reviewed. Current-release installation, live feed delivery, model compliance, native playback and gameplay acceptance remain unverified. A handsome llama is not a QA department.
+**Candidate: 0.1.5 — PRE-ALPHA.** This CHIM server extension directs ordinary Standard-mode scenes. The candidate includes protected filtered Logs/export and richer routing, presence and reflection diagnostics; source and isolated fixtures have been reviewed. Installation, live feed delivery, model compliance, native playback and gameplay acceptance remain unverified. A handsome llama is not a QA department.
 
 ## Start here
 
@@ -37,22 +37,22 @@ This controls the inspected Standard pipeline. It is not an acoustic simulation,
 
 Requires a working CHIM/HerikaServer with the supported request, prompt and response hooks. Compatibility was inspected against server `cf5030f15781637498be86debe26fcf102f5690d` and native source `12e035d0a810b9b932fe2df1f688407a72cd27a1`; these references do not prove your installed DLL matches. Test with an isolated CHIM server/database. A disposable Skyrim save does not isolate server data.
 
-Download from the [0.1.4 release](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.4). Choose **one source**:
+Download from the [0.1.5 release](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.5). Choose **one source**:
 
 | Asset | Intended route |
 | --- | --- |
-| [MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.4/private_conversation-0.1.4-mo2.zip) | Plain import with `CHIM/server-plugins/private_conversation/0.1.4.dwpkg`. Keep `CHIM` directly under the data root. |
-| [DWPkg](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.4/private_conversation-0.1.4.dwpkg) | Rename to `0.1.4.dwpkg`; place at `Data/CHIM/server-plugins/private_conversation/0.1.4.dwpkg`. Do not unpack it into Data. |
-| [Repository tar](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.4/private_conversation.tar.gz) | CHIM repository/Plugin Manager ingestion; strip its one `private_conversation/` wrapper, exposing `manifest.json` and extension files. A different consumer from DWPkg sync. |
-| [SHA256SUMS.txt](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.4/SHA256SUMS.txt) | Verify downloaded assets. |
+| [MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.5/private_conversation-0.1.5-mo2.zip) | Plain import with `CHIM/server-plugins/private_conversation/0.1.5.dwpkg`. Keep `CHIM` directly under the data root. |
+| [DWPkg](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.5/private_conversation-0.1.5.dwpkg) | Rename to `0.1.5.dwpkg`; place at `Data/CHIM/server-plugins/private_conversation/0.1.5.dwpkg`. Do not unpack it into Data. |
+| [Repository tar](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.5/private_conversation.tar.gz) | CHIM repository/Plugin Manager ingestion; strip its one `private_conversation/` wrapper, exposing `manifest.json` and extension files. A different consumer from DWPkg sync. |
+| [SHA256SUMS.txt](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.5/SHA256SUMS.txt) | Verify downloaded assets. |
 
 MO2 may warn that CHIM-only data does not look like Skyrim content. Retain the intended layout with its manual installer's **OK → Ignore** override if necessary; that does not prove successful sync. Check the client `SERVER_PLUGIN_SYNC` log and **installed** version in CHIM Plugin Manager. Open **Plugin Page**, or the server's `ext/private_conversation/index.php` path with its actual origin/port/base path.
 
 **Replace older packages; do not stack enabled versions.** When switching to Plugin Manager, disable/remove the old sync source first. Routes have separate ledgers. This repository contains multiple plugins: use per-plugin manifests and explicit release assets, not repository-wide `releases/latest`. Official CHIM catalog listing has not been submitted or approved.
 
-**0.1.4 requires no separate Papyrus companion, ESP or ESL and consumes no Skyrim plugin slot.** It reads CHIM's existing background reports. The older 0.1.3 companion was a historical experimental candidate, not a requirement; its artifacts remain untouched.
+**0.1.5 requires no separate Papyrus companion, ESP or ESL and consumes no Skyrim plugin slot.** It reads CHIM's existing background reports. The older 0.1.3 companion was a historical experimental candidate, not a requirement; its artifacts remain untouched.
 
-Optional opinion effects need compatible [Mind Poisoning 0.1.12](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/mind_poisoning-v0.1.12), enabled alongside it. Scene direction works without Mind Poisoning.
+Optional opinion effects still work with compatible [Mind Poisoning 0.1.12](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/mind_poisoning-v0.1.12), enabled alongside PCV. Published [Mind Poisoning 0.1.13](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/mind_poisoning-v0.1.13) adds the sanitized observer used for unified solo model/persistence diagnostics; that observer is optional. Scene direction works without Mind Poisoning.
 
 ## Direct your first scene
 
@@ -123,6 +123,8 @@ CHIM supplies a broader scan, not precise earshot or door/floor checks. Ambiguou
 
 ## Logs and troubleshooting
 
+**The 0.1.5 candidate includes logging revision 2:** a protected Logs view, manual filtered sanitized export, richer presence/lifecycle evidence and visible storage/reader health. See the [diagnostics guide](docs/logging-revision-2.md). Published **0.1.4 archives remain unchanged** and their reader is CLI-only; the CLI instructions below also work with 0.1.5. Detailed solo model/persistence diagnostics require observer-capable Mind Poisoning 0.1.13; without it, PCV reports the observer as unavailable and MP keeps its details in its own diagnostics. Pair gossip has no verified PCV correlation API and remains diagnosed in MP.
+
 Records explain **when, what, why, success/skip/failure**, with request IDs and configuration UUIDs connecting stages. Ordinary PCV logs omit raw prompts/dialogue; bounded NPC IDs and exception metadata may appear.
 
 Run the reader on the server as the PHP worker's effective user:
@@ -134,7 +136,7 @@ php diagnostics.php --request REQUEST_ID --config CONFIG_UUID --limit 100
 php diagnostics.php --config CONFIG_UUID --jsonl > /restricted/path/private-conversation.jsonl
 ```
 
-The reader is CLI-only, not a public HTTP endpoint. It accepts 1–1000 matching records and scans at most five rotated 10 MiB files. Missing/capped logs are not proof nothing happened. The private per-install temporary location can be cleaned by the OS. For retention, configure **`PCV_LOG_DIR`** in the trusted worker environment: absolute/private, outside the webroot, worker-owned, mode `0700`. The reader needs the same identity/environment.
+The 0.1.5 candidate includes the protected Logs view; `diagnostics.php` itself still rejects HTTP. The reader accepts 1–1000 matching records and scans at most five rotated 10 MiB files. Missing/capped logs are not proof nothing happened. The private per-install temporary location can be cleaned by the OS. For retention, configure **`PCV_LOG_DIR`** in the trusted worker environment: absolute/private, outside the webroot, worker-owned, mode `0700`. The reader needs the same identity/environment.
 
 **`PCV_LOG_DEBUG_UNTIL`** enables temporary routing detail using a Unix timestamp no more than one hour ahead. It is an administrator environment setting, not a web parameter/toggle. Mind Poisoning's dashboard separately displays opinion outcomes/provenance; see its [dashboard guide](https://github.com/Francisco-boop-001/CHIM-Plugins/blob/main/docs/dashboard.md).
 
@@ -172,8 +174,8 @@ Standard input → preprocessing validation + instruction conversion
 | [context_pre.php](server/context_pre.php), [context.php](server/context.php) | Nearby replacement, action constraints and prompt/speaker validation. |
 | [json_response_custom.php](server/json_response_custom.php) | Fixed counterpart or native solo no-rechat listener. |
 | [prepostrequest.php](server/prepostrequest.php), [postrequest.php](server/postrequest.php), [reflection.php](server/reflection.php) | Solo relationship-queue suppression, exact output registration and ACK/integration checks. |
-| [log.php](server/log.php), [diagnostics.php](server/diagnostics.php) | Bounded private diagnostics and CLI export. |
-| [build-package.py](scripts/build-package.py) | Deterministic formats from a 17-file server allowlist. |
+| [log.php](server/log.php), [log_reader.php](server/log_reader.php), [diagnostics.php](server/diagnostics.php) | Bounded private diagnostics, shared sanitized reading and CLI export; the shared reader is included in the 0.1.5 candidate. |
+| [build-package.py](scripts/build-package.py) | Deterministic formats from an explicit server allowlist; historical 0.1.4 has 17 files, and the 0.1.5 candidate adds the shared reader. |
 
 The existing native marker `explicit_disable_rechat` is not a pretend second NPC. Exact registration never guesses identity from the newest database row. Filesystem locks are released before model/database work. Invalid optional modules are caught/logged instead of counted as success.
 

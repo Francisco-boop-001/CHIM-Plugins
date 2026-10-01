@@ -43,6 +43,7 @@ class PackageChecks(unittest.TestCase):
                 self.assertEqual(inner["config_url"], "../ext/private_conversation/index.php")
                 self.assertIn("server/diagnostics.php", expected)
                 self.assertIn("server/log.php", expected)
+                self.assertIn("server/log_reader.php", expected)
                 self.assertIn("server/assets/private-conversation-scene.png", expected)
                 self.assertIn("server/assets/style.css", expected)
                 self.assertIn("server/assets/ui-refresh.js", expected)
@@ -58,9 +59,9 @@ class PackageChecks(unittest.TestCase):
             PACKAGE.build_release(ROOT, second)
 
             names = {
-                "private_conversation-0.1.4.dwpkg",
+                "private_conversation-0.1.5.dwpkg",
                 "private_conversation.tar.gz",
-                "private_conversation-0.1.4-mo2.zip",
+                "private_conversation-0.1.5-mo2.zip",
                 "SHA256SUMS.txt",
             }
             self.assertEqual({path.name for path in first.iterdir()}, names)
@@ -68,7 +69,7 @@ class PackageChecks(unittest.TestCase):
                 {path.name: path.read_bytes() for path in first.iterdir()},
                 {path.name: path.read_bytes() for path in second.iterdir()},
             )
-            self.assertEqual(manifest["version"], "0.1.4")
+            self.assertEqual(manifest["version"], "0.1.5")
             self.assertEqual(manifest["status"], "development_candidate")
             self.assertEqual(manifest["schema_version"], 2)
             self.assertEqual(manifest["git_repo"], "Francisco-boop-001/CHIM-Plugins")
@@ -88,11 +89,11 @@ class PackageChecks(unittest.TestCase):
             )
             self.assertEqual(
                 channel["package_urls"],
-                ["https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.4/private_conversation.tar.gz"],
+                ["https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.5/private_conversation.tar.gz"],
             )
             self.assertEqual(channel["archive_strip_components"], 1)
 
-            dwpkg = first / "private_conversation-0.1.4.dwpkg"
+            dwpkg = first / "private_conversation-0.1.5.dwpkg"
             PACKAGE.verify_package(dwpkg, ROOT)
             with ZipFile(dwpkg) as archive:
                 self.assertEqual(archive.testzip(), None)
@@ -135,8 +136,8 @@ class PackageChecks(unittest.TestCase):
                 {name: (ROOT / "server" / name).read_bytes() for name in PACKAGE.SERVER_FILES},
             )
 
-            mo2 = first / "private_conversation-0.1.4-mo2.zip"
-            member = "CHIM/server-plugins/private_conversation/0.1.4.dwpkg"
+            mo2 = first / "private_conversation-0.1.5-mo2.zip"
+            member = "CHIM/server-plugins/private_conversation/0.1.5.dwpkg"
             with ZipFile(mo2) as archive:
                 self.assertEqual(archive.namelist(), [member])
                 self.assertEqual(archive.testzip(), None)
@@ -168,9 +169,9 @@ class PackageChecks(unittest.TestCase):
             self.assertEqual(
                 {path.name for path in output.iterdir()},
                 {
-                    "private_conversation-0.1.4.dwpkg",
+                    "private_conversation-0.1.5.dwpkg",
                     "private_conversation.tar.gz",
-                    "private_conversation-0.1.4-mo2.zip",
+                    "private_conversation-0.1.5-mo2.zip",
                     "SHA256SUMS.txt",
                 },
             )

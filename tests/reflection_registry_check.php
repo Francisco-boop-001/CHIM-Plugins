@@ -79,6 +79,51 @@ function reflectionRemoveTestDirectory(string $path): void
     @rmdir($path);
 }
 
+function reflectionPcvLogEntries(): array
+{
+    $path = pcv_log_path();
+    if (!is_string($path) || !is_file($path) || is_link($path)) {
+        return [];
+    }
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    return is_array($lines)
+        ? array_map(static fn(string $line): array => json_decode($line, true, 32, JSON_THROW_ON_ERROR), $lines)
+        : [];
+}
+
+function reflectionPcvEventCount(string $event, string $utteranceId): int
+{
+    return count(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+        ($entry['event'] ?? null) === $event
+        && ($entry['context']['correlation']['utterance_id'] ?? null) === $utteranceId));
+}
+
+$legacyLog = new class {};
+check(!pcv_reflection_attach_mp_observer($legacyLog),
+    'A logger without the optional observer method must remain supported.');
+$mpObserverSupported = method_exists(\ChimMindPoisoning\RequestLog::class, 'observe');
+$actualLog = new \ChimMindPoisoning\RequestLog(static function (string $json): void {}, false);
+check(pcv_reflection_attach_mp_observer($actualLog) === $mpObserverSupported,
+    'The current Mind Poisoning RequestLog observer capability should be detected without changing its evaluation path.');
+$optionalLog = new class {
+    public $observer = null;
+    public function observe(?callable $observer): void
+    {
+        $this->observer = $observer;
+    }
+};
+check(pcv_reflection_attach_mp_observer($optionalLog) && is_callable($optionalLog->observer),
+    'An optional observer-capable logger should be attached without affecting the evaluation path.');
+($optionalLog->observer)([], 'info');
+$failingOptionalLog = new class {
+    public function observe(?callable $observer): void
+    {
+        throw new RuntimeException('optional observer setup failure');
+    }
+};
+check(!pcv_reflection_attach_mp_observer($failingOptionalLog),
+    'An observer setup failure must be contained and reported as unsupported.');
+
 function checkBrokenOptionalModule(string $testRoot, string $serverSource): void
 {
     check(function_exists('proc_open'), 'The local PHP CLI must support isolated subprocess fixtures.');
@@ -177,12 +222,29 @@ $registry = json_decode((string)file_get_contents($registryPath), true, 16, JSON
 same(1, $registry['version'] ?? null, 'The registry version is required.');
 same(hash('sha256', $subtitle), $registry['registration']['speech_hash'] ?? null, 'Hash only the trimmed subtitle field.');
 check(!str_contains((string)file_get_contents($registryPath), $subtitle), 'Do not persist raw dialogue.');
+$registeredEntries = array_values(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+    ($entry['event'] ?? null) === 'reflection.output_registered'));
+$registeredCorrelation = $registeredEntries[0]['context']['correlation'] ?? [];
+same('200', $registeredCorrelation['event_id'] ?? null, 'The accepted registration log should carry the exact matched source event ID.');
+same($id, $registeredCorrelation['utterance_id'] ?? null, 'The accepted registration log should carry the exact native utterance ID.');
 
 $modelCalls = 0;
 $prompt = null;
 $claimToken = null;
 $mpRecords = [];
-$requestLog = new \ChimMindPoisoning\RequestLog(static function (string $json) use (&$mpRecords): void { $mpRecords[] = json_decode($json, true, 32, JSON_THROW_ON_ERROR); }, false);
+$ackObserverBoundary = null;
+$requestLog = new \ChimMindPoisoning\RequestLog(static function (string $json) use (&$mpRecords, &$ackObserverBoundary): void {
+    $record = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
+    $mpRecords[] = $record;
+    if ($ackObserverBoundary === null && ($record['source_kind'] ?? null) === 'reflection'
+        && in_array($record['event'] ?? null, ['reflection_model_finished', 'persistence_finished', 'persistence_cleanup_failed', 'request_finished'], true)) {
+        $request =& pcv_log_request_context();
+        $ackObserverBoundary = [
+            'config_id' => $request['config_id'],
+            'correlation' => $request['correlation'],
+        ];
+    }
+}, false);
 $ack = reflectionAck($subtitle);
 same('registration_missing', pcv_reflection_evaluate_with_store(reflectionAck($subtitle, 'utt_aaaaaaaaaaaaaaaa'), $store, static function (): never { throw new RuntimeException('unrelated ACK provider call'); }, $directory, static fn(): array => reflectionScopeFixture()), 'An unrelated utterance must not use this registration.');
 same('ack_mismatch', pcv_reflection_evaluate_with_store(reflectionAck('Different words.', $id), $store, static function (): never { throw new RuntimeException('mismatched ACK provider call'); }, $directory, static fn(): array => reflectionScopeFixture()), 'A mismatched subtitle must leave the registration unused.');
@@ -208,6 +270,9 @@ file_put_contents($expiredPath, json_encode($expiredRecord, JSON_THROW_ON_ERROR)
 $expiredCalls = 0;
 same('registration_stale', pcv_reflection_evaluate_with_store($ack, reflectionStore($id), static function () use (&$expiredCalls): never { $expiredCalls++; throw new RuntimeException('expired provider call'); }, $expiredDirectory), 'An expired registration must not be evaluated.');
 same(0, $expiredCalls, 'Expired registrations must not call the provider.');
+// Each real ACK arrives in a new HTTP request, so prior registration globals cannot anchor the observer tuple.
+pcv_log_set_config_id(null);
+pcv_log_set_correlation([]);
 $status = pcv_reflection_evaluate_with_store($ack, $store, static function (array $messages) use (&$modelCalls, &$prompt, &$claimToken, $directory): string {
     $modelCalls++;
     $prompt = $messages;
@@ -219,6 +284,12 @@ $status = pcv_reflection_evaluate_with_store($ack, $store, static function (arra
     return validModelResponse([['subject' => 'npc:33', 'delta' => 3, 'reason' => 'The reflection supports a change.', 'evidence' => 'Jarl Balgruuf betrayed me']]);
 }, $directory, static fn(): array => reflectionScopeFixture(), $requestLog);
 same('committed', $status, 'The exact ACK must reach the real Mind Poisoning reflection API.');
+same('123e4567-e89b-42d3-a456-426614174000', $ackObserverBoundary['config_id'] ?? null,
+    'The successful ACK must bind the validated configuration before an observer row is written.');
+same('200', $ackObserverBoundary['correlation']['event_id'] ?? null,
+    'The successful ACK must bind the validated event ID before an observer row is written.');
+same($id, $ackObserverBoundary['correlation']['utterance_id'] ?? null,
+    'The successful ACK must bind the validated utterance ID before an observer row is written.');
 same(1, $modelCalls, 'Evaluate this ACK once.');
 $payload = json_decode($prompt[1]['content'], true, 64, JSON_THROW_ON_ERROR)['untrusted_data'] ?? [];
 same($subtitle, $payload['current_reflection'] ?? null, 'Use emitted subtitle even when core source text differs.');
@@ -232,8 +303,56 @@ same('reflection', $summary['source_kind'] ?? null, 'MP diagnostics must retain 
 same('11', $summary['opinion_owner_id'] ?? null, 'MP diagnostics must attribute the actor opinion owner.');
 same('committed', $summary['outcome'] ?? null, 'MP diagnostics should record the persisted result.');
 check(!array_key_exists('listener_id', $summary ?? []), 'MP diagnostics must not invent a listener.');
+$unsupportedEntries = array_values(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+    ($entry['event'] ?? null) === 'reflection.observer_unavailable'
+    && ($entry['reason'] ?? null) === 'observer_unsupported'
+    && ($entry['context']['correlation']['event_id'] ?? null) === '200'
+    && ($entry['context']['correlation']['utterance_id'] ?? null) === $id));
+same($mpObserverSupported ? 0 : 2, count($unsupportedEntries),
+    'The PCV log should report observer unavailability only when the installed MP RequestLog lacks the optional API.');
+if (!$mpObserverSupported && $unsupportedEntries !== []) {
+    same('unavailable', $unsupportedEntries[0]['outcome'] ?? null,
+        'The PCV log should state that unified MP outcome import is unsupported for a validated ACK.');
+}
+$importedEntries = array_values(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+    in_array($entry['event'] ?? null, ['reflection.model_finished', 'reflection.persistence_finished', 'reflection.evaluation_result'], true)));
+check($mpObserverSupported ? $importedEntries !== [] : $importedEntries === [],
+    'Detailed Mind Poisoning outcomes should be imported only when its optional observer API is available.');
+same(2, reflectionPcvEventCount('reflection.evaluation_finished', $id),
+    'Each committed adapter return should be recorded once without making playback claims.');
 same('claim_taken', pcv_reflection_evaluate_with_store($ack, $store, static function (): never { throw new RuntimeException('duplicate provider call'); }, $directory, static fn(): array => reflectionScopeFixture()), 'Consume duplicate ACKs without evaluation.');
 same(1, $modelCalls, 'Duplicate ACKs must not call the provider again.');
+$replayEntries = array_values(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+    ($entry['event'] ?? null) === 'reflection.ack_skipped' && ($entry['reason'] ?? null) === 'claim_taken'));
+check($replayEntries !== []
+    && ($replayEntries[0]['context']['correlation']['event_id'] ?? null) === '200'
+    && ($replayEntries[0]['context']['correlation']['utterance_id'] ?? null) === $id,
+    'A replay skip should retain the same exact correlation tuple without making a second provider call.');
+
+$zeroDirectory = $testRoot . DIRECTORY_SEPARATOR . 'zero_change';
+$zeroStore = reflectionStore($id);
+same('registered', reflectionRegister($zeroStore, $zeroDirectory, $wire), 'Register zero-change fixture.');
+$zeroRecords = [];
+$zeroLog = new \ChimMindPoisoning\RequestLog(static function (string $json) use (&$zeroRecords): void {
+    $zeroRecords[] = json_decode($json, true, 32, JSON_THROW_ON_ERROR);
+}, false);
+same('committed', pcv_reflection_evaluate_with_store($ack, $zeroStore, static fn(): string => validModelResponse([
+    ['subject' => 'npc:33', 'delta' => 0, 'reason' => 'No new evidence supports a change.', 'evidence' => 'Jarl Balgruuf betrayed me'],
+]), $zeroDirectory, static fn(): array => reflectionScopeFixture(), $zeroLog), 'The exact reflection may be confirmed with no affinity changes.');
+$zeroSummary = null;
+foreach (array_reverse($zeroRecords) as $entry) {
+    if (($entry['event'] ?? null) === 'request_finished') { $zeroSummary = $entry; break; }
+}
+same('committed', $zeroSummary['outcome'] ?? null, 'Mind Poisoning must retain the detailed zero-change result.');
+same(0, $zeroSummary['changed_count'] ?? null, 'Mind Poisoning must retain the exact zero change count.');
+$unsupportedAfterZero = array_values(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+    ($entry['event'] ?? null) === 'reflection.observer_unavailable'
+    && ($entry['context']['correlation']['event_id'] ?? null) === '200'
+    && ($entry['context']['correlation']['utterance_id'] ?? null) === $id));
+same($mpObserverSupported ? 0 : 3, count($unsupportedAfterZero),
+    'Each validated ACK should get an unsupported-import marker only when the optional observer API is absent.');
+same(3, reflectionPcvEventCount('reflection.evaluation_finished', $id),
+    'Each committed adapter return should be recorded once.');
 
 foreach ([
     reflectionWire($subtitle, $id, 'Aela', 'Player'),
@@ -262,6 +381,8 @@ $staleStatus = pcv_reflection_evaluate_with_store($ack, $scopeStore, static func
 }, $scopeDirectory, $scopeReader, $staleLog);
 same('stale', $staleStatus, 'The transaction must reject a changed active scope.');
 same(25, $scopeStore->npcs[11]['extended_data']->relationships->{'Jarl Balgruuf'}->aff, 'A stale transaction must not persist.');
+same(3, reflectionPcvEventCount('reflection.evaluation_finished', $id),
+    'A stale API result must not be reported as an accepted adapter completion.');
 
 $failureDirectory = $testRoot . DIRECTORY_SEPARATOR . 'provider_failure';
 $failureStore = reflectionStore($id);
@@ -276,6 +397,21 @@ foreach (array_reverse($failureRecords) as $entry) {
 }
 same('failed', $failureSummary['outcome'] ?? null, 'MP diagnostics should label provider failure as failed.');
 same('model_request_failed', $failureSummary['reason'] ?? null, 'MP diagnostics should retain the fixed provider failure code.');
+$failureUnavailable = array_values(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+    ($entry['event'] ?? null) === 'reflection.observer_unavailable'
+    && ($entry['context']['correlation']['event_id'] ?? null) === '200'
+    && ($entry['context']['correlation']['utterance_id'] ?? null) === $id));
+same($mpObserverSupported ? 0 : 5, count($failureUnavailable),
+    'A provider-failure ACK should report observer unavailability only when the optional observer API is absent.');
+$providerError = array_values(array_filter(reflectionPcvLogEntries(), static fn(array $entry): bool =>
+    ($entry['event'] ?? null) === 'reflection.ack_error'
+    && ($entry['reason'] ?? null) === 'evaluation_failed'
+    && ($entry['context']['correlation']['event_id'] ?? null) === '200'
+    && ($entry['context']['correlation']['utterance_id'] ?? null) === $id));
+same(1, count($providerError), 'A returned provider failure should have one fixed PCV error with the exact ACK correlation.');
+same('error', $providerError[0]['severity'] ?? null, 'A returned provider failure must not be informational.');
+same(3, reflectionPcvEventCount('reflection.evaluation_finished', $id),
+    'A failed provider return must not increment accepted adapter completions.');
 
 $corruptDirectory = $testRoot . DIRECTORY_SEPARATOR . 'corrupt';
 same('registered', reflectionRegister(reflectionStore($id), $corruptDirectory, $wire), 'Register corruption fixture.');
@@ -290,9 +426,10 @@ $pcvEntries = array_map(static fn(string $line): array => json_decode($line, tru
 check(!str_contains($pcvLogs . $mpLogs, $subtitle), 'PCV and MP logs must not contain raw speech.');
 check(!str_contains($pcvLogs . $mpLogs, hash('sha256', $subtitle)), 'PCV and MP logs must not contain the private speech hash.');
 check(is_string($claimToken) && preg_match('/\A[a-f0-9]{32}\z/D', $claimToken) === 1 && !str_contains($pcvLogs . $mpLogs, $claimToken), 'PCV and MP logs must not expose registry claim tokens.');
-check(str_contains($pcvLogs, 'reflection.evaluation_finished') && str_contains($pcvLogs, 'reflection.ack_error'), 'PCV logs should report terminal success and registry failure.');
-$providerError = array_values(array_filter($pcvEntries, static fn(array $entry): bool => ($entry['event'] ?? null) === 'reflection.ack_error' && ($entry['reason'] ?? null) === 'internal_error'));
-check(count($providerError) === 1 && ($providerError[0]['context']['actor_a_id'] ?? null) === '11', 'PCV provider diagnostics should retain bounded owner correlation and a fixed error code.');
+check(str_contains($pcvLogs, 'reflection.evaluation_finished')
+    && ($mpObserverSupported ? !str_contains($pcvLogs, 'reflection.observer_unavailable') : str_contains($pcvLogs, 'reflection.observer_unavailable'))
+    && str_contains($pcvLogs, 'reflection.ack_error'),
+    'PCV logs should report adapter returns, optional observer availability accurately, and registry failures.');
 $missingMindPoisoning = array_values(array_filter($pcvEntries, static fn(array $entry): bool => ($entry['event'] ?? null) === 'reflection.registration_skipped' && ($entry['reason'] ?? null) === 'mind_poisoning_unavailable'));
 check(count($missingMindPoisoning) === 1 && ($missingMindPoisoning[0]['severity'] ?? null) === 'info', 'Missing optional MP support should be an informational skip.');
 $moduleSource = (string)file_get_contents(__DIR__ . '/../server/reflection.php');

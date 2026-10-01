@@ -1,6 +1,6 @@
 {
   "name": "private_conversation",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "schema_version": 2,
   "git_repo": "Francisco-boop-001/CHIM-Plugins",
   "description": "PRE-ALPHA: Stage a two-NPC scene direction or solo reflection for the next eligible ordinary Standard-mode input.",
@@ -14,7 +14,7 @@
       "manifest_url": "https://raw.githubusercontent.com/Francisco-boop-001/CHIM-Plugins/main/plugins/private_conversation/server/manifest.json",
       "package_source": "release",
       "package_urls": [
-        "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.4/private_conversation.tar.gz"
+        "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.5/private_conversation.tar.gz"
       ],
       "archive_strip_components": 1,
       "allow_force": false

@@ -1,6 +1,64 @@
 <?php
 declare(strict_types=1);
 
+if (($argv[1] ?? null) === '--storage-health-child') {
+    require_once dirname(__DIR__) . '/server/log.php';
+    putenv('PCV_LOG_DIR=' . ($argv[2] ?? ''));
+    $health = pcv_log_storage_health();
+    $health['mode'] = $health['storage_mode'];
+    echo json_encode($health, JSON_THROW_ON_ERROR);
+    exit(0);
+}
+
+if (($argv[1] ?? null) === '--storage-failure-child') {
+    require_once dirname(__DIR__) . '/server/log.php';
+    putenv('PCV_LOG_DIR=' . ($argv[2] ?? ''));
+    pcv_log_event('ui.page_open', 'info', 'ok');
+    $directory = pcv_log_default_directory(false);
+    if (!is_string($directory)) {
+        exit(2);
+    }
+    $lock = fopen($directory . '/events.lock', 'c');
+    if (!is_resource($lock) || !flock($lock, LOCK_EX | LOCK_NB)) {
+        exit(3);
+    }
+    pcv_log_event('ui.page_open', 'info', 'ok');
+    flock($lock, LOCK_UN);
+    fclose($lock);
+    echo json_encode(pcv_log_storage_health(), JSON_THROW_ON_ERROR);
+    exit(0);
+}
+
+if (($argv[1] ?? null) === '--fifo-lock-child') {
+    define('PCV_LOG_TESTING', true);
+    require_once dirname(__DIR__) . '/server/log.php';
+    $directory = $argv[2] ?? '';
+    if (!pcv_log_set_test_directory($directory)) {
+        exit(2);
+    }
+    pcv_log_event('ui.page_open', 'info', 'ok');
+    echo json_encode([
+        'write_status' => pcv_log_storage_health()['write_status'],
+        'failure_codes' => pcv_log_storage_health()['failure_codes'],
+        'active_log_exists' => is_file($directory . '/events.jsonl'),
+    ], JSON_THROW_ON_ERROR);
+    exit(0);
+}
+
+if (($argv[1] ?? null) === '--shutdown-child' || ($argv[1] ?? null) === '--fatal-child') {
+    define('PCV_LOG_TESTING', true);
+    require_once dirname(__DIR__) . '/server/log.php';
+    if (!pcv_log_set_test_directory($argv[2] ?? '')) {
+        exit(2);
+    }
+    pcv_log_event('routing.request_started', 'info', 'ok', null, ['request_type' => 'inputtext']);
+    pcv_log_set_terminal('postrequest_observed', null, ['phase' => 'postrequest', 'route' => 'player_speech']);
+    if ($argv[1] === '--fatal-child') {
+        trigger_error('DO NOT LOG THIS FATAL MESSAGE', E_USER_ERROR);
+    }
+    exit(0);
+}
+
 if (($argv[1] ?? null) === '--debug-child' || ($argv[1] ?? null) === '--writer-child') {
     define('PCV_LOG_TESTING', true);
     if ($argv[1] === '--debug-child') {
@@ -49,6 +107,7 @@ function cleanLogFixture(string $directory, string $fallback): void
 
 $fixture = sys_get_temp_dir() . '/chim-private-conversation-log-check-' . bin2hex(random_bytes(8));
 $fallback = $fixture . '-fallback.log';
+$fifoLockDirectory = null;
 $oldErrorLog = ini_get('error_log');
 $exitCode = 0;
 
@@ -67,6 +126,13 @@ try {
     logCheck(is_string($configId), 'secure config ID generator should return an ID');
     pcv_log_begin_request($configId);
     pcv_log_set_playthrough_ref($playthroughKey);
+    pcv_log_set_correlation([
+        'event_id' => 123,
+        'utterance_id' => 'utt_abcdefgh12345678',
+        'linked_request_id' => 'abcdefabcdefabcdefabcdef',
+        'source_request_id' => 'DO NOT LOG UNKNOWN CORRELATION',
+        'speech_hash' => 'DO NOT LOG THIS HASH',
+    ]);
     pcv_log_event('state.scope_staged', 'info', 'ok', null, [
         'action' => 'enable',
         'scene_mode' => 'solo',
@@ -102,15 +168,76 @@ try {
     pcv_log_event('reflection.ack_skipped', 'info', 'skipped', 'evaluation_rejected', array_replace($reflectionContext, ['phase' => 'ack']));
     pcv_log_event('reflection.ack_error', 'error', 'failed', 'database_unavailable', array_replace($reflectionContext, ['phase' => 'ack']));
     pcv_log_event('reflection.evaluation_finished', 'info', 'accepted', null, array_replace($reflectionContext, ['phase' => 'ack']));
+    pcv_log_event('reflection.observer_unavailable', 'info', 'unavailable', 'observer_unsupported', array_replace($reflectionContext, ['phase' => 'ack']));
+    pcv_log_presence_observed('background_read', 'stale', 0, 'presence_stale');
+    pcv_log_presence_observed('background_read', 'unavailable', 0, 'presence_baseline');
+    pcv_log_import_mp_record([
+        'schema_version' => 1,
+        'plugin' => 'mind_poisoning',
+        'request_id' => '1234567890abcdef12345678',
+        'event' => 'persistence_finished',
+        'source_kind' => 'reflection',
+        'config_id' => $configId,
+        'event_id' => 123,
+        'utterance_id' => 'utt_abcdefgh12345678',
+        'speaker_id' => '101',
+        'speaker_kind' => 'npc',
+        'persistence_outcome' => 'committed',
+        'persistence_reason' => 'zero-change',
+        'commit_state' => 'confirmed',
+        'committed' => true,
+        'changed_count' => 0,
+        'changes' => [],
+        'model_reason' => 'DO NOT LOG THIS MODEL DETAIL',
+        'speech' => 'DO NOT LOG THIS SPEECH',
+    ], 'info');
+    pcv_log_import_mp_record([
+        'schema_version' => 1,
+        'plugin' => 'mind_poisoning',
+        'request_id' => 'abcdef1234567890abcdef12',
+        'event' => 'persistence_finished',
+        'source_kind' => 'reflection',
+        'config_id' => $configId,
+        'event_id' => 123,
+        'utterance_id' => 'utt_abcdefgh12345678',
+        'speaker_id' => '101',
+        'speaker_kind' => 'npc',
+        'persistence_outcome' => 'failed',
+        'persistence_reason' => 'commit-failed',
+        'commit_state' => 'unconfirmed',
+        'committed' => false,
+        'changed_count' => 0,
+        'changes' => [],
+        'reason' => 'commit-failed',
+    ], 'error');
+    pcv_log_import_mp_record([
+        'schema_version' => 1,
+        'plugin' => 'mind_poisoning',
+        'request_id' => 'fedcba0987654321fedcba09',
+        'event' => 'request_finished',
+        'source_kind' => 'reflection',
+        'config_id' => $configId,
+        'event_id' => 123,
+        'utterance_id' => 'utt_abcdefgh12345678',
+        'outcome' => 'skipped',
+        'reason' => 'pause_control_invalid',
+    ], 'warning');
+    pcv_log_event('routing.request_started', 'info', 'ok', null, ['request_type' => 'inputtext']);
+    pcv_log_set_terminal('failed', 'hook_exception', ['phase' => 'prerequest', 'request_type' => 'inputtext']);
+    pcv_log_set_terminal('postrequest_observed', null, ['phase' => 'postrequest']);
+    pcv_log_shutdown_terminal();
+    logCheck(!pcv_log_rule_matches('routing.request_finished', 'info', 'postrequest_observed', 'fatal_error'),
+        'A contradictory terminal outcome/reason pair must be rejected by the shared rule.');
 
     $path = pcv_log_path();
     logCheck(is_string($path) && is_file($path), 'CLI path accessor should return the isolated JSONL file');
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    logCheck(is_array($lines) && count($lines) === 11, 'debug event should be suppressed while ordinary events are retained');
+    logCheck(is_array($lines) && count($lines) === 19, 'debug event should be suppressed while ordinary events are retained');
     $entries = array_map(static fn(string $line) => json_decode($line, true, 16, JSON_THROW_ON_ERROR), $lines);
     $manifest = json_decode((string)file_get_contents(dirname(__DIR__) . '/server/manifest.json'), true, 16, JSON_THROW_ON_ERROR);
     foreach ($entries as $entry) {
         logCheck(($entry['schema_version'] ?? null) === PCV_LOG_SCHEMA_VERSION, 'schema version missing');
+        logCheck(($entry['logging_revision'] ?? null) === 2, 'new records must identify the instrumentation revision');
         logCheck(($entry['plugin_version'] ?? null) === ($manifest['version'] ?? null), 'plugin version should come from manifest');
         logCheck(is_string($entry['request_id'] ?? null) && $entry['request_id'] === pcv_log_request_id(), 'request ID should be stable');
         logCheck(($entry['config_id'] ?? null) === $configId, 'config ID should correlate the request');
@@ -120,10 +247,17 @@ try {
             'timestamp must be UTC with millisecond precision');
     }
     logCheck(!str_contains((string)file_get_contents($path), 'DO NOT LOG THIS'), 'raw exception/dialogue text leaked');
+    logCheck(!str_contains((string)file_get_contents($path), 'DO NOT LOG UNKNOWN CORRELATION')
+        && !str_contains((string)file_get_contents($path), 'DO NOT LOG THIS HASH'), 'unknown correlation fields must be omitted');
     logCheck(!str_contains((string)file_get_contents($path), $playthroughKey), 'full playthrough key leaked');
     logCheck(($entries[0]['context']['actor_a_id'] ?? null) === '101', 'approved actor IDs should be retained');
     logCheck(($entries[0]['context']['scene_mode'] ?? null) === 'solo', 'scene mode should be retained as a fixed enum');
     logCheck(!array_key_exists('dialogue', $entries[0]['context']), 'unapproved context must be omitted');
+    logCheck(($entries[0]['context']['correlation'] ?? null) === [
+        'event_id' => '123',
+        'utterance_id' => 'utt_abcdefgh12345678',
+        'linked_request_id' => 'abcdefabcdefabcdefabcdef',
+    ], 'only validated correlation fields should be retained');
     logCheck(($entries[1]['context']['exception_class'] ?? null) === RuntimeException::class, 'exception class should be structured');
     logCheck(($entries[1]['context']['exception_code'] ?? null) === 37, 'exception code should be structured');
     logCheck(preg_match('/^[A-Za-z0-9_.-]+$/D', $entries[1]['context']['source_file'] ?? '') === 1, 'exception path should be reduced to basename');
@@ -137,18 +271,111 @@ try {
         && ($entries[4]['context']['scene_mode'] ?? null) === 'solo',
         'expected actor ineligibility should be logged as a fixed informational skip');
     $reflectionEntries = array_values(array_filter($entries, static fn(array $entry): bool => str_starts_with((string)($entry['event'] ?? ''), 'reflection.')));
-    logCheck(count($reflectionEntries) === 6
+    logCheck(count($reflectionEntries) === 10
         && ($reflectionEntries[0]['reason'] ?? null) === 'baseline_stale'
         && ($reflectionEntries[1]['severity'] ?? null) === 'error'
         && ($reflectionEntries[2]['outcome'] ?? null) === 'accepted'
         && ($reflectionEntries[3]['context']['phase'] ?? null) === 'ack'
         && ($reflectionEntries[4]['reason'] ?? null) === 'database_unavailable'
-        && ($reflectionEntries[5]['event'] ?? null) === 'reflection.evaluation_finished',
+        && ($reflectionEntries[5]['event'] ?? null) === 'reflection.evaluation_finished'
+        && ($reflectionEntries[6]['event'] ?? null) === 'reflection.observer_unavailable'
+        && ($reflectionEntries[6]['reason'] ?? null) === 'observer_unsupported',
         'reflection log entries must use the fixed skip/error/accepted contracts');
     logCheck(!str_contains((string)file_get_contents($path), 'DO NOT LOG THIS ID')
         && !str_contains((string)file_get_contents($path), 'DO NOT LOG THIS DIGEST')
         && !str_contains((string)file_get_contents($path), 'DO NOT LOG THIS SPEECH'),
         'reflection log context leaked an output ID, digest, or speech');
+    $presenceEntry = $entries[12] ?? [];
+    logCheck(($presenceEntry['event'] ?? null) === 'state.presence_observed'
+        && ($presenceEntry['severity'] ?? null) === 'info'
+        && ($presenceEntry['reason'] ?? null) === 'presence_stale', 'expected stale presence should not be logged as an error');
+    $baselinePresence = $entries[13] ?? [];
+    logCheck(($baselinePresence['event'] ?? null) === 'state.presence_observed'
+        && ($baselinePresence['outcome'] ?? null) === 'unavailable'
+        && ($baselinePresence['severity'] ?? null) === 'info'
+        && ($baselinePresence['reason'] ?? null) === 'presence_baseline',
+        'An initial ordering baseline must remain distinct from both empty and age-stale presence.');
+    $imported = $entries[14] ?? [];
+    logCheck(($imported['event'] ?? null) === 'reflection.persistence_finished'
+        && ($imported['outcome'] ?? null) === 'zero_change'
+        && ($imported['context']['commit_state'] ?? null) === 'confirmed'
+        && ($imported['context']['changed_count'] ?? null) === 0
+        && ($imported['context']['source_reason'] ?? null) === 'zero-change'
+        && ($imported['context']['correlation']['linked_request_id'] ?? null) === '1234567890abcdef12345678',
+        'MP persistence summaries must preserve safe outcome and correlation fields');
+    logCheck(($entries[15]['event'] ?? null) === 'reflection.persistence_finished'
+        && ($entries[15]['outcome'] ?? null) === 'unconfirmed'
+        && ($entries[15]['severity'] ?? null) === 'error'
+        && ($entries[15]['reason'] ?? null) === 'commit_unconfirmed'
+        && ($entries[15]['context']['commit_state'] ?? null) === 'unconfirmed'
+        && ($entries[15]['context']['source_reason'] ?? null) === 'commit-failed',
+        'StoreDb error-level uncertain commits must retain failure severity and the fixed source reason');
+    logCheck(($entries[16]['event'] ?? null) === 'reflection.evaluation_result'
+        && ($entries[16]['outcome'] ?? null) === 'rejected'
+        && ($entries[16]['severity'] ?? null) === 'warning'
+        && ($entries[16]['context']['source_reason'] ?? null) === 'pause_control_invalid',
+        'Warning-level invalid pause controls must not disappear into an informational skip');
+    logCheck(!str_contains((string)file_get_contents($path), 'DO NOT LOG THIS MODEL DETAIL')
+        && !str_contains((string)file_get_contents($path), 'DO NOT LOG THIS SPEECH'), 'MP import leaked model detail or dialogue');
+    logCheck(($entries[18]['event'] ?? null) === 'routing.request_finished'
+        && ($entries[18]['outcome'] ?? null) === 'failed'
+        && ($entries[18]['reason'] ?? null) === 'hook_exception',
+        'A later postrequest observation must not overwrite an earlier caught failure');
+
+    pcv_log_set_correlation([]);
+    $beforeFirstImport = count(file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+    pcv_log_import_mp_record([
+        'schema_version' => 1,
+        'plugin' => 'mind_poisoning',
+        'request_id' => '1234567890abcdef12345678',
+        'event' => 'request_finished',
+        'source_kind' => 'reflection',
+        'config_id' => $configId,
+        'event_id' => 125,
+        'utterance_id' => 'utt_mnopqrst12345678',
+        'outcome' => 'skipped',
+        'reason' => 'pause_control_invalid',
+    ], 'info');
+    $firstCorrelation = pcv_log_request_context()['correlation'];
+    $afterFirstImport = count(file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+    logCheck(($firstCorrelation['event_id'] ?? null) === '125'
+        && ($firstCorrelation['utterance_id'] ?? null) === 'utt_mnopqrst12345678'
+        && $afterFirstImport === $beforeFirstImport + 1,
+        'A first valid observer tuple must still be accepted when no correlation is established.');
+
+    $registeredTuple = ['event_id' => '123', 'utterance_id' => 'utt_abcdefgh12345678'];
+    $beforeMismatchedImports = count(file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+    pcv_log_set_correlation($registeredTuple);
+    pcv_log_import_mp_record([
+        'schema_version' => 1,
+        'plugin' => 'mind_poisoning',
+        'request_id' => '1234567890abcdef12345678',
+        'event' => 'request_finished',
+        'source_kind' => 'reflection',
+        'config_id' => $configId,
+        'event_id' => 124,
+        'utterance_id' => $registeredTuple['utterance_id'],
+        'outcome' => 'skipped',
+        'reason' => 'pause_control_invalid',
+    ], 'info');
+    $eventMismatchStayed = pcv_log_request_context()['correlation'] === $registeredTuple;
+    pcv_log_set_correlation($registeredTuple);
+    pcv_log_import_mp_record([
+        'schema_version' => 1,
+        'plugin' => 'mind_poisoning',
+        'request_id' => '1234567890abcdef12345678',
+        'event' => 'request_finished',
+        'source_kind' => 'reflection',
+        'config_id' => $configId,
+        'event_id' => 123,
+        'utterance_id' => 'utt_ijklmnop12345678',
+        'outcome' => 'skipped',
+        'reason' => 'pause_control_invalid',
+    ], 'info');
+    $utteranceMismatchStayed = pcv_log_request_context()['correlation'] === $registeredTuple;
+    $afterMismatchedImports = count(file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+    logCheck($eventMismatchStayed && $utteranceMismatchStayed && $afterMismatchedImports === $beforeMismatchedImports,
+        'MP observer rows with a different event or utterance ID must not relabel or add to the established ACK tuple');
 
     $permissions = fileperms($path) & 0777;
     logCheck($permissions === 0600, 'log file should be owner-only');
@@ -229,6 +456,89 @@ try {
         'rejected directory must remain untouched');
     chmod($unsafeDirectory, 0700);
     unlink($marker);
+    chmod($unsafeDirectory, 0755);
+    $healthProcess = proc_open([PHP_BINARY, __FILE__, '--storage-health-child', $unsafeDirectory],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $healthPipes);
+    logCheck(is_resource($healthProcess), 'could not start storage health fixture');
+    fclose($healthPipes[0]);
+    $healthOutput = stream_get_contents($healthPipes[1]);
+    $healthError = stream_get_contents($healthPipes[2]);
+    fclose($healthPipes[1]);
+    fclose($healthPipes[2]);
+    logCheck(proc_close($healthProcess) === 0, 'storage health fixture failed: ' . $healthError);
+    $health = json_decode((string)$healthOutput, true, 16, JSON_THROW_ON_ERROR);
+    logCheck(($health['mode'] ?? null) === 'temporary_fallback'
+        && ($health['reason'] ?? null) === 'override_invalid'
+        && !array_key_exists('path', $health), 'unsafe storage override must be visible without disclosing the fallback path');
+    $fallbackTemp = $fixture . '/fallback-temp';
+    mkdir($fallbackTemp, 0700);
+    $failureProcess = proc_open([PHP_BINARY, __FILE__, '--storage-failure-child', $unsafeDirectory],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $failurePipes, null,
+        array_replace($_ENV, ['TMPDIR' => $fallbackTemp]));
+    logCheck(is_resource($failureProcess), 'could not start sequential storage failure fixture');
+    fclose($failurePipes[0]);
+    $failureOutput = stream_get_contents($failurePipes[1]);
+    $failureError = stream_get_contents($failurePipes[2]);
+    fclose($failurePipes[1]);
+    fclose($failurePipes[2]);
+    logCheck(proc_close($failureProcess) === 0, 'sequential storage failure fixture failed: ' . $failureError);
+    $failureHealth = json_decode((string)$failureOutput, true, 16, JSON_THROW_ON_ERROR);
+    logCheck(($failureHealth['write_status'] ?? null) === 'degraded'
+        && in_array('override_invalid', $failureHealth['failure_codes'] ?? [], true)
+        && in_array('lock_unavailable', $failureHealth['failure_codes'] ?? [], true),
+        'A successful fallback append must not erase the invalid-override or later lock-failure health');
+
+    $fifoLockDirectory = $fixture . '/fifo-lock';
+    mkdir($fifoLockDirectory, 0700);
+    logCheck(function_exists('posix_mkfifo') && posix_mkfifo($fifoLockDirectory . '/events.lock', 0600),
+        'could not create isolated FIFO lock fixture');
+    $fifoProcess = proc_open([PHP_BINARY, __FILE__, '--fifo-lock-child', $fifoLockDirectory],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $fifoPipes);
+    logCheck(is_resource($fifoProcess), 'could not start FIFO lock fixture');
+    fclose($fifoPipes[0]);
+    stream_set_blocking($fifoPipes[1], false);
+    stream_set_blocking($fifoPipes[2], false);
+    $fifoOutput = '';
+    $fifoError = '';
+    $fifoDeadline = microtime(true) + 2.0;
+    $fifoFinished = false;
+    do {
+        $fifoOutput .= stream_get_contents($fifoPipes[1]);
+        $fifoError .= stream_get_contents($fifoPipes[2]);
+        $fifoStatus = proc_get_status($fifoProcess);
+        if (!$fifoStatus['running']) {
+            $fifoFinished = true;
+            break;
+        }
+        usleep(20000);
+    } while (microtime(true) < $fifoDeadline);
+    if (!$fifoFinished) {
+        proc_terminate($fifoProcess, 9);
+    }
+    fclose($fifoPipes[1]);
+    fclose($fifoPipes[2]);
+    $fifoExit = proc_close($fifoProcess);
+    if ($fifoExit === -1 && isset($fifoStatus['exitcode'])) {
+        $fifoExit = $fifoStatus['exitcode'];
+    }
+    logCheck($fifoFinished && $fifoExit === 0,
+        'a FIFO lock path must be rejected promptly instead of blocking the request: ' . $fifoError);
+    $fifoResult = json_decode($fifoOutput, true, 16, JSON_THROW_ON_ERROR);
+    logCheck(($fifoResult['write_status'] ?? null) === 'degraded'
+        && in_array('lock_unavailable', $fifoResult['failure_codes'] ?? [], true)
+        && ($fifoResult['active_log_exists'] ?? null) === false,
+        'a rejected FIFO lock must set lock health without creating a JSONL segment');
+    logCheck(!str_contains($fifoOutput . $fifoError, 'DO NOT LOG'),
+        'FIFO lock rejection must not emit private fixture details');
+
+    foreach (glob($fallbackTemp . '/private-conversation-*') ?: [] as $fallbackDirectory) {
+        foreach (glob($fallbackDirectory . '/*') ?: [] as $fallbackFile) {
+            @unlink($fallbackFile);
+        }
+        @rmdir($fallbackDirectory);
+    }
+    @rmdir($fallbackTemp);
+    chmod($unsafeDirectory, 0700);
     rmdir($unsafeDirectory);
 
     $lockPath = $fixture . '/events.lock';
@@ -245,6 +555,47 @@ try {
     logCheck(str_contains($fallbackText, 'config_id=' . $configId), 'fallback should identify the active config when valid');
     logCheck(!str_contains($fallbackText, 'DO NOT LOG THIS'), 'fallback should not contain raw exception text');
 
+    $normalShutdown = $fixture . '/normal-shutdown';
+    $fatalShutdown = $fixture . '/fatal-shutdown';
+    mkdir($normalShutdown, 0700);
+    mkdir($fatalShutdown, 0700);
+    foreach ([['--shutdown-child', $normalShutdown], ['--fatal-child', $fatalShutdown]] as [$mode, $directory]) {
+        $process = proc_open([PHP_BINARY, __FILE__, $mode, $directory],
+            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        logCheck(is_resource($process), 'could not start isolated shutdown fixture');
+        fclose($pipes[0]);
+        $childOutput = stream_get_contents($pipes[1]);
+        $childError = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $childStatus = proc_close($process);
+        if ($mode === '--shutdown-child') {
+            logCheck($childStatus === 0, 'normal shutdown child failed: ' . $childError);
+            $childRows = array_map(static fn(string $line) => json_decode($line, true, 16, JSON_THROW_ON_ERROR),
+                file($directory . '/events.jsonl', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+            $terminalRows = array_values(array_filter($childRows, static fn(array $row): bool => ($row['event'] ?? null) === 'routing.request_finished'));
+            logCheck(count($terminalRows) === 1 && ($terminalRows[0]['outcome'] ?? null) === 'postrequest_observed',
+                'Registered shutdown should emit one observed terminal without manual invocation.');
+        } else {
+            logCheck($childStatus !== 0, 'fatal shutdown child unexpectedly returned successfully');
+            $fatalPath = $directory . '/events.jsonl';
+            $fatalLines = file($fatalPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $fatalRows = array_map(static fn(string $line) => json_decode($line, true, 16, JSON_THROW_ON_ERROR), $fatalLines);
+            $fatalTerminals = array_values(array_filter($fatalRows, static fn(array $row): bool => ($row['event'] ?? null) === 'routing.request_finished'));
+            logCheck(count($fatalTerminals) === 1 && ($fatalTerminals[0]['outcome'] ?? null) === 'failed'
+                && ($fatalTerminals[0]['reason'] ?? null) === 'fatal_error'
+                && ($fatalTerminals[0]['context']['source_file'] ?? null) === 'log_check.php'
+                && ($fatalTerminals[0]['context']['exception_code'] ?? null) === E_USER_ERROR
+                && is_int($fatalTerminals[0]['context']['source_line'] ?? null)
+                && !str_contains((string)file_get_contents($fatalPath), 'DO NOT LOG THIS FATAL MESSAGE'),
+                'Fatal shutdown should record fixed basename/type/line metadata without the error message.');
+        }
+        foreach (['events.jsonl', 'events.1.jsonl', 'events.2.jsonl', 'events.3.jsonl', 'events.4.jsonl', 'events.lock'] as $name) {
+            @unlink($directory . '/' . $name);
+        }
+        @rmdir($directory);
+    }
+
     echo "PASS: schema/redaction, IDs, debug window, five-segment rotation, private permissions, concurrent JSONL, unsafe-path rejection, lock fallback\n";
 } catch (Throwable $error) {
     fwrite(STDERR, 'FAIL: ' . $error->getMessage() . "\n");
@@ -252,6 +603,11 @@ try {
 } finally {
     if (is_string($oldErrorLog)) {
         ini_set('error_log', $oldErrorLog);
+    }
+    if (is_string($fifoLockDirectory)) {
+        @unlink($fifoLockDirectory . '/events.lock');
+        @unlink($fifoLockDirectory . '/events.jsonl');
+        @rmdir($fifoLockDirectory);
     }
     cleanLogFixture($fixture, $fallback);
 }

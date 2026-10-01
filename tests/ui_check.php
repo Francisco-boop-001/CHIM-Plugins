@@ -5,6 +5,7 @@ define('PCV_LOG_TESTING', true);
 require_once __DIR__ . '/../server/log.php';
 define('PCV_UI_TEST', true);
 require_once __DIR__ . '/../server/index.php';
+require_once __DIR__ . '/../server/log_reader.php';
 
 function check(bool $condition, string $message): void
 {
@@ -22,6 +23,58 @@ function rejects(callable $callback, string $message): void
     }
     throw new RuntimeException($message);
 }
+
+check(pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '127.0.0.1']), 'Exact IPv4 loopback must authorize diagnostics.');
+check(pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '::1']), 'Exact IPv6 loopback must authorize diagnostics.');
+check(pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '10.0.0.2', 'REMOTE_USER' => 'operator']),
+    'A nonempty web-server REMOTE_USER must authorize diagnostics.');
+check(pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '10.0.0.2', 'REMOTE_USER' => 'operator', 'HTTP_X_FORWARDED_FOR' => '127.0.0.1']),
+    'A trusted server REMOTE_USER must authorize independently of caller forwarding headers.');
+check(!pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '10.0.0.2', 'HTTP_REMOTE_USER' => 'operator', 'PHP_AUTH_USER' => 'operator']),
+    'Caller-controlled user headers must not authorize diagnostics.');
+foreach (['HTTP_FORWARDED', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP'] as $forwardedHeader) {
+    check(!pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '127.0.0.1', $forwardedHeader => '']),
+        'Loopback with any forwarding header must not authorize diagnostics.');
+}
+check(!pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '127.0.0.2']), 'Non-loopback private addresses must not authorize diagnostics.');
+check(!pcv_ui_logs_access_allowed(['REMOTE_ADDR' => '10.0.0.2', 'REMOTE_USER' => '   ']), 'Blank server REMOTE_USER must not authorize diagnostics.');
+
+$normalizedFilters = pcv_ui_logs_filters([
+    'action' => 'read', 'csrf' => 'token', 'request' => str_repeat('a', 32), 'event' => 'ui.page_open',
+    'severity' => 'info', 'limit' => '25',
+]);
+check($normalizedFilters['request'] === str_repeat('a', 32) && $normalizedFilters['event'] === 'ui.page_open'
+    && $normalizedFilters['severity'] === 'info' && $normalizedFilters['limit'] === 25,
+    'Diagnostics form values must normalize to the reader’s strict bounded filter contract.');
+rejects(static fn() => pcv_ui_logs_filters(['action' => 'read', 'csrf' => 'token', 'limit' => '1001']),
+    'The diagnostics UI must reject limits above 1000.');
+rejects(static fn() => pcv_ui_logs_filters(['action' => 'read', 'csrf' => 'token', 'message' => 'dialogue']),
+    'The diagnostics UI must reject unrecognized posted fields.');
+
+$safeLogEntry = pcv_diagnostics_project_entry([
+    'schema_version' => 1, 'logging_revision' => 2, 'plugin_version' => '0.1.4',
+    'timestamp' => '2026-09-30T12:00:00.123Z', 'event' => 'ui.page_open', 'severity' => 'info', 'outcome' => 'ok',
+    'reason' => null, 'request_id' => str_repeat('a', 32), 'config_id' => null, 'playthrough_ref' => null,
+    'elapsed_ms' => 1, 'context' => [], 'raw_dialogue' => 'SECRET-DIALOGUE', 'absolute_path' => 'C:/private/events.jsonl',
+]);
+$logsHtml = pcv_render_logs_page('valid-token', pcv_ui_logs_filters([]), [
+    'status' => 'ok', 'entries' => [$safeLogEntry],
+    'health' => [
+        'read_status' => 'ok', 'storage' => ['storage_mode' => 'external', 'write_status' => 'written',
+            'failure_codes' => [], 'retention' => 'bounded_rotation', 'max_files' => 5,
+            'max_file_bytes' => 10485760, 'max_entry_bytes' => 8192, 'completeness' => 'bounded_history'],
+        'completeness' => 'bounded_history', 'captured_segments' => 1,
+        'omissions' => ['malformed' => 0, 'oversized' => 0, 'unknown_schema' => 0, 'unsupported_revision' => 0,
+            'filtered' => 0, 'capped' => 0, 'read_failed' => 0],
+    ],
+], '<script>alert(1)</script>');
+check(str_contains($logsHtml, '&lt;script&gt;alert(1)&lt;/script&gt;') && !str_contains($logsHtml, '<script>alert(1)</script>'),
+    'Diagnostics HTML must escape untrusted presentation text.');
+check(!str_contains($logsHtml, 'SECRET-DIALOGUE') && !str_contains($logsHtml, 'C:/private/events.jsonl'),
+    'Diagnostics rendering must not expose raw record fields or filesystem paths.');
+check(str_contains($logsHtml, 'UTC') && str_contains($logsHtml, 'Current request only')
+    && str_contains($logsHtml, 'filtered') && str_contains($logsHtml, 'capped'),
+    'Diagnostics must label UTC time, current-request write health, and normal filter/cap counts.');
 
 $known = pcv_build_known_npcs([
     ['id' => 101, 'profile_id' => 7, 'npc_name' => '<script>alert(1)</script>'],
@@ -153,6 +206,10 @@ check(!str_contains($html, 'api_key'), 'UI must not expose secrets.');
 check(str_contains($html, 'assets/style.css') && str_contains($html, 'assets/private-conversation-scene.png'), 'Hero assets are not referenced locally.');
 check(str_contains($html, 'assets/ui-refresh.js') && str_contains($html, 'data-refresh-url="?refresh=1"'),
     'Automatic refresh must use a local external script and same-origin route.');
+check(str_contains($html, 'href="?view=logs"') && str_contains($html, 'data-logs-url="?view=logs"'),
+    'The scene page must expose a standalone diagnostics route and same-origin client-report target.');
+check(str_contains($html, 'class="scope-form"') && str_contains($html, 'End on next input'),
+    'Diagnostics-only access checks must leave the existing scene ARM and END controls intact.');
 check(str_contains($html, 'This list polls automatically for updates')
     && str_contains($html, 'Uses CHIM’s broader nearby range')
     && str_contains($html, 'AI observations expire after 45 seconds')
