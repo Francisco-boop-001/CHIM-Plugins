@@ -16,13 +16,15 @@ It also supports Player-origin input, an opinion dashboard in CHIM Plugin Manage
 
 [Recommended MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.19/mind_poisoning-0.1.19-mo2.zip) · [Release and checksums](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/tag/mind_poisoning-v0.1.19) · [Source](https://github.com/Francisco-boop-001/CHIM-MindPoisoning) · [Player guide](docs/mind-poisoning.md) · [Dashboard and logs](docs/dashboard.md) · [Developer guide](docs/development.md)
 
-### Private Conversation 0.1.16 — PRE-ALPHA
+### Private Conversation 0.1.17 — PRE-ALPHA
 
 Stage a pair, a group of 2–4, a free scene, or one solo response. For example, choose Aela and Lydia on the Private Conversation page, arm the scene, then send a Standard-mode direction in Skyrim. Arming alone does not start dialogue. Voice-friendly “wrap up” and “end scene” phrases close scenes. Scene direction works without Mind Poisoning. When installed, Mind Poisoning can evaluate eligible dialogue acknowledgements and registered solo reflections for opinion effects; its judgments still come from dialogue, not scene-action execution. Scene scope does not enforce physical earshot or erase retained memories.
 
 Scenes now support optional Personal, Physical and Intimate actions. All three are off by default and can be opted into per scene. Personal covers solo or shared activities, Physical covers scene-member brawls or surrender and is unavailable in solo scenes, and Intimate uses SHARMAT's gated actions. Targets stay within the scene; Attack and KillTarget are excluded. CHIM's action switch remains authoritative, and SHARMAT's consent and safety gates still apply to Intimate actions.
 
-[Release and checksums](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/tag/private_conversation-v0.1.16) · [Source](https://github.com/Francisco-boop-001/CHIM-PrivateConversation) · [Tagged guide and installation](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.16/README.md) · [Logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.16/docs/logging-revision-2.md)
+Version 0.1.17 is a packaging-only update: the MO2 ZIP adds minimal MO2 metadata. Runtime code is unchanged; package metadata advances to 0.1.17.
+
+[Release and checksums](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/tag/private_conversation-v0.1.17) · [Source](https://github.com/Francisco-boop-001/CHIM-PrivateConversation) · [Tagged guide and installation](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.17/README.md) · [Logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.17/docs/logging-revision-2.md)
 
 ### Sworn & Scorned 0.1.5 — PRE-ALPHA
 
@@ -47,7 +49,7 @@ Pick one install route per plugin. Each release page lists its `SHA256SUMS.txt` 
 | Plugin | MO2 ZIP (recommended for MO2 users) | Advanced: CHIM DWPkg (manual file sync) | Advanced: server TAR (existing manifest/channel) |
 | --- | --- | --- | --- |
 | Mind Poisoning 0.1.19 | [Download](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.19/mind_poisoning-0.1.19-mo2.zip) | [Download](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.19/mind_poisoning-0.1.19.dwpkg) | [Download](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.19/mind_poisoning.tar.gz) |
-| Private Conversation 0.1.16 | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.16/private_conversation-0.1.16-mo2.zip) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.16/private_conversation-0.1.16.dwpkg) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.16/private_conversation.tar.gz) |
+| Private Conversation 0.1.17 | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.17/private_conversation-0.1.17-mo2.zip) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.17/private_conversation-0.1.17.dwpkg) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.17/private_conversation.tar.gz) |
 | Sworn & Scorned 0.1.5 | [Download](https://github.com/Francisco-boop-001/CHIM-SwornAndScorned/releases/download/sworn_and_scorned-v0.1.5/sworn_and_scorned-0.1.5-mo2.zip) | [Download](https://github.com/Francisco-boop-001/CHIM-SwornAndScorned/releases/download/sworn_and_scorned-v0.1.5/sworn_and_scorned-0.1.5.dwpkg) | [Download](https://github.com/Francisco-boop-001/CHIM-SwornAndScorned/releases/download/sworn_and_scorned-v0.1.5/sworn_and_scorned.tar.gz) |
 
 ## Install carefully
@@ -60,7 +62,7 @@ CHIM stores relationship data on the server. A separate Skyrim save or MO2 profi
 
 ## Support
 
-For Mind Poisoning, open CHIM Plugin Manager → Plugin Page → Logs → Download filtered plugin log. For Private Conversation, follow its [tagged logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.16/docs/logging-revision-2.md); for Sworn & Scorned, follow its [tagged guide](https://github.com/Francisco-boop-001/CHIM-SwornAndScorned/blob/sworn_and_scorned-v0.1.5/README.md). Each plugin has its own logging instructions.
+For Mind Poisoning, open CHIM Plugin Manager → Plugin Page → Logs → Download filtered plugin log. For Private Conversation, follow its [tagged logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.17/docs/logging-revision-2.md); for Sworn & Scorned, follow its [tagged guide](https://github.com/Francisco-boop-001/CHIM-SwornAndScorned/blob/sworn_and_scorned-v0.1.5/README.md). Each plugin has its own logging instructions.
 
 For a useful report, include installed plugin versions, CHIM/client revision if known, relevant settings, reproduction steps, and expected versus observed behavior. Omit credentials and full private conversation dumps. Mind Poisoning's optional debug rationale can contain sensitive context, so review it before sharing.
 

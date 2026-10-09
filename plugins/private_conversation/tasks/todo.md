@@ -292,3 +292,28 @@ Review: tasks/critique-followup-2026-10-01/final-review.md accepts the 60-second
 Plan: tasks/release-0.1.8/plan.md. User authorized commit, push and publish Private Conversation only; installed environments remain unchanged.
 
 Review: tasks/release-0.1.8/publication-evidence.md records the 0.1.8 PRE-ALPHA release and hub bridge. Clean-source and clean-tag package gates passed; both draft and fresh public downloads matched exact bytes. The hub tagged snapshot equals canonical source, both update branches advanced only after publication, and final public refs/manifests and all 52 protected hashes were verified. Historical tags/assets and unrelated dirty files remain intact. Installed CHIM/provider/Skyrim behavior remains unverified.
+
+## MO2 packaging warning investigation — 2026-10-08
+
+- [x] Inspect current package, public CHIM examples and MO2 content/metadata checks.
+- [x] Review native CHIM sync discovery and distinguish it from MO2 warnings.
+- [x] Respect online-only scope and record the smallest source-supported packaging remedy.
+
+Plan: tasks/mo2-warning-check-2026-10-08/plan.md. Review: tasks/mo2-warning-check-2026-10-08/final-review.md. Root meta.ini with validated=true is the candidate; unchanged DWPkg and no FOMOD/game payload required. MO2 UI/install/update and actual CHIM sync are unverified in this investigation. No product changes or publication. tasks/lessons.md records the checker-tracing correction.
+## MO2 metadata fix — 2026-10-08
+
+- [x] Implement minimal deterministic metadata and targeted package regression.
+- [x] Clarify installation instructions and preserve documented verification limits.
+- [x] Independently verify resulting package, review all diffs and unchanged runtime/pins.
+
+Plan: tasks/mo2-metadata-fix-2026-10-08/plan.md. Local implementation only; no publication or installed-environment changes.
+Review: tasks/mo2-metadata-fix-2026-10-08/final-review.md accepts the minimal metadata wrapper and corrected install instructions after RED/GREEN, four package checks, reproducible builds, independent artifact inspection and lead review. All runtime files/pins and prior assets are unchanged. MO2 UI/install/update and native/game sync remain unverified; nothing was committed or published.
+
+## Publish Private Conversation 0.1.17 — 2026-10-09
+
+- [x] Prepare/review 0.1.17 source metadata and PCV-only hub changes.
+- [ ] Commit scoped source, verify immutable tag/reproducible packages.
+- [ ] Verify draft assets, publish, then advance mutable update refs.
+- [ ] Verify public downloads/refs/hub and record final judgment.
+
+Plan: tasks/release-0.1.17/plan.md. User authorized commit, push and publication; no installed changes or separate Mind Poisoning work.

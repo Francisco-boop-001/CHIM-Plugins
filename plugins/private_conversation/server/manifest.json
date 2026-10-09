@@ -1,6 +1,6 @@
 {
   "name": "private_conversation",
-  "version": "0.1.15",
+  "version": "0.1.17",
   "schema_version": 2,
   "git_repo": "Francisco-boop-001/CHIM-PrivateConversation",
   "description": "PRE-ALPHA: Stage a two-NPC scene direction or solo reflection for the next eligible ordinary Standard-mode input.",

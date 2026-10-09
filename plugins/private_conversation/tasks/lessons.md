@@ -38,3 +38,7 @@
 - Mistake pattern: expanding a plugin logging task into changes to its collaborating plugin without preserving the user's project ownership boundary.
   - Corrected rule: when the user assigns collaborator changes to a separate task, keep this plugin compatible with the published collaborator and provide a precise follow-up prompt.
   - Prevention: separate required local diagnostics from optional collaborator telemetry; label unsupported observation explicitly and undo only current-task collaborator edits.
+
+- Mistake pattern: inferring that metadata cannot affect MO2 installer validation because the installer does not parse its fields.
+  - Corrected rule: trace the selected game's content checker as well as metadata parsing; Skyrim's checker accepts root .ini files, while the installed-mod tree excludes meta.ini and uses the separate validated flag.
+  - Prevention: compare real public plugin payloads and both archive/install and installed-mod paths before promising or dismissing a warning remedy. Respect a user's request for online-only investigation; do not retry denied application access.

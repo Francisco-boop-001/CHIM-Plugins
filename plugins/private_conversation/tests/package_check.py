@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import configparser
 import hashlib
 import importlib.util
 import json
@@ -147,10 +148,19 @@ class PackageChecks(unittest.TestCase):
             mo2 = first / f"private_conversation-{EXPECTED_VERSION}-mo2.zip"
             member = f"CHIM/server-plugins/private_conversation/{EXPECTED_VERSION}.dwpkg"
             with ZipFile(mo2) as archive:
-                self.assertEqual(archive.namelist(), [member])
+                self.assertEqual(archive.namelist(), ["meta.ini", member])
                 self.assertEqual(archive.testzip(), None)
                 mo2_package = archive.read(member)
                 self.assertEqual(mo2_package, dwpkg.read_bytes())
+                metadata = archive.read("meta.ini")
+                self.assertEqual(
+                    metadata,
+                    f"[General]\nversion={EXPECTED_VERSION}\nvalidated=true\n".encode("utf-8"),
+                )
+                config = configparser.ConfigParser()
+                config.read_string(metadata.decode("utf-8"))
+                self.assertEqual(config.get("General", "version"), EXPECTED_VERSION)
+                self.assertTrue(config.getboolean("General", "validated"))
 
             sums = (first / "SHA256SUMS.txt").read_text(encoding="ascii").splitlines()
             self.assertEqual(len(sums), 3)

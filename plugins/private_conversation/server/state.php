@@ -25,6 +25,7 @@ const PCV_GROUP_MAX_MEMBERS = 4;
 const PCV_FREE_MAX_MEMBERS = 6;
 const PCV_ACTIVE_REFUSAL_END = 300;
 const PCV_SCENE_CARD_MAX_CHARS = 300;
+const PCV_SCENE_ACTION_GROUPS = ['personal', 'physical', 'intimate'];
 
 function pcv_shared_server_identity($playerName): array
 {
@@ -460,6 +461,15 @@ function pcv_valid_scene_extras(array $config, ?string $sceneMode): bool
     }
     if (array_key_exists('pace', $config) && ($sceneMode !== 'pair' || !in_array($config['pace'], ['short', 'long'], true))) {
         return false;
+    }
+    if (array_key_exists('actions', $config)) {
+        // 0.1.16 scene actions: a non-empty canonical subset; solo has no one to brawl with.
+        $actions = $config['actions'];
+        $canonical = is_array($actions) ? array_values(array_intersect(PCV_SCENE_ACTION_GROUPS, $actions)) : null;
+        if (!is_array($actions) || !array_is_list($actions) || $actions === [] || $canonical !== $actions
+            || ($sceneMode === 'solo' && in_array('physical', $actions, true))) {
+            return false;
+        }
     }
     if (array_key_exists('free_cap', $config)) {
         $cap = $config['free_cap'];
@@ -1766,6 +1776,24 @@ function pcv_normalize_config(array $desired, array $knownNpcs): array
     }
     if ($pace !== 'normal' && ($config['scene_mode'] ?? 'pair') === 'pair') {
         $config['pace'] = $pace;
+    }
+    if (array_key_exists('actions', $desired)) {
+        $wanted = $desired['actions'];
+        if (!is_array($wanted)) {
+            throw new InvalidArgumentException('Choose valid scene actions.');
+        }
+        foreach ($wanted as $group) {
+            if (!is_string($group) || !in_array($group, PCV_SCENE_ACTION_GROUPS, true)) {
+                throw new InvalidArgumentException('Choose valid scene actions.');
+            }
+        }
+        $groups = array_values(array_intersect(PCV_SCENE_ACTION_GROUPS, $wanted));
+        if (($config['scene_mode'] ?? 'pair') === 'solo') {
+            $groups = array_values(array_diff($groups, ['physical']));
+        }
+        if ($groups !== []) {
+            $config['actions'] = $groups;
+        }
     }
     if (($config['free'] ?? false) === true && array_key_exists('free_cap', $desired)) {
         $cap = filter_var($desired['free_cap'], FILTER_VALIDATE_INT);

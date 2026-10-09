@@ -778,6 +778,15 @@ function pcvResolveScopeNames(array $storedScope, array $knownNpcs, ?string $pla
     if ($sceneMode === 'pair' && in_array($storedScope['pace'] ?? null, ['short', 'long'], true)) {
         $extras['pace'] = $storedScope['pace'];
     }
+    if (is_array($storedScope['actions'] ?? null) && $storedScope['actions'] !== []) {
+        $groups = array_values(array_intersect(['personal', 'physical', 'intimate'], $storedScope['actions']));
+        if ($sceneMode === 'solo') {
+            $groups = array_values(array_diff($groups, ['physical']));
+        }
+        if ($groups !== []) {
+            $extras['actions'] = $groups;
+        }
+    }
     if ($sceneMode === 'solo') {
         // Solo keeps its pre-0.1.11 shape; reflection code relies on it.
         return [
@@ -1117,6 +1126,173 @@ function pcvApplyTurnPlanToChim(array $plan, string $requestType): void
     }
 }
 
+/**
+ * 0.1.16 scene actions. CHIM action code names per opt-in group. Attack, KillTarget, gifts, movement, crime,
+ * spawning, teleport, Director and following are never offered in a scene. The intimate list is SHARMAT 3.1.9.3's
+ * partner and self actions (its role actions are excluded); SHARMAT's own gating still decides what is enabled.
+ */
+function pcvSceneActionGroups(): array
+{
+    return [
+        'personal' => ['Drink', 'Toast', 'Consume', 'TakeASeat', 'Relax'],
+        'physical' => ['Brawl', 'Surrender'],
+        'intimate' => ['ExtCmdHug', 'ExtCmdHoldHands', 'ExtCmdKiss', 'ExtCmdRemoveClothes', 'ExtCmdPutOnClothes',
+            'ExtCmdStartSex', 'ExtCmdStartBlowJob', 'ExtCmdStartAnalSex', 'ExtCmdStartMassage', 'ExtCmdStartThreesome',
+            'ExtCmdStartHandJobSex', 'ExtCmdStartTitfuck', 'ExtCmdDrinkBloodSex', 'ExtCmdStartSelfMasturbation',
+            'ExtCmdAcceptSex', 'ExtCmdRefuseSex'],
+    ];
+}
+
+/** Action code names this scene allows (empty: talk only). */
+function pcvSceneAllowedActionCodes(array $resolvedScope): array
+{
+    $codes = [];
+    $groups = pcvSceneActionGroups();
+    foreach ((array)($resolvedScope['actions'] ?? []) as $group) {
+        foreach ($groups[$group] ?? [] as $code) {
+            $codes[] = $code;
+        }
+    }
+    return array_values(array_unique($codes));
+}
+
+/** Actor or item names in an action parameter: JSON "target" or plain text, comma-separated, RefID suffixes removed. */
+function pcvActionTargetsFromParameter(string $parameter): array
+{
+    $raw = $parameter;
+    $decoded = json_decode($parameter, true);
+    if (is_array($decoded)) {
+        $raw = is_string($decoded['target'] ?? null) ? $decoded['target'] : '';
+    }
+    $targets = [];
+    foreach (explode(',', $raw) as $part) {
+        $name = trim((string)preg_replace('/\s*\[RefID:[^\]]*\]\s*/i', ' ', $part));
+        if ($name !== '') {
+            $targets[] = $name;
+        }
+    }
+    return $targets;
+}
+
+/**
+ * Keep (null) or drop (reason) one action of $speaker in this scene. Targets must be scene members; the player
+ * counts only when included; solo actions are self-directed only. Consume's target is an inventory item.
+ */
+function pcvSceneActionVerdict(string $code, string $parameter, array $resolvedScope, string $speaker, ?string $playerName): ?string
+{
+    if (!in_array($code, pcvSceneAllowedActionCodes($resolvedScope), true)) {
+        return 'action_not_allowed';
+    }
+    if ($code === 'Consume') {
+        return null;
+    }
+    $solo = ($resolvedScope['scene_mode'] ?? 'pair') === 'solo';
+    $speakerKey = pcv_scope_name_key($speaker);
+    $allowed = [];
+    if (!$solo) {
+        foreach (pcvScopeMembers($resolvedScope) as $member) {
+            $allowed[] = pcv_scope_name_key($member);
+        }
+        if (($resolvedScope['exclude_player'] ?? true) === false && is_string($playerName) && trim($playerName) !== '') {
+            $allowed[] = pcv_scope_name_key($playerName);
+        }
+    }
+    $targets = pcvActionTargetsFromParameter($parameter);
+    $needsPartner = !$solo && in_array($code, array_merge(['Brawl'], array_diff(pcvSceneActionGroups()['intimate'],
+        ['ExtCmdStartSelfMasturbation', 'ExtCmdPutOnClothes', 'ExtCmdRemoveClothes'])), true);
+    if ($targets === []) {
+        return $needsPartner ? 'target_outside_scene' : null;
+    }
+    foreach ($targets as $target) {
+        $key = pcv_scope_name_key($target);
+        if ($key === $speakerKey) {
+            if ($needsPartner) {
+                return 'target_outside_scene';
+            }
+            continue;
+        }
+        if ($solo || !in_array($key, $allowed, true)) {
+            return 'target_outside_scene';
+        }
+    }
+    return null;
+}
+
+/**
+ * Before CHIM rebuilds its action list (context_pre): switch actions on only for scenes with groups, narrow
+ * ENABLED_FUNCTIONS to allowed codes CHIM/SHARMAT already enabled (never re-enable a gated one), narrow Brawl's
+ * target list to the members, and register the post-filter once (after other plugins' filters).
+ */
+function pcvPrepareSceneActions(array $resolvedScope): bool
+{
+    $codes = pcvSceneAllowedActionCodes($resolvedScope);
+    // A scene only narrows CHIM's own setting: actions switched off in CHIM stay off.
+    if ($codes === [] || ($GLOBALS['FUNCTIONS_ARE_ENABLED'] ?? false) !== true) {
+        $GLOBALS['FUNCTIONS_ARE_ENABLED'] = false;
+        return false;
+    }
+    $enabled = is_array($GLOBALS['ENABLED_FUNCTIONS'] ?? null) ? $GLOBALS['ENABLED_FUNCTIONS'] : [];
+    $GLOBALS['ENABLED_FUNCTIONS'] = array_values(array_filter($enabled, static fn($code) => in_array($code, $codes, true)));
+    $GLOBALS['FUNCTIONS_ARE_ENABLED'] = true;
+    $members = pcvScopeMembers($resolvedScope);
+    if (is_array($GLOBALS['FUNCTION_PARM_INSPECT'] ?? null)) {
+        $memberKeys = array_map('pcv_scope_name_key', $members);
+        $GLOBALS['FUNCTION_PARM_INSPECT'] = array_values(array_filter($GLOBALS['FUNCTION_PARM_INSPECT'],
+            static fn($name) => is_string($name) && in_array(pcv_scope_name_key(trim((string)preg_replace('/\s*\[RefID:[^\]]*\]\s*/i', ' ', $name))), $memberKeys, true)));
+    }
+    if (!is_array($GLOBALS['action_post_process_fnct_ex'] ?? null)) {
+        $GLOBALS['action_post_process_fnct_ex'] = [];
+    }
+    if (!in_array('pcvSceneActionPostFilter', $GLOBALS['action_post_process_fnct_ex'], true)) {
+        $GLOBALS['action_post_process_fnct_ex'][] = 'pcvSceneActionPostFilter';
+    }
+    return true;
+}
+
+/** After CHIM's rebuild: every offered action is Talk or one this scene allows. */
+function pcvSceneActionListAllowed(array $funcList, array $resolvedScope): bool
+{
+    $codes = pcvSceneAllowedActionCodes($resolvedScope);
+    foreach ($funcList as $name) {
+        $code = function_exists('getFunctionCodeName') ? (string)(getFunctionCodeName($name) ?: $name) : (string)$name;
+        if ($code !== 'Talk' && $name !== 'Talk' && !in_array($code, $codes, true)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/** CHIM action post-filter (action_post_process_fnct_ex): drop scene actions that break the scene's rules. */
+function pcvSceneActionPostFilter($actions)
+{
+    $requestScope = $GLOBALS['PCV_REQUEST_SCOPE'] ?? null;
+    if (!is_array($actions) || !is_array($requestScope) || ($requestScope['status'] ?? null) !== 'active'
+        || !is_array($requestScope['scope'] ?? null)) {
+        return $actions;
+    }
+    $speaker = trim((string)($GLOBALS['HERIKA_NAME'] ?? ''));
+    $player = is_string($requestScope['action_player'] ?? null) ? $requestScope['action_player'] : null;
+    $kept = [];
+    foreach ($actions as $index => $action) {
+        $parts = explode('|', (string)$action, 3);
+        $command = $parts[2] ?? '';
+        $at = strpos($command, '@');
+        $code = trim($at === false ? $command : substr($command, 0, $at));
+        $parameter = $at === false ? '' : trim(substr($command, $at + 1));
+        $code = function_exists('getFunctionCodeName') ? (string)(getFunctionCodeName($code) ?: $code) : $code;
+        $reason = ($parts[1] ?? '') === 'command' ? pcvSceneActionVerdict($code, $parameter, $requestScope['scope'], $speaker, $player) : null;
+        if ($reason === null) {
+            $kept[$index] = $action;
+            continue;
+        }
+        pcv_log_event('routing.action_dropped', 'warning', 'blocked', $reason, [
+            'phase' => 'postrequest',
+            'request_type' => pcvRoutingLogCurrentType(),
+        ]);
+    }
+    return $kept;
+}
+
 /** SHARMAT's NPC-to-NPC intimate-scene listener pin for this request, if any (set in SHARMAT's prerequest). */
 function pcvSharmatListenerPin(): ?string
 {
@@ -1179,6 +1355,12 @@ function pcvScopeRoleplayGuidance(array $resolvedScope, array $turn = []): strin
     }
     if (($turn['wrap_up'] ?? false) === true) {
         $parts[] = 'This is the closing moment of the conversation: give parting words that bring it to an end.';
+    }
+    if (pcvSceneAllowedActionCodes($resolvedScope) !== []) {
+        // 0.1.16: actions are allowed for this scene; the post-filter enforces the target rule.
+        $parts[] = ($resolvedScope['scene_mode'] ?? 'pair') === 'solo'
+            ? 'You may act on your own, not only think aloud, when it fits the moment; any action is yours alone.'
+            : 'You may act, not only talk, when it fits the moment; act only toward the people in this scene.';
     }
     if ($parts === []) {
         return '';

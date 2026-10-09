@@ -48,6 +48,26 @@ function pcv_form_desired_state(array $post, string $csrfToken, array $knownNpcs
     if (is_string($pace) && ($desired['scene_mode'] ?? 'pair') !== 'solo') {
         $desired['pace'] = $pace;
     }
+    // 0.1.16 scene actions: opt-in groups; solo has no one to brawl with.
+    $actions = $post['actions'] ?? null;
+    if ($actions !== null) {
+        require_once __DIR__ . '/state.php';
+        if (!is_array($actions) || !array_is_list($actions)) {
+            throw new PcvUiFormRejection('invalid_configuration', 'Choose valid scene actions.');
+        }
+        foreach ($actions as $group) {
+            if (!is_string($group) || !in_array($group, PCV_SCENE_ACTION_GROUPS, true)) {
+                throw new PcvUiFormRejection('invalid_configuration', 'Choose valid scene actions.');
+            }
+        }
+        $groups = array_values(array_intersect(PCV_SCENE_ACTION_GROUPS, $actions));
+        if (($desired['scene_mode'] ?? 'pair') === 'solo') {
+            $groups = array_values(array_diff($groups, ['physical']));
+        }
+        if ($groups !== []) {
+            $desired['actions'] = $groups;
+        }
+    }
     $cap = $post['free_cap'] ?? null;
     if (($desired['free'] ?? false) === true && $cap !== null) {
         if (!is_string($cap) || preg_match('/\A[2-6]\z/', $cap) !== 1) {
@@ -321,6 +341,9 @@ function pcv_render_page(
         if (is_string($scope['card'] ?? null) && $scope['card'] !== '') {
             $scopeSummary .= '<p class="small-note">Scene card: ' . pcv_html($scope['card']) . '</p>';
         }
+        if (is_array($scope['actions'] ?? null) && $scope['actions'] !== []) {
+            $scopeSummary .= '<p class="small-note">Scene actions: ' . pcv_html(implode(', ', $scope['actions'])) . '</p>';
+        }
     }
     if ($status === 'active' && is_array($state['dropped'] ?? null)) {
         foreach ($state['dropped'] as $droppedEntry) {
@@ -419,6 +442,19 @@ function pcv_render_page(
         $capOptions .= '<option value="' . $cap . '"' . ($formCap === $cap ? ' selected' : '') . '>' . ($cap === 6 ? '6 (nearest six)' : (string)$cap) . "</option>\n";
     }
     $paceDisabledAttr = $sceneMode === 'solo' ? ' disabled' : '';
+    // 0.1.16 scene actions; unticked by default, so a new scene never inherits them by surprise.
+    $formActions = is_array($formScope['actions'] ?? null) ? $formScope['actions'] : [];
+    $actionLabels = [
+        'personal' => 'Personal (drink, toast, eat, sit, relax)',
+        'physical' => 'Physical (a bare-fisted brawl between members; not for solo)',
+        'intimate' => 'Intimate (SHARMAT actions between members, or alone in solo; SHARMAT\'s own rules still apply)',
+    ];
+    $actionBoxes = '';
+    foreach ($actionLabels as $group => $label) {
+        $actionBoxes .= '<p class="checkbox-field"><label><input type="checkbox" id="actions-' . $group . '" name="actions[]" value="' . $group . '"'
+            . (in_array($group, $formActions, true) ? ' checked' : '')
+            . ($group === 'physical' && $sceneMode === 'solo' ? ' disabled' : '') . '> <span>' . pcv_html($label) . "</span></label></p>\n";
+    }
     $capDisabledAttr = $freeMode ? '' : ' disabled';
     $noticeHtml =$notice === '' ? '' : '<p role="status">' . pcv_html($notice) . '</p>';
     $csrf = pcv_html($csrfToken);
@@ -491,6 +527,8 @@ function pcv_render_page(
 ' . $paceOptions . '</select></p>
 <p class="field"><label for="scene-card">Scene card (optional)</label><textarea id="scene-card" name="card" maxlength="300" rows="2" placeholder="Late night at the Bannered Mare. Tense. The treaty is on the table.">' . pcv_html($formCard) . '</textarea></p>
 <p class="small-note">The card and turn length shape every scene turn. They add to each NPC\'s own state (for example a SHARMAT drunk stage) and never replace it.</p>
+<fieldset class="scene-actions"><legend>Scene actions (optional; talk only when none is ticked)</legend>
+' . $actionBoxes . '<p class="small-note">Actions only ever reach the people in the scene. Attack and killing are never allowed.</p></fieldset>
 <p class="checkbox-field"><label><input type="checkbox" name="exclude_player" value="1"' . ($sceneMode === 'solo' || $freeMode || $excludePlayer ? ' checked' : '') . $excludePlayerDisabledAttr . '> <span>Exclude the player</span></label></p>
 <button id="arm-button" class="primary-button" type="submit" data-roster-ready="' . ($rosterReady ? '1' : '0') . '"' . $armDisabledAttr . '>Arm or update on next input</button>
 </form>

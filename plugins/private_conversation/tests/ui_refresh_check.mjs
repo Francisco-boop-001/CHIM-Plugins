@@ -109,7 +109,7 @@ function createHarness(fetchQueue, { reportQueue = [], group = false, free = fal
             ['#actor-d', makeSelect(['', '101', '202', '303'], '')],
             ['#opener', makeSelect(['auto', '101', '202', '303'], 'auto')],
         ] : []),
-        ...(free ? [['#free-mode', makeCheckbox(false)], ['#free-cap', makeSelect(['2', '3', '4', '5', '6'], '6')], ['#pace', makeSelect(['short', 'normal', 'long'], 'normal')]] : []),
+        ...(free ? [['#free-mode', makeCheckbox(false)], ['#free-cap', makeSelect(['2', '3', '4', '5', '6'], '6')], ['#pace', makeSelect(['short', 'normal', 'long'], 'normal')], ['#actions-physical', makeCheckbox(true)]] : []),
     ]);
     const documentRef = {
         body: { dataset: { playthroughRef: 'same-playthrough', refreshUrl: '?refresh=1', logsUrl: '?view=logs' } },
@@ -564,4 +564,20 @@ test('0.1.14: free size follows the Free scene box and turn length is off for so
     soloMode.dispatchChange();
     assert.equal(cap.disabled, true, 'Free size is off again when solo replaces free.');
     assert.equal(pace.disabled, true, 'Turn length is off for solo.');
+});
+
+test('0.1.16: the Physical scene-action box is off for solo', async () => {
+    const harness = createHarness([
+        { snapshot: makeSnapshot({ a: ['101', '202', '303'], b: ['101', '202', '303'], group: ['101', '202', '303'] }) },
+    ], { group: true, free: true });
+    await flushPromises();
+    const soloMode = harness.nodes.get('#solo-mode');
+    const physical = harness.nodes.get('#actions-physical');
+    assert.equal(physical.disabled, false, 'Physical applies to pairs and groups.');
+    soloMode.checked = true;
+    soloMode.dispatchChange();
+    assert.equal(physical.disabled, true, 'Solo has no one to brawl with.');
+    soloMode.checked = false;
+    soloMode.dispatchChange();
+    assert.equal(physical.disabled, false, 'Leaving solo restores Physical.');
 });

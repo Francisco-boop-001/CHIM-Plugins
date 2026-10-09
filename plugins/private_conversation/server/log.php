@@ -175,6 +175,7 @@ function pcv_log_event_rules(): array
         'routing.request_prepared' => ['severity' => 'info', 'outcome' => 'ok', 'context' => ['phase', 'route', 'actor_a_id', 'actor_b_id', 'speaker_id', 'exclude_player', 'bystander_mode', 'member_count', 'opener_source', 'free_scene', 'scene_card', 'pace', 'wrap_up', 'sharmat_listener']],
         'routing.request_skipped' => ['severity' => 'info', 'outcome' => 'skipped', 'context' => ['phase', 'request_type', 'state_status', 'mode']],
         'routing.request_blocked' => ['severity' => 'warning', 'outcome' => 'blocked', 'context' => ['phase', 'request_type', 'actor_a_id', 'actor_b_id']],
+        'routing.action_dropped' => ['severity' => 'warning', 'outcome' => 'blocked', 'context' => ['phase', 'request_type']],
         'routing.request_error' => ['severity' => 'error', 'outcome' => 'failed', 'context' => ['phase', 'request_type', 'actor_a_id', 'actor_b_id']],
         'routing.request_detail' => ['severity' => 'debug', 'outcome' => 'ok', 'context' => ['phase', 'decision', 'request_type', 'actor_a_id', 'actor_b_id', 'speaker_id', 'audience_before_count', 'audience_after_count', 'present_before_count', 'present_after_count']],
         'reflection.registration_skipped' => ['severity' => 'info', 'outcome' => 'skipped', 'context' => ['phase', 'route', 'actor_a_id']],
@@ -256,7 +257,7 @@ function pcv_log_reason_codes(): array
 {
     return [
         'active_ttl', 'pending_ttl', 'invalid_state_key', 'identity_unavailable', 'state_unavailable', 'reply_in_progress',
-        'left_scene', 'not_eligible_at_start', 'speaker_outside_scene', 'rechat_speaker_outside_scene', 'members_gone', 'scope_unavailable', 'ended_in_game', 'wrapped_up', 'background_paused',
+        'left_scene', 'not_eligible_at_start', 'speaker_outside_scene', 'rechat_speaker_outside_scene', 'members_gone', 'scope_unavailable', 'ended_in_game', 'wrapped_up', 'background_paused', 'action_not_allowed', 'target_outside_scene',
         'corrupt_state', 'symlinked_state', 'not_regular_file', 'state_stat_failed', 'state_too_large',
         'state_read_failed', 'invalid_json', 'invalid_state', 'state_stage_failed', 'state_transition_failed', 'profile_lookup_failed',
         'session_unavailable', 'catalog_unavailable', 'readback_mismatch',
@@ -326,7 +327,7 @@ function pcv_log_reason_allowed(string $event, ?string $reason, ?string $outcome
         return in_array($reason, $allowed, true);
     }
     if ($reason === null) {
-        return !in_array($event, ['state.store_recovered', 'state.scope_expired', 'state.unavailable', 'ui.unavailable', 'ui.scope_stage_rejected', 'ui.scope_stage_failed',
+        return !in_array($event, ['routing.action_dropped', 'state.store_recovered', 'state.scope_expired', 'state.unavailable', 'ui.unavailable', 'ui.scope_stage_rejected', 'ui.scope_stage_failed',
             'ui.diagnostics_rejected', 'routing.request_skipped', 'routing.request_blocked', 'routing.request_error', 'state.scope_skipped'], true);
     }
 
@@ -374,6 +375,9 @@ function pcv_log_reason_allowed(string $event, ?string $reason, ?string $outcome
     }
     if ($event === 'state.scope_ended') {
         return in_array($reason, ['members_gone', 'ended_in_game', 'wrapped_up'], true);
+    }
+    if ($event === 'routing.action_dropped') {
+        return in_array($reason, ['action_not_allowed', 'target_outside_scene'], true);
     }
     if ($event === 'state.store_recovered') {
         return in_array($reason, ['invalid_json', 'invalid_state', 'state_too_large'], true);

@@ -139,6 +139,11 @@
         if (pace) {
             pace.disabled = solo;
         }
+        // 0.1.16: solo has no one to brawl with.
+        const physicalActions = documentRef.querySelector('#actions-physical');
+        if (physicalActions) {
+            physicalActions.disabled = solo;
+        }
         if (bystanderMode) {
             bystanderMode.disabled = false;
         }

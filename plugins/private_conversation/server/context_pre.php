@@ -96,9 +96,12 @@ try {
     throw $error;
 }
 $GLOBALS['PROMPT_NEARBY_SECTIONS'] = $nearbyContext;
-$GLOBALS['FUNCTIONS_ARE_ENABLED'] = false;
-$GLOBALS['PROMPT_ACTIONS_LIST'] = '';
-$GLOBALS['actionsList'] = '';
+// 0.1.16: opt-in scene actions narrow CHIM's enabled list (never widen it); without groups the scene stays talk-only.
+$actionsOn = pcvPrepareSceneActions($scope);
+if (!$actionsOn) {
+    $GLOBALS['PROMPT_ACTIONS_LIST'] = '';
+    $GLOBALS['actionsList'] = '';
+}
 if (!function_exists('chimRefreshJsonResponseState')) {
     pcvBlockRequest('Private Conversation cannot refresh action constraints; request stopped for safety.', 'actions_unavailable', 'context_pre', $requestScope, true);
 }
@@ -111,18 +114,18 @@ try {
     throw $error;
 }
 $allowedActions = $GLOBALS['FUNC_LIST'] ?? null;
-if (!is_array($allowedActions) || ($allowedActions !== [] && $allowedActions !== ['Talk'])) {
+if (!is_array($allowedActions) || !pcvSceneActionListAllowed($allowedActions, $scope)) {
     pcvBlockRequest('Private Conversation action constraints could not be applied; request stopped for safety.', 'actions_unavailable', 'context_pre', $requestScope, true);
 }
 $actionSchema = $GLOBALS['structuredOutputTemplate']['json_schema']['schema']['properties']['action'] ?? null;
 if (is_array($actionSchema) && array_key_exists('enum', $actionSchema)) {
     $allowedEnum = $actionSchema['enum'];
-    if (!is_array($allowedEnum) || ($allowedEnum !== [] && $allowedEnum !== ['Talk'])) {
+    if (!is_array($allowedEnum) || !pcvSceneActionListAllowed($allowedEnum, $scope)) {
         pcvBlockRequest('Private Conversation action constraints could not be applied; request stopped for safety.', 'actions_unavailable', 'context_pre', $requestScope, true);
     }
 }
 
-$GLOBALS['FUNCTIONS_ARE_ENABLED'] = false;
+$GLOBALS['FUNCTIONS_ARE_ENABLED'] = $actionsOn;
 $routing = pcvScopeRoutingSnapshot([], $scope, $playerName);
 $GLOBALS['CACHE_PEOPLE'] = $routing['audience'];
 $GLOBALS['CACHE_PEOPLE_LIMITED'] = $routing['audience'];
@@ -136,6 +139,7 @@ if (is_array($GLOBALS['requestRoutingSnapshot'] ?? null)) {
 
 $GLOBALS['PCV_REQUEST_SCOPE'] = array_replace($requestScope, [
     'status' => 'active', 'scope' => $scope, 'start' => false, 'route' => $route,
+    'action_player' => $playerName,
 ]);
 pcvRoutingLogDetail('context_pre', 'action_constraints_refreshed', $requestType, $requestScope, [
     'audience_before_count' => pcvRoutingAudienceCount($beforeAudience),
