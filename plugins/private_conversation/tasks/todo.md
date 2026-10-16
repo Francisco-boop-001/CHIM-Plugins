@@ -347,11 +347,103 @@ Review: lead accepted after independent aggregate review. The scene owner's RED/
 - [x] Update current README/install version references and manifest version/ALPHA description; preserve 0.1.17 PRE-ALPHA history and manifest compatibility/channel fields.
 - [x] Add 0.1.18 ALPHA distribution notes with accurate END behavior, evidence limits, single-source install guidance, and no fabricated hashes.
 - [x] Run bounded Windows-only JSON/link/name/diff/whitespace checks; write source report and hand off allowlist.
-- [ ] Build owner: candidate package and focused final-tree checks; lead: commit the explicit source allowlist.
-- [ ] Build owner: clean committed-source rebuild and exact package hashes; lead: immutable tag push, draft asset download checks, then publish verified assets.
-- [ ] Hub owner: PCV-only canonical main/hub snapshot and pointers after publication; lead: verify public refs/downloads.
-- [ ] Add publication evidence separately after public verification; do not put it in the initial source commit or invent checksums before actual builder output.
+- [x] Build owner: candidate package and focused final-tree checks; lead: commit the explicit source allowlist.
+- [x] Build owner: clean committed-source rebuild and exact package hashes; lead: immutable tag push, draft asset download checks, then publish verified assets.
+- [x] Hub owner: PCV-only canonical main/hub snapshot and pointers after publication; lead: verify public refs/downloads.
+- [x] Add publication evidence separately after public verification; do not put it in the initial source commit or invent checksums before actual builder output.
 
 Plan: tasks/release-0.1.18/plan.md. Release operations remain lead-owned; no package/install/commit/tag/push/publication by this metadata owner.
 
-Review: tasks/release-0.1.18/source-report.md records the final metadata/docs scope, pre-edit hashes, invariant checks, verified links, and exact initial staging allowlist. The release gate remains open until the build, commit, tag, publication, hub, and public-download checks are completed by their owners.
+Review: tasks/release-0.1.18/publication-evidence.md records the published ALPHA, immutable source/tag identity, exact verified package/download outcome, preserved 0.1.17 assets, and PCV-only hub snapshot. All authorized gates are complete; package/fixture evidence does not establish live 0.1.18 gameplay, playback, universal privacy, or every installation route.
+
+## Private Conversation 0.1.18+solo-validationpatch bounded beta checks — 2026-10-16
+
+- [x] Write the ordered plan distinguishing immutable public 0.1.18 from the unpublished validation candidate.
+- [x] Inventory source/release identity, isolated test environment, and native-client boundary.
+- [x] Scene owner: complete the scope.php action fix with RED/GREEN and lint; lead approved Gate 1.
+- [x] Build the private candidate and import through the actual package API; verify all 20 installed files.
+- [x] Exercise actual direct END immutable-replacement failure, recovery, and ordinary routing. Caller fixture passes with stubbed stage outcomes.
+- [x] Close Gate 2 with the lead. The bounded UI GET still failed before deletion on missing public.database_versioning; package removal/reimport remains NOTRUN, with no POST or bypass.
+- [ ] Exercise actual storage failure through solo/group wrap generation and full CHIM dispatch; current caller fixture stubs the state result.
+- [x] Verify the exact MP 0.1.20 tag/export provenance and private DB connector identity.
+- [x] Run reflection attempt 03 and preserve its outputs. Result: fixture assertion failed with sentinel_mismatch; static review attributes it to the omitted core chat helper include, so no product defect is inferred.
+- [x] Prepare a fail-closed cleanup proposal for the exact attempt-03 synthetic profile/NPC rows, fixture-created eventlog/speech tables, and matching PCV state/receipt; no cleanup has run.
+- [ ] After the reflection owner fixes the fixture and root resolves the automatic-review conflict, re-enter only the explicit test distro, verify all exact preconditions, and perform the authorized synthetic cleanup. Stop if any identity, count, config, receipt, or history check differs.
+- [ ] Run one corrected reflection integration attempt after the exclusive window opens; preserve exact command, exit, stdout/stderr, and structured outcome.
+- [ ] Reassess native/client boundary only if lead identifies a decision-changing need. MO2/client, installed game, provider, and live CHIM remain NOTRUN.
+- [x] Lead review accepted; see tasks/beta-checks-2026-10-16/lead-review.md.
+
+Plan and ledger: tasks/beta-checks-2026-10-16/plan.md and progress.md. Gate 1 and Gate 2 are closed; Gate 3 is pending corrected fixture plus runtime authorization. Published 0.1.18 and canonical core/MP sources remain unchanged.
+### Final bounded runtime update (2026-10-16; supersedes the earlier pending Gate 3 bullets above)
+
+- [x] Gate 1 action fix and Gate 2 package import/direct END evidence passed and were lead-closed.
+- [x] Gate 3 production connector identity passed; the exact attempt-03 synthetic state/receipt and DB rows were removed by the approved production-helper + guarded transaction cleanup (`tasks/beta-checks-2026-10-16/reflection-evidence/attempt03-cleanup-receipt.md`).
+- [x] Attempt 04 observed the actual MP relationship commit; its full fixture exited 1 because its history assertion expected pre-write state, while MP stores post-write state with the relationship provenance marker. The bounded continuation on the same committed data passed post-write history/ledger/affinity checks, consumed the registry entry, matched the present native ACK row, and returned evaluator `claim_taken`, made no model call or DB change, and staged state off. This is not fresh-receipt or public-hook replay proof; see `attempt04-continuation-result.json`.
+- [x] Stop only the owned PostgreSQL cluster and foreground hold; the final Windows-only WSL status query returned no running distros. Attempt-04 DB/history/logs were preserved; no post-continuation cleanup.
+- [x] Lead review accepted; see tasks/beta-checks-2026-10-16/lead-review.md. Corrected full fixture lint is NOTRUN because the test distro was already stopped; no re-entry solely for lint.
+- [ ] Remaining NOTRUN: exact-build installed pair/removal and package reimport, native timeout/cancellation recovery, full CHIM solo/group wrap dispatcher under real storage failure, fresh-receipt/public-hook replay, native MO2/client, installed game, provider, and live CHIM. The complete beta gate remains NOT READY until the installed-pair/removal and native recovery checks pass.
+
+Evidence: `tasks/beta-checks-2026-10-16/progress.md`, `environment.md`, and `reflection-evidence/attempt04-runtime-shutdown-receipt.md`.
+
+## PCV bounded beta completion - 2026-10-16
+
+- [x] Write the ordered plan and wait for root confirmation before any distro/runtime entry.
+- [x] Inspect package install/removal callers and core schema/bootstrap locally; record the source-derived bootstrap proposal and assertions in `tasks/beta-finish-2026-10-16/install-report.md`. Full-core runtime verification remains gated.
+- [x] In the released short window, build the fresh private core/DB environment and import the exact candidate through the supported API; retain connector identity, 20-file byte-match, and off-state receipts.
+- [x] Hand off the corrected reflection fixture environment; after fixture/lead gate, run one corrected fixture and preserve the original output/exit receipts. Lead accepted the run; exact limits remain in the reflection report.
+- [ ] Verify exact-build Standard-pair flow, END/ordinary routing, and supported package removal using actual callers in a separate fully initialized scratch environment.
+- [ ] Reflection owner: fresh public-ACK scheduling seam. Native timeout/cancellation recovery only if an exact safe client seam exists; otherwise record NOTRUN.
+- [x] Stop only owned processes, preserve synthetic DB/evidence, update environment/results, and request final lead review. The delayed Windows-only status query confirmed the test distro Stopped; see `install-evidence/phase1/shutdown-summary.md`.
+
+Plan and setup proposal: `tasks/beta-finish-2026-10-16/plan.md` and `install-report.md`; environment status: `tasks/beta-finish-2026-10-16/environment.md`. Phase one is complete and its test distro is Stopped.
+
+### Short-window update
+
+- [x] Root released only the fresh minimal fixture setup/import window; Windows-only WSL/VHD preflight is recorded in `tasks/beta-finish-2026-10-16/install-evidence/preflight.md`.
+- [x] Create the new nonce-isolated source and private DB; apply only eight pinned-source DDL tables and one synthetic player row; verify both actual core connectors use the exact private DB/socket/role.
+- [x] Import the unchanged candidate through the actual package API, verify all 20 installed bytes, and initialize/read production off state; preserve the old a9d47c2e attempt untouched.
+- [x] Send exact readiness to root and the reflection owner; wait for and receive lead approval before the one corrected fixture run.
+- [x] Stop only owned processes and verify the test distro is Stopped. Full-core/provider/pair/wrap/removal/public-ACK/native work remains outside this short window and needs a separate gate.
+
+### Phase-one closeout / next-window preparation
+
+- [x] Lead accepted the corrected reflection fixture (lint exit 0, one run exit 0); raw output and state receipts are under `tasks/beta-finish-2026-10-16/reflection-evidence/`.
+- [x] Preserve the fresh synthetic DB, private source/state, and receipts; stop only the recorded PHP/PG/hold helpers. After a 16-second shutdown delay, the Windows-only WSL query returned the test distro Stopped. VHD size/mtime are metadata only, not byte-preservation proof.
+- [ ] Prepare and lead-review a source-derived full-core/bootstrap + actual pair/END/ordinary/wrap/removal harness in Windows-only static work. Reflection owns the public ACK SSE provider/driver; scene owner reviews PCV route assertions. Do not enter WSL until root opens a new runtime gate.
+
+### Full-core harness preparation (2026-10-16; no runtime gate yet)
+
+- [x] Review production callers and correct the instruction attribution chain: transport prefix is stripped by CHIM before persistence.
+- [ ] Add sanitized read-only CLI checkpoints for PCV state/receipt/registry, exact native ACK tuple, hashed synthetic relationship/history state, and correlated duplicate `claim_taken` event.
+- [ ] Freeze checkpoint schema with reflection owner; keep provider request inspection in memory and emit only safe booleans/hashes.
+- [ ] Record source-derived full-core schema/updater, loopback connector, no-egress namespace, PHP worker overlap, TTS/background-worker guards, and actual HTTP route sequence.
+- [ ] Obtain scene-owner and lead static review. No runtime window is currently open; do not enter/start the test distro until root opens a new gate.
+
+Plan: `tasks/beta-finish-2026-10-16/install-evidence/fullcore-harness-plan.md`.
+
+### Static closeout (2026-10-16)
+
+- [x] Match the selected cached core schema/bootstrap source files against the exact `cf5030f` tree; inventory and limits are in `tasks/beta-finish-2026-10-16/install-evidence/fullcore-source-provenance.md`.
+- [ ] Freeze the full-core checkpoint interface. The draft `post_wrap` check binds to the first pair's config UUID, but the driver ends that scene and creates a new pending pair before `wrap up:`; add a fail-closed pending-config capture before wrap in a later approved window.
+- [ ] Build the full-core schema/import/updater runner and perform the approved exact-build pair, UI END/ordinary, wrap, supported removal, and public-ACK gates. None ran in this static closeout; no WSL/runtime window was entered.
+- [ ] Native timeout recovery remains separate and NOTRUN unless a safe native client seam is approved.
+
+Full-core beta remains NOT READY. The controlled-ALPHA candidate decision and accepted phase-one import/fixture are separate and unchanged.
+## Private Conversation 0.1.19 ALPHA release documentation - 2026-10-16
+
+- [x] Describe the solo target fix, underscore-compatible diagnostic writer/reader, and additive flat Plugin Manager archive.
+- [x] Document the actual Server Plugins refresh/install/update/Plugin Page flow, distinguish repository-slug and legacy paths, and retain one-source/archive-wrapper guidance.
+- [x] Explain loaded MP API compatibility for the released 0.1.21 repo-slug path and retain the known 0.1.16 compatibility without making either a hard requirement.
+- [x] Keep clean helper evidence tied to the local 0.1.18 validation candidate; do not link uncommitted beta task artifacts or imply full 0.1.19 runtime proof.
+- [x] Correct the operator checklist to distinguish disposable acceptance from the separately authorized, backed-up live ALPHA test.
+- [x] Run final scoped JSON, link, LF/newline, diff-whitespace and SHA-256 checks; report exact hashes to the lead.
+- [x] Builder: create and verify the candidate assets and record actual member/hash output.
+- [ ] Lead: review the source allowlist, commit/tag/publish the ALPHA release, verify fresh public assets and record publication evidence.
+- [ ] Full HTTP pair/END/wrap/removal, public ACK scheduling, native recovery, and gameplay remain NOT RUN for 0.1.19; beta certification remains pending.
+
+Plan and source assessment: `tasks/release-0.1.19/plan.md` and `tasks/release-0.1.19/source-report.md`. Release operations remain lead-owned.
+
+
+### Prepublication review
+
+Source/docs are accepted. The focused four package checks, 20-file payload delta, and independent 16-assert archive review passed. The clean committed-source build, tag and draft/public asset checks, publication, and canonical main/hub advancement remain lead-owned and pending.

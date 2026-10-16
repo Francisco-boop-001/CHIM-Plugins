@@ -1198,7 +1198,7 @@ function pcvSceneActionVerdict(string $code, string $parameter, array $resolvedS
         }
     }
     $targets = pcvActionTargetsFromParameter($parameter);
-    $needsPartner = !$solo && in_array($code, array_merge(['Brawl'], array_diff(pcvSceneActionGroups()['intimate'],
+    $needsPartner = in_array($code, array_merge(['Brawl'], array_diff(pcvSceneActionGroups()['intimate'],
         ['ExtCmdStartSelfMasturbation', 'ExtCmdPutOnClothes', 'ExtCmdRemoveClothes'])), true);
     if ($targets === []) {
         return $needsPartner ? 'target_outside_scene' : null;

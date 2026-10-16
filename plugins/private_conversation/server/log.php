@@ -607,7 +607,7 @@ function pcv_log_plugin_version(): string
         if (is_string($contents)) {
             $decoded = json_decode($contents, true);
             $candidate = is_array($decoded) ? ($decoded['version'] ?? null) : null;
-            if (is_string($candidate) && preg_match('/^[0-9A-Za-z][0-9A-Za-z.+-]{0,31}$/D', $candidate) === 1) {
+            if (is_string($candidate) && preg_match('/^[0-9A-Za-z][0-9A-Za-z._+-]{0,31}$/D', $candidate) === 1) {
                 $version = $candidate;
             }
         }

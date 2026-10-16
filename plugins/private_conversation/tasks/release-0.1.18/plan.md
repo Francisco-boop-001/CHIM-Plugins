@@ -43,11 +43,11 @@
 
 **Files:** build-owner package report; hub-owner report; `tasks/release-0.1.18/publication-evidence.md` (after public verification, separate from the initial source commit).
 
-- [ ] Metadata owner sends source-diff summary and exact staging allowlist; build owner produces candidate package and focused final-tree checks.
-- [ ] Lead commits only the explicit source allowlist; build owner rebuilds from the clean committed tree and records exact package hashes.
-- [ ] Lead pushes the immutable version tag and verifies draft asset downloads against the clean build, then publishes only verified assets.
-- [ ] Hub owner advances the canonical main/hub snapshot and pointers only after publication; lead verifies public refs and downloads.
-- [ ] Record checksums and publication evidence only from actual builder and public-download output; keep that later report out of the initial source commit.
+- [x] Metadata owner sends source-diff summary and exact staging allowlist; build owner produces candidate package and focused final-tree checks.
+- [x] Lead commits only the explicit source allowlist; build owner rebuilds from the clean committed tree and records exact package hashes.
+- [x] Lead pushes the immutable version tag and verifies draft asset downloads against the clean build, then publishes only verified assets.
+- [x] Hub owner advances the canonical main/hub snapshot and pointers only after publication; lead verifies public refs and downloads.
+- [x] Record checksums and publication evidence only from actual builder and public-download output; keep that later report out of the initial source commit.
 
 ## Explicit source staging allowlist
 

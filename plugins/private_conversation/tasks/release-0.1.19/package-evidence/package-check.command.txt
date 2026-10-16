@@ -1,0 +1,2 @@
+py -3 tests/package_check.py
+workdir=K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev

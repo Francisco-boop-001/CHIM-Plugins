@@ -1,0 +1,2 @@
+py -3 scripts/build-package.py --format release --release-dir tasks/release-0.1.19/package-evidence/private-build-0.1.19
+workdir=K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev

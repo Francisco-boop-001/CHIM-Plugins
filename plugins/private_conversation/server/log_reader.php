@@ -207,7 +207,7 @@ function pcv_diagnostics_project_entry($row): ?array
     $severity = $row['severity'] ?? null;
     $outcome = $row['outcome'] ?? null;
     if (!is_string($timestamp) || preg_match('/\A[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z\z/D', $timestamp) !== 1
-        || !is_string($pluginVersion) || preg_match('/\A[A-Za-z0-9][A-Za-z0-9.+-]{0,31}\z/D', $pluginVersion) !== 1
+        || !is_string($pluginVersion) || preg_match('/\A[A-Za-z0-9][A-Za-z0-9._+-]{0,31}\z/D', $pluginVersion) !== 1
         || !is_string($requestId) || preg_match('/\A(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})\z/D', $requestId) !== 1
         || ($configId !== null && (!is_string($configId) || !pcv_log_valid_uuid($configId)))
         || ($playthroughRef !== null && (!is_string($playthroughRef) || preg_match('/\A[a-f0-9]{16}\z/D', $playthroughRef) !== 1))

@@ -68,6 +68,7 @@ class PackageChecks(unittest.TestCase):
                 f"private_conversation-{EXPECTED_VERSION}.dwpkg",
                 "private_conversation.tar.gz",
                 f"private_conversation-{EXPECTED_VERSION}-mo2.zip",
+                "chim-plugin.tar.gz",
                 "SHA256SUMS.txt",
             }
             self.assertEqual({path.name for path in first.iterdir()}, names)
@@ -145,6 +146,22 @@ class PackageChecks(unittest.TestCase):
             )
             self.assertEqual(extracted_files[".htaccess"], expected_htaccess)
 
+            discovery = first / "chim-plugin.tar.gz"
+            PACKAGE.verify_repository_archive(discovery, ROOT, flat_root=True)
+            self.assertEqual(len(PACKAGE.SERVER_FILES), 20)
+            with tarfile.open(discovery, "r:gz") as archive:
+                members = archive.getmembers()
+                self.assertEqual([member.name for member in members], list(PACKAGE.SERVER_FILES))
+                self.assertTrue(all(member.type == tarfile.REGTYPE for member in members))
+                discovery_files = {
+                    member.name: archive.extractfile(member).read()
+                    for member in members
+                }
+            self.assertEqual(
+                discovery_files,
+                {name: (ROOT / "server" / name).read_bytes() for name in PACKAGE.SERVER_FILES},
+            )
+
             mo2 = first / f"private_conversation-{EXPECTED_VERSION}-mo2.zip"
             member = f"CHIM/server-plugins/private_conversation/{EXPECTED_VERSION}.dwpkg"
             with ZipFile(mo2) as archive:
@@ -163,7 +180,7 @@ class PackageChecks(unittest.TestCase):
                 self.assertTrue(config.getboolean("General", "validated"))
 
             sums = (first / "SHA256SUMS.txt").read_text(encoding="ascii").splitlines()
-            self.assertEqual(len(sums), 3)
+            self.assertEqual(len(sums), 4)
             self.assertEqual({line.split("  ", 1)[1] for line in sums}, names - {"SHA256SUMS.txt"})
             for line in sums:
                 digest, name = line.split("  ", 1)
@@ -191,6 +208,7 @@ class PackageChecks(unittest.TestCase):
                     f"private_conversation-{EXPECTED_VERSION}.dwpkg",
                     "private_conversation.tar.gz",
                     f"private_conversation-{EXPECTED_VERSION}-mo2.zip",
+                    "chim-plugin.tar.gz",
                     "SHA256SUMS.txt",
                 },
             )

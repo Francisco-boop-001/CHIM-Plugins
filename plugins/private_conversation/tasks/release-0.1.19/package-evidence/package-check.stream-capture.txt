@@ -1,0 +1,1 @@
+exec_command returned one combined output field; stdout and stderr were not captured separately. Do not treat this note as an empty stderr capture.

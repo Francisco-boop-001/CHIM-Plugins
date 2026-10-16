@@ -1,0 +1,52 @@
+$code = @'
+import ast, hashlib, json, pathlib, re, tarfile, zipfile
+root=pathlib.Path(r'K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev')
+pkg=root/'tasks/release-0.1.19/package-evidence/private-build-0.1.19'
+source=root/'server'
+tree=ast.parse((root/'scripts/build-package.py').read_text(encoding='utf-8'))
+files=None
+for node in tree.body:
+    if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id=='SERVER_FILES' for target in node.targets):
+        files=list(ast.literal_eval(node.value)); break
+asset_names={'chim-plugin.tar.gz','private_conversation.tar.gz','private_conversation-0.1.19.dwpkg','private_conversation-0.1.19-mo2.zip'}
+assets={path.name:path.read_bytes() for path in pkg.iterdir() if path.is_file() and path.name!='SHA256SUMS.txt'}
+checks={}
+checks['exact_five_output_files']={path.name for path in pkg.iterdir() if path.is_file()}==asset_names|{'SHA256SUMS.txt'}
+checks['four_checksums_cover_assets']=(pkg/'SHA256SUMS.txt').read_text(encoding='ascii')==''.join(f"{hashlib.sha256(assets[name]).hexdigest()}  {name}\n" for name in sorted(asset_names))
+manifest=json.loads((source/'manifest.json').read_text(encoding='utf-8'))
+checks['manifest_0_1_19_and_legacy_contract']=manifest.get('name')=='private_conversation' and manifest.get('version')=='0.1.19' and manifest.get('schema_version')==2 and manifest.get('default_channel')=='candidate' and manifest.get('status')=='development_candidate' and manifest.get('channels',{}).get('candidate',{}).get('archive_strip_components')==1 and manifest.get('channels',{}).get('candidate',{}).get('package_urls')==['https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v<version>/private_conversation.tar.gz']
+flat=pkg/'chim-plugin.tar.gz'
+with flat.open('rb') as stream: header=stream.read(8)
+checks['flat_gzip_header_epoch']=header[:2]==b'\x1f\x8b' and header[4:8]==b'\0\0\0\0'
+with tarfile.open(flat,'r:gz') as archive:
+    flat_members=archive.getmembers()
+    checks['flat_20_allowlisted_root_files']=len(flat_members)==20 and [member.name for member in flat_members]==files
+    checks['flat_metadata_and_bytes_match_source']=all(member.type==tarfile.REGTYPE and member.mode==0o644 and member.mtime==315532800 and member.uid==0 and member.gid==0 and member.size==(source/member.name).stat().st_size and archive.extractfile(member).read()==(source/member.name).read_bytes() for member in flat_members)
+    checks['flat_root_index_and_manifest']=any(member.name=='index.php' for member in flat_members) and any(member.name=='manifest.json' and archive.extractfile(member).read()==(source/'manifest.json').read_bytes() for member in flat_members)
+legacy=pkg/'private_conversation.tar.gz'
+with tarfile.open(legacy,'r:gz') as archive:
+    old_members=archive.getmembers(); expected_old=['private_conversation']+[f'private_conversation/{name}' for name in files]
+    checks['legacy_wrapper_members_and_bytes']=[member.name for member in old_members]==expected_old and old_members[0].type==tarfile.DIRTYPE and all(member.type==tarfile.REGTYPE and member.size==(source/name).stat().st_size and archive.extractfile(member).read()==(source/name).read_bytes() for member,name in zip(old_members[1:],files))
+dwpkg=pkg/'private_conversation-0.1.19.dwpkg'
+with zipfile.ZipFile(dwpkg) as archive:
+    dwpkg_names=archive.namelist()
+    checks['dwpkg_crc_and_exact_members']=archive.testzip() is None and dwpkg_names==sorted(['manifest.json','checksums.sha256']+[f'server/{name}' for name in files])
+    package_meta=json.loads(archive.read('manifest.json'))
+    checks['dwpkg_schema4_identity_mutable_state']=package_meta=={'name':'private_conversation','schema_version':4,'server':{'mutable_paths':['state']},'version':'0.1.19'}
+    hashes={line.split('  ',1)[1]:line.split('  ',1)[0] for line in archive.read('checksums.sha256').decode('ascii').splitlines()}
+    checks['dwpkg_checksums_cover_members']=set(hashes)==set(dwpkg_names)-{'checksums.sha256'} and all(hashes[name]==hashlib.sha256(archive.read(name)).hexdigest() for name in hashes)
+    checks['dwpkg_server_bytes_match_source']=all(archive.read(f'server/{name}')==(source/name).read_bytes() for name in files)
+    checks['dwpkg_embedded_manifest_matches_source']=json.loads(archive.read('server/manifest.json'))==manifest
+mo2=pkg/'private_conversation-0.1.19-mo2.zip'; mo2_member='CHIM/server-plugins/private_conversation/0.1.19.dwpkg'
+with zipfile.ZipFile(mo2) as archive:
+    checks['mo2_crc_and_exact_members']=archive.testzip() is None and archive.namelist()==['meta.ini',mo2_member]
+    checks['mo2_metadata_and_inner_bytes']=archive.read('meta.ini')==b'[General]\nversion=0.1.19\nvalidated=true\n' and archive.read(mo2_member)==dwpkg.read_bytes()
+tag='private_conversation-v0.1.19'
+manager=pathlib.Path(r'C:\Users\Francisco Estaba\AppData\Local\Temp\chim-plugin-review-f9cb8eb-b22979c4aedd4a0fb5389b62942a67b7\lib\plugin_discovery.php').read_text(encoding='utf-8')
+writer=(source/'log.php').read_text(encoding='utf-8'); reader=(source/'log_reader.php').read_text(encoding='utf-8')
+checks['fulltag_underscore_accepted_by_manager_writer_reader']=len(tag)==28 and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._+-]{0,99}',tag) is not None and re.fullmatch(r'[0-9A-Za-z][0-9A-Za-z._+-]{0,31}',tag) is not None and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._+-]{0,31}',tag) is not None and 'A-Za-z0-9._+-]{0,99}' in manager and '0-9A-Za-z._+-]{0,31}' in writer and 'A-Za-z0-9._+-]{0,31}' in reader
+result={'all_pass':all(checks.values()),'checks':checks,'flat_member_count':len(flat_members),'flat_members':[member.name for member in flat_members],'dwpkg_member_count':len(dwpkg_names),'package_tag':tag,'asset_sha256':{name:hashlib.sha256(assets[name]).hexdigest() for name in sorted(asset_names)}}
+print(json.dumps(result,sort_keys=True))
+if not result['all_pass']: raise SystemExit(2)
+'@
+py -3 -B -c $code

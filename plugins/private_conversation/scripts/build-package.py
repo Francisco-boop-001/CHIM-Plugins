@@ -174,12 +174,19 @@ def build_package(project_root: Path, output_path: Path) -> dict:
     return plugin_manifest
 
 
-def verify_repository_archive(archive_path: Path, project_root: Path) -> dict:
-    """Check the strip-one tar wrapper and every flattened source payload byte."""
+def verify_repository_archive(
+    archive_path: Path, project_root: Path, *, flat_root: bool = False,
+) -> dict:
+    """Check deterministic tar metadata and source bytes, wrapped or flat."""
     plugin_manifest, entries = _source_entries(Path(project_root))
     package_name = plugin_manifest["name"]
-    expected = [(f"{package_name}/{name}", entries[f"server/{name}"]) for name in SERVER_FILES]
-    expected_names = [package_name, *(name for name, _ in expected)]
+    expected = [
+        (name if flat_root else f"{package_name}/{name}", entries[f"server/{name}"])
+        for name in SERVER_FILES
+    ]
+    expected_names = [name for name, _ in expected]
+    if not flat_root:
+        expected_names.insert(0, package_name)
     try:
         with Path(archive_path).open("rb") as raw:
             header = raw.read(8)
@@ -192,12 +199,14 @@ def verify_repository_archive(archive_path: Path, project_root: Path) -> dict:
             members = archive.getmembers()
             if [member.name for member in members] != expected_names:
                 raise PackageError("Repository archive member list differs from the explicit allowlist")
-            root = members[0]
-            if root.type != tarfile.DIRTYPE or root.size != 0 or root.mode != 0o755:
-                raise PackageError("Repository archive root metadata is invalid")
-            if (root.mtime, root.uid, root.gid) != (REPOSITORY_TAR_MTIME, 0, 0):
-                raise PackageError("Repository archive root metadata is not deterministic")
-            for member, (name, contents) in zip(members[1:], expected, strict=True):
+            if not flat_root:
+                root = members[0]
+                if root.type != tarfile.DIRTYPE or root.size != 0 or root.mode != 0o755:
+                    raise PackageError("Repository archive root metadata is invalid")
+                if (root.mtime, root.uid, root.gid) != (REPOSITORY_TAR_MTIME, 0, 0):
+                    raise PackageError("Repository archive root metadata is not deterministic")
+            payload_members = members if flat_root else members[1:]
+            for member, (name, contents) in zip(payload_members, expected, strict=True):
                 if member.name != name or member.type != tarfile.REGTYPE or member.size != len(contents):
                     raise PackageError(f"Repository payload does not match the allowlist: {member.name}")
                 if (member.mode, member.mtime, member.uid, member.gid) != (0o644, REPOSITORY_TAR_MTIME, 0, 0):
@@ -213,8 +222,10 @@ def verify_repository_archive(archive_path: Path, project_root: Path) -> dict:
     return plugin_manifest
 
 
-def build_repository_archive(project_root: Path, archive_path: Path) -> dict:
-    """Build a deterministic one-wrapper tarball for the CHIM repository installer."""
+def build_repository_archive(
+    project_root: Path, archive_path: Path, *, flat_root: bool = False,
+) -> dict:
+    """Build the deterministic legacy wrapped or CHIM discovery tarball."""
     root = Path(project_root).resolve()
     output = Path(archive_path).resolve()
     try:
@@ -236,23 +247,24 @@ def build_repository_archive(project_root: Path, archive_path: Path) -> dict:
         with temporary.open("wb") as raw:
             with gzip.GzipFile(filename="", fileobj=raw, mode="wb", compresslevel=9, mtime=0) as compressed:
                 with tarfile.open(fileobj=compressed, mode="w", format=tarfile.USTAR_FORMAT) as archive:
-                    directory = tarfile.TarInfo(package_name)
-                    directory.type = tarfile.DIRTYPE
-                    directory.mode = 0o755
-                    directory.mtime = REPOSITORY_TAR_MTIME
-                    directory.uid = directory.gid = 0
-                    directory.uname = directory.gname = ""
-                    archive.addfile(directory)
+                    if not flat_root:
+                        directory = tarfile.TarInfo(package_name)
+                        directory.type = tarfile.DIRTYPE
+                        directory.mode = 0o755
+                        directory.mtime = REPOSITORY_TAR_MTIME
+                        directory.uid = directory.gid = 0
+                        directory.uname = directory.gname = ""
+                        archive.addfile(directory)
                     for name in SERVER_FILES:
                         contents = entries[f"server/{name}"]
-                        member = tarfile.TarInfo(f"{package_name}/{name}")
+                        member = tarfile.TarInfo(name if flat_root else f"{package_name}/{name}")
                         member.size = len(contents)
                         member.mode = 0o644
                         member.mtime = REPOSITORY_TAR_MTIME
                         member.uid = member.gid = 0
                         member.uname = member.gname = ""
                         archive.addfile(member, io.BytesIO(contents))
-        verify_repository_archive(temporary, root)
+        verify_repository_archive(temporary, root, flat_root=flat_root)
         os.replace(temporary, output)
     finally:
         temporary.unlink(missing_ok=True)
@@ -319,10 +331,12 @@ def build_release(project_root: Path, release_dir: Path) -> dict:
         output / f"{name}-{version}.dwpkg",
         output / f"{name}.tar.gz",
         output / f"{name}-{version}-mo2.zip",
+        output / "chim-plugin.tar.gz",
     ]
     build_package(root, assets[0])
     build_repository_archive(root, assets[1])
     build_mo2_sync_archive(root, assets[2])
+    build_repository_archive(root, assets[3], flat_root=True)
     sums = "".join(
         f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n"
         for path in sorted(assets, key=lambda item: item.name)

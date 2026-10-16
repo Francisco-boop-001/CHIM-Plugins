@@ -84,15 +84,43 @@ try {
     $kept = pcvSceneActionPostFilter([
         "Lidia|command|Brawl@{\"target\":\"Bruce\"}\r\n",
         "Lidia|command|Brawl@{\"target\":\"Hawke\"}\r\n",
+        "Lidia|command|ExtCmdHug@{\"target\":\"Bruce\"}\r\n",
+        "Lidia|command|ExtCmdHug@{\"target\":\"Aelva\"}\r\n",
         "Lidia|command|KillTarget@{\"target\":\"Bruce\"}\r\n",
     ]);
-    saCheck(array_values($kept) === ["Lidia|command|Brawl@{\"target\":\"Bruce\"}\r\n"], 'The post-filter keeps only allowed, in-scene actions.');
+    saCheck(array_values($kept) === [
+        "Lidia|command|Brawl@{\"target\":\"Bruce\"}\r\n",
+        "Lidia|command|ExtCmdHug@{\"target\":\"Bruce\"}\r\n",
+    ], 'The post-filter keeps only allowed, in-scene actions.');
+
+    $groupKnown = $known + ['13' => 'Aelva'];
+    $group = $pair + ['actor_ids' => ['11', '12', '13'], 'actions' => ['intimate']];
+    $groupResolved = pcvResolveScopeNames($group, $groupKnown, 'Hawke');
+    saCheck(is_array($groupResolved), 'A group resolves for the action filter.');
+    $GLOBALS['PCV_REQUEST_SCOPE'] = ['status' => 'active', 'scope' => $groupResolved, 'action_player' => 'Hawke'];
+    $groupActions = ["Lidia|command|ExtCmdHug@{\"target\":\"Aelva\"}\r\n"];
+    saCheck(array_values(pcvSceneActionPostFilter($groupActions)) === $groupActions, 'A group partner may target any scene member.');
+
+    $GLOBALS['PCV_REQUEST_SCOPE'] = ['status' => 'active', 'scope' => $soloResolved, 'action_player' => 'Hawke'];
+    $soloActions = [
+        "Lidia|command|ExtCmdHug@\r\n",
+        "Lidia|command|ExtCmdHug@{\"target\":\"\"}\r\n",
+        "Lidia|command|ExtCmdHug@{\"target\":\r\n",
+        "Lidia|command|ExtCmdHug@{\"target\":\"Lidia\"}\r\n",
+        "Lidia|command|ExtCmdStartSex@{\"target\":\"Aelva\"}\r\n",
+        "Lidia|command|ExtCmdStartSelfMasturbation@\r\n",
+        "Lidia|command|ExtCmdPutOnClothes@\r\n",
+        "Lidia|command|ExtCmdRemoveClothes@{\"target\":\"Lidia\"}\r\n",
+    ];
+    saCheck(array_values(pcvSceneActionPostFilter($soloActions)) === array_slice($soloActions, 5),
+        'Solo partner actions need a valid in-scene target; self-directed actions remain available.');
+
     unset($GLOBALS['PCV_REQUEST_SCOPE']);
     saCheck(pcvSceneActionPostFilter(['x|command|Attack@{}']) === ['x|command|Attack@{}'], 'Outside a scene the filter changes nothing.');
     saCheck(pcv_log_rule_matches('routing.action_dropped', 'warning', 'blocked', 'target_outside_scene')
         && pcv_log_rule_matches('routing.action_dropped', 'warning', 'blocked', 'action_not_allowed'), 'Drops are logged as warnings.');
 
-    echo "PASS scene actions: opt-in groups, member-only targets, lethal never, solo self-only, post-filter drops the rest\n";
+    echo "PASS scene actions: opt-in groups, member-only targets, solo partner targets, self actions, post-filter drops the rest\n";
 } catch (Throwable $error) {
     fwrite(STDERR, 'FAIL: ' . $error->getMessage() . "\n");
     $exitCode = 1;
