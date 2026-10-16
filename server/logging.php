@@ -182,6 +182,9 @@ final class RequestLog
             }
             $manifest = json_decode($contents, true);
             $version = is_array($manifest) ? ($manifest['version'] ?? null) : null;
+            if (is_string($version) && preg_match('/\Amind_poisoning-v([0-9]+\.[0-9]+\.[0-9]+)\z/D', $version, $matches) === 1) {
+                $version = $matches[1];
+            }
             return is_string($version) && preg_match('/\A[0-9]+\.[0-9]+\.[0-9]+\z/D', $version) === 1
                 ? $version
                 : 'unknown';

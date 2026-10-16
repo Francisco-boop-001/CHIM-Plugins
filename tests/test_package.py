@@ -4,12 +4,16 @@ import tarfile
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 from zipfile import ZIP_STORED, ZipFile
 
 PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 
+from scripts import package as package_builder
 from scripts.package import (
     SERVER_FILES,
     REPOSITORY_TAR_MTIME,
@@ -133,6 +137,53 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(member.mtime, REPOSITORY_TAR_MTIME)
                 with archive.extractfile(member) as contents:
                     self.assertEqual(contents.read(), (self.source / "server" / name).read_bytes())
+
+    def test_chim_plugin_tar_is_flat_deterministic_and_independently_verified(self) -> None:
+        write_fixture_project(self.source, extra_files=True)
+        index = self.source / "server" / "index.php"
+        index.write_bytes(b"<?php require __DIR__ . '/dashboard.php';\n")
+        first = self.root / "chim-plugin-first.tar.gz"
+        second = self.root / "chim-plugin-second.tar.gz"
+        build = getattr(package_builder, "build_chim_plugin_archive", None)
+        verify = getattr(package_builder, "verify_chim_plugin_archive", None)
+
+        self.assertTrue(callable(build), "flat CHIM Plugin Manager archive builder is missing")
+        self.assertTrue(callable(verify), "flat CHIM Plugin Manager archive verifier is missing")
+        build(self.source, first)
+        build(self.source, second)
+
+        self.assertEqual(first.read_bytes(), second.read_bytes())
+        self.assertEqual(int.from_bytes(first.read_bytes()[4:8], "little"), 0)
+        self.assertEqual(verify(first, self.source)["name"], FIXTURE_NAME)
+        expected_names = list(SERVER_FILES)
+        with tarfile.open(first, "r:gz") as archive:
+            members = archive.getmembers()
+            self.assertEqual([member.name for member in members], expected_names)
+            self.assertNotIn("mind_poisoning", [member.name for member in members])
+            for member in members:
+                self.assertTrue(member.isfile())
+                self.assertEqual(member.mode, 0o644)
+                self.assertEqual(member.mtime, REPOSITORY_TAR_MTIME)
+                self.assertEqual(member.uid, 0)
+                self.assertEqual(member.gid, 0)
+                with archive.extractfile(member) as contents:
+                    self.assertEqual(
+                        contents.read(), (self.source / "server" / member.name).read_bytes()
+                    )
+        self.assertIn("globals.php", expected_names)
+        self.assertIn("index.php", expected_names)
+
+        (self.source / "scripts").mkdir()
+        with (
+            patch.object(package_builder, "__file__", str(self.source / "scripts" / "package.py")),
+            patch("sys.argv", ["package.py", "--format", "chim-plugin-tar-gz"]),
+            redirect_stdout(StringIO()) as output,
+        ):
+            package_builder.main()
+        cli_archive = self.source / "dist" / "chim-plugin.tar.gz"
+        self.assertTrue(cli_archive.is_file())
+        self.assertIn("chim-plugin.tar.gz", output.getvalue())
+        verify(cli_archive, self.source)
 
     def test_current_webp_artwork_and_postrequest_hook_are_packaged(self) -> None:
         artwork = (PROJECT / "server" / "dashboard-art.webp").read_bytes()

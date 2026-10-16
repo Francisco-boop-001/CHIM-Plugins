@@ -1,15 +1,15 @@
 {
   "name": "mind_poisoning",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "schema_version": 2,
   "git_repo": "Francisco-boop-001/CHIM-MindPoisoning",
-  "description": "PRE-ALPHA: Conservative affinity updates with optional single CHIM relationship-type judgments from identity-checked NPC acknowledgements and Player-origin input, actor-owned reflection, default-off NPC ACK overhearing, CHIM-canonical Player relationship handling, reserved rechat-sentinel exclusion, and a read-only history dashboard. New type behavior has isolated fixture coverage only; no live type-change behavior is claimed.",
+  "description": "BETA CANDIDATE: Conservative affinity updates with optional single CHIM relationship-type judgments from identity-checked NPC acknowledgements and Player-origin input, actor-owned reflection, default-off NPC ACK overhearing, CHIM-canonical Player relationship handling, reserved rechat-sentinel exclusion, and a read-only history dashboard. The additional stable-release site-discovery package is experimental and requires a newer CHIM manager; package and fixture checks do not establish live gameplay behavior.",
   "status": "development_candidate",
   "config_url": "../ext/mind_poisoning/dashboard.php?local=1",
   "default_channel": "candidate",
   "channels": {
     "candidate": {
-      "label": "PRE-ALPHA development candidate",
+      "label": "BETA CANDIDATE (experimental site discovery)",
       "branch": "main",
       "package_source": "release",
       "manifest_url": "https://raw.githubusercontent.com/Francisco-boop-001/CHIM-MindPoisoning/main/server/manifest.json",

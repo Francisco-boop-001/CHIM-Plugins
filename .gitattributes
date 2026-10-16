@@ -4,3 +4,5 @@
 *.css text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+# Preserve the native fixture's pinned CRLF bytes for the PostgreSQL import check.
+tests/fixtures/mp-native-db/eventlog-base-ddl.sql -text whitespace=cr-at-eol
