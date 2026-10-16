@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+if (!(require __DIR__ . '/installation_guard.php')) {
+    return;
+}
+
 require_once __DIR__ . '/scope.php';
 
 $requestScope = $GLOBALS['PCV_REQUEST_SCOPE'] ?? null;

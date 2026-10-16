@@ -8,6 +8,21 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
+if (!(require __DIR__ . '/installation_guard.php')) {
+    $decision = $GLOBALS['__PCV_INSTALLATION_GUARD_DECISION_V120'] ?? [];
+    $ownerName = $decision['owner_name'] ?? null;
+    if (!is_string($ownerName) || preg_match('/\A[A-Za-z0-9._-]{1,80}\z/', $ownerName) !== 1) {
+        $ownerName = 'another copy';
+    }
+    $message = ($decision['status'] ?? null) === 'ambiguous'
+        ? 'Private Conversation diagnostics refused: the installation owner is ambiguous.'
+        : ((($decision['owner_legacy'] ?? false) === true)
+            ? 'Private Conversation diagnostics refused: the legacy owner is ext/' . $ownerName . '.'
+            : 'Private Conversation diagnostics refused: the active owner is ext/' . $ownerName . '.');
+    fwrite(STDERR, $message . "\n");
+    exit(2);
+}
+
 require_once __DIR__ . '/log_reader.php';
 
 function pcv_diagnostics_usage(): string

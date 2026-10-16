@@ -1,0 +1,2 @@
+py -3 scripts/build-package.py --format release --release-dir dist/release-v0.1.19-clean
+workdir=K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\dist\release-0.1.19-clean\source

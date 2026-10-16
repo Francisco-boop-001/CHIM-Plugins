@@ -61,6 +61,27 @@ try {
         'exclude_player' => true, 'bystander_mode' => 'exclude', 'actions' => ['personal']], $known, 'Hawke');
     shCheck(str_contains(pcvScopeRoleplayGuidance($soloResolved), 'on your own'), 'Solo is told to act on its own.');
 
+    $soloWithAllGroups = array_replace($soloResolved, ['actions' => ['personal', 'physical', 'intimate']]);
+    $soloActionCodes = ['Drink', 'Toast', 'Consume', 'TakeASeat', 'Relax', 'ExtCmdRemoveClothes',
+        'ExtCmdPutOnClothes', 'ExtCmdStartSelfMasturbation'];
+    shCheck(pcvSceneAllowedActionCodes($soloWithAllGroups) === $soloActionCodes,
+        'Solo offers personal actions and the three self-directed intimate actions only, even if handed a physical group.');
+    $GLOBALS['ENABLED_FUNCTIONS'] = ['Drink', 'Brawl', 'Surrender', 'Attack', 'ExtCmdKiss', 'ExtCmdStartSex',
+        'ExtCmdStartSelfMasturbation', 'ExtCmdPutOnClothes', 'ExtCmdRemoveClothes', 'Toast', 'Consume', 'TakeASeat', 'Relax'];
+    $GLOBALS['FUNCTIONS_ARE_ENABLED'] = true;
+    shCheck(pcvPrepareSceneActions($soloWithAllGroups) === true, 'Solo scene actions remain enabled when already enabled in CHIM.');
+    shCheck($GLOBALS['ENABLED_FUNCTIONS'] === ['Drink', 'ExtCmdStartSelfMasturbation', 'ExtCmdPutOnClothes',
+        'ExtCmdRemoveClothes', 'Toast', 'Consume', 'TakeASeat', 'Relax'],
+        'Solo preparation narrows already-enabled actions without widening CHIM or SHARMAT gates.');
+    $GLOBALS['FUNC_LIST'] = array_merge(['Talk'], $GLOBALS['ENABLED_FUNCTIONS']);
+    $GLOBALS['structuredOutputTemplate'] = ['json_schema' => ['schema' => ['properties' => [
+        'action' => ['enum' => $GLOBALS['FUNC_LIST']],
+    ]]]];
+    shCheck(pcvSceneActionListAllowed($GLOBALS['FUNC_LIST'], $soloWithAllGroups),
+        'The context_pre function list accepts only prepared solo actions.');
+    shCheck(pcvSceneActionListAllowed($GLOBALS['structuredOutputTemplate']['json_schema']['schema']['properties']['action']['enum'], $soloWithAllGroups),
+        'The context_pre action schema enum accepts only prepared solo actions.');
+
     echo "PASS scene actions hook: narrows enabled actions, never re-enables gated ones, members-only Brawl targets, post-filter registered\n";
     exit(0);
 } catch (Throwable $error) {

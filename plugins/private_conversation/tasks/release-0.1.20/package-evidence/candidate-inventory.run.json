@@ -1,0 +1,8 @@
+{
+  "command": "py -3 tasks/release-0.1.20/package-evidence/inspect_candidate.py",
+  "cwd": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev",
+  "exit_code": 0,
+  "stdout": "candidate-inventory.stdout.txt",
+  "stderr": "candidate-inventory.stderr.txt",
+  "captured_at_utc": "2026-10-16T23:19:01.8412848Z"
+}

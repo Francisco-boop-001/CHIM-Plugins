@@ -1,0 +1,32 @@
+{
+  "commit": {
+    "parents": [
+      "3feee95f9754b05902da8b77efc7d8454f4fb754"
+    ],
+    "sha": "301dce06b7e0559180a38449aaba7ba4551ff4a4",
+    "tree": "9012b1ecae0d4d07af9627a225bb611303ba4532"
+  },
+  "verified_public_files": [
+    {
+      "path": "README.md",
+      "git_blob": "347a39ea91f90c8957f1657184fe5354eaaf1708",
+      "matches_local_commit": true,
+      "version": null
+    },
+    {
+      "path": "plugins/private_conversation/server/manifest.json",
+      "git_blob": "7ab804af888f6c169650b9500a483f2dc68a91a2",
+      "matches_local_commit": true,
+      "version": "0.1.19"
+    },
+    {
+      "path": "server/manifest.json",
+      "git_blob": "3b59071d60139ac6f90ecc0a8ed3922ae8cc799e",
+      "matches_local_commit": true,
+      "version": "0.1.21"
+    }
+  ],
+  "pcv_subtree": "dc76ae7ac1551622767135b47487b6b6118aaa43",
+  "protected_git_objects_unchanged": 239,
+  "changed_paths": 37
+}

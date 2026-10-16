@@ -1,0 +1,22 @@
+{
+  "source": "dist/release-0.1.19-clean/clean-build-evidence",
+  "destination": "tasks/release-0.1.19/publication-evidence/clean-build-verification",
+  "copied_count": 14,
+  "all_copies_byte_identical": true,
+  "files": [
+    {"name":"archive-extraction.combined-output.json","bytes":408,"sha256":"8f73b33cd5e73e687aa39a9617f3255d0e1bcd402eabec0544cdf53d03ebfd46","byte_identical":true},
+    {"name":"archive-extraction.exit-code.txt","bytes":11,"sha256":"69152b1d8cb28460d2ae02a4b1f6cda44630741c3e8ad16a68e960e3e6c96ede","byte_identical":true},
+    {"name":"archive-extraction.stream-capture.txt","bytes":98,"sha256":"5aa91683ec47366985049ecc7fc0446c1845772e8a059493d356948ff1d1cfa9","byte_identical":true},
+    {"name":"build.combined-output.txt","bytes":808,"sha256":"594a1f5de2b9127c4bf354c155df0af142eb0e5645c6249c39f236f47cd3f548","byte_identical":true},
+    {"name":"build.command.txt","bytes":193,"sha256":"677868cdb73a6cd30cd77391b78002e7bd1160e82b95e4b20568b1e6e300312f","byte_identical":true},
+    {"name":"build.exit-code.txt","bytes":11,"sha256":"69152b1d8cb28460d2ae02a4b1f6cda44630741c3e8ad16a68e960e3e6c96ede","byte_identical":true},
+    {"name":"build.stream-capture.txt","bytes":98,"sha256":"5aa91683ec47366985049ecc7fc0446c1845772e8a059493d356948ff1d1cfa9","byte_identical":true},
+    {"name":"candidate-compare.combined-output.json","bytes":1764,"sha256":"5ad09075e6b74094511785d0493289112adb415f2a550ee6b6449cd276099e08","byte_identical":true},
+    {"name":"candidate-compare.command.txt","bytes":1295,"sha256":"e0b70ee2e2ff76cbf05d9095230a234ac5b7b324c11b4252d84b7de6393a914c","byte_identical":true},
+    {"name":"candidate-compare.exit-code.txt","bytes":11,"sha256":"69152b1d8cb28460d2ae02a4b1f6cda44630741c3e8ad16a68e960e3e6c96ede","byte_identical":true},
+    {"name":"candidate-compare.stream-capture.txt","bytes":98,"sha256":"5aa91683ec47366985049ecc7fc0446c1845772e8a059493d356948ff1d1cfa9","byte_identical":true},
+    {"name":"git-tree.combined-output.txt","bytes":40,"sha256":"4b543ef16f9c2e9d0a0be004de44cef9244f5a51359fa193f30f690c817fd626","byte_identical":true},
+    {"name":"git-tree.command.txt","bytes":212,"sha256":"e683e1ef280af3d0843b359900f6491e4158a4bb17adadd9399a17b842ee93fc","byte_identical":true},
+    {"name":"git-tree.exit-code.txt","bytes":11,"sha256":"69152b1d8cb28460d2ae02a4b1f6cda44630741c3e8ad16a68e960e3e6c96ede","byte_identical":true}
+  ]
+}

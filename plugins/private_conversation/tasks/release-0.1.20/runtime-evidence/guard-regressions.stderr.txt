@@ -1,0 +1,5 @@
+PHP Fatal error:  Uncaught RuntimeException: The isolated UI request failed: Could not activate fixture logger. in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php:29
+Stack trace:
+#0 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php(268): pageCheckChild()
+#1 {main}
+  thrown in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php on line 29

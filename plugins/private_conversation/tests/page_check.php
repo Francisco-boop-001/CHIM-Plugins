@@ -42,8 +42,8 @@ function pageCheckSessionId(string $scenario): string
 }
 
 $root = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'pcv-page-check-' . bin2hex(random_bytes(8));
-$server = $root . DIRECTORY_SEPARATOR . 'plugin' . DIRECTORY_SEPARATOR . 'server';
-$engine = $root;
+$server = $root . DIRECTORY_SEPARATOR . 'webroot' . DIRECTORY_SEPARATOR . 'HerikaServer' . DIRECTORY_SEPARATOR . 'ext' . DIRECTORY_SEPARATOR . 'private_conversation';
+$engine = $root . DIRECTORY_SEPARATOR . 'webroot' . DIRECTORY_SEPARATOR . 'HerikaServer';
 $logs = $root . DIRECTORY_SEPARATOR . 'logs';
 $sessions = $root . DIRECTORY_SEPARATOR . 'sessions';
 foreach ([$server, $logs, $sessions, $engine . '/lib/core', $engine . '/conf'] as $directory) {
@@ -54,7 +54,7 @@ foreach ([$server, $logs, $sessions, $engine . '/lib/core', $engine . '/conf'] a
 }
 
 $packageServer = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'server';
-foreach (['index.php', 'log.php', 'scope.php'] as $file) {
+foreach (['index.php', 'log.php', 'scope.php', 'installation_guard.php', 'manifest.json'] as $file) {
     if (!copy($packageServer . DIRECTORY_SEPARATOR . $file, $server . DIRECTORY_SEPARATOR . $file)) {
         throw new RuntimeException('Could not copy the actual UI controller into the isolated fixture.');
     }
@@ -398,6 +398,8 @@ try {
         $server . DIRECTORY_SEPARATOR . 'scope.php',
         $server . DIRECTORY_SEPARATOR . 'state.php',
         $server . DIRECTORY_SEPARATOR . 'request.php',
+        $server . DIRECTORY_SEPARATOR . 'installation_guard.php',
+        $server . DIRECTORY_SEPARATOR . 'manifest.json',
         $engine . '/lib/runtime_bootstrap.php',
         $engine . '/lib/fixture_db.class.php',
         $engine . '/lib/core/npc_master.class.php',
@@ -410,7 +412,9 @@ try {
     @rmdir($engine . '/lib');
     @rmdir($engine . '/conf');
     @rmdir($server);
-    @rmdir($root . DIRECTORY_SEPARATOR . 'plugin');
+    @rmdir($engine . DIRECTORY_SEPARATOR . 'ext');
+    @rmdir($engine);
+    @rmdir($root . DIRECTORY_SEPARATOR . 'webroot');
     @rmdir($logs);
     @rmdir($sessions);
     @rmdir($root);

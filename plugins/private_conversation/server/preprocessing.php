@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+if (!(require __DIR__ . '/installation_guard.php')) {
+    return;
+}
+
 if (!function_exists('pcv_current_playthrough_key')) {
     require_once __DIR__ . '/state.php';
 }

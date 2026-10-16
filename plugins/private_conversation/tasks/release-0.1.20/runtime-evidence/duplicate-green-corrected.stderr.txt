@@ -1,0 +1,7 @@
+new-new hook fixture failed: PHP Fatal error:  Uncaught RuntimeException: The default log root is not keyed to the elected owner path. in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/duplicate_install_check.php:12
+Stack trace:
+#0 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/duplicate_install_check.php(242): duplicateCheck()
+#1 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/duplicate_install_check.php(315): duplicateAssertOwnerState()
+#2 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/duplicate_install_check.php(340): duplicateHookChild()
+#3 {main}
+  thrown in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/duplicate_install_check.php on line 12

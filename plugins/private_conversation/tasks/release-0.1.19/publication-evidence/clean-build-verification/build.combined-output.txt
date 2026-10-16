@@ -1,0 +1,5 @@
+Built and verified dist\release-v0.1.19-clean\SHA256SUMS.txt (381 bytes, sha256 096cce8e8dcbf72aa0085be890baee7d33814f8e33c0a3fd4fb60f4a1df2e56a)
+Built and verified dist\release-v0.1.19-clean\chim-plugin.tar.gz (3051196 bytes, sha256 2453de55c50c04c6a167432bb00d02eaa2e42ccf353ba64e71e3f3ebe99d141f)
+Built and verified dist\release-v0.1.19-clean\private_conversation-0.1.19-mo2.zip (3054306 bytes, sha256 6dcb27863fae36ab3c6deab5f8ba6255aea02a68a56af8c439df95a78774ebb9)
+Built and verified dist\release-v0.1.19-clean\private_conversation-0.1.19.dwpkg (3464673 bytes, sha256 d78a969480375d448afe347142ddd320c66a201ed01ab1e43d858aa490d2ccf6)
+Built and verified dist\release-v0.1.19-clean\private_conversation.tar.gz (3051279 bytes, sha256 921518e1a750fd2595ac030412fd05ec65909b7b10e5548766c27588f111b34c)

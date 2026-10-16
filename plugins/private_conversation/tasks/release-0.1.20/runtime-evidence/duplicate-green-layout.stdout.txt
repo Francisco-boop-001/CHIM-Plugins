@@ -1,0 +1,8 @@
+RUNTIME_TMPDIR=/tmp/pcv-020-checks.YDvK5l
+No syntax errors detected in tests/duplicate_install_check.php
+PASS: inactive refresh, Logs, and POST routes refuse over loopback HTTP without touching owner state
+PASS: inactive refresh, Logs, and POST routes refuse over loopback HTTP without touching owner state
+PASS: generated Plugin Manager manifest is recognized as a single owner
+PASS: new/new owner election is stable in both hook load orders
+PASS: exact .19/new mixed installs defer to the legacy owner in both path placements
+PASS: ambiguous known PCV paths refuse before UI state access

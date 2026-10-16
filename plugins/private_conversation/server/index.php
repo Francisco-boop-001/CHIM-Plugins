@@ -1255,6 +1255,24 @@ function pcv_run_page(): void
     echo pcv_render_page($csrfToken, $state, $knownNpcs, $notice, $eligibilityStatus, $catalogAvailable, $displayNpcs, $playthroughRef);
 }
 
+if (!(require __DIR__ . '/installation_guard.php')) {
+    $decision = $GLOBALS['__PCV_INSTALLATION_GUARD_DECISION_V120'] ?? [];
+    $ownerName = $decision['owner_name'] ?? null;
+    if (!is_string($ownerName) || preg_match('/\A[A-Za-z0-9._-]{1,80}\z/', $ownerName) !== 1) {
+        $ownerName = 'another copy';
+    }
+    http_response_code(409);
+    header('Content-Type: text/plain; charset=UTF-8');
+    if (($decision['status'] ?? null) === 'ambiguous') {
+        echo "Private Conversation installation metadata or owner path is ambiguous. No settings were opened or changed. Correct the duplicate installation layout before using ARM or END.\n";
+    } elseif (($decision['owner_legacy'] ?? false) === true) {
+        echo 'The legacy Private Conversation copy in ext/' . $ownerName . ' remains active. This version will not open or migrate its state. Remove that duplicate before using ARM or END here.' . "\n";
+    } else {
+        echo 'This Private Conversation copy is inactive; the active owner is ext/' . $ownerName . ". Use that copy or remove the duplicate before using ARM or END here.\n";
+    }
+    return;
+}
+
 if (!defined('PCV_UI_TEST')) {
     pcv_run_page();
 }

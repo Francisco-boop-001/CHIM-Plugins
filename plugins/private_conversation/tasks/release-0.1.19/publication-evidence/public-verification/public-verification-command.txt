@@ -1,0 +1,31 @@
+Read-only public verification performed 2026-10-16 21:26 UTC.
+
+Windows PowerShell exact three-way comparison (clean source, draft download, supplied anonymous public download):
+$root='K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev'
+$clean=Join-Path $root 'dist\release-0.1.19-clean\source\dist\release-v0.1.19-clean'
+$draft=Join-Path $root 'tasks\release-0.1.19\publication-evidence\draft-downloads'
+$public=Join-Path $root 'tasks\release-0.1.19\publication-evidence\public-downloads'
+$expected=@('chim-plugin.tar.gz','private_conversation-0.1.19-mo2.zip','private_conversation-0.1.19.dwpkg','private_conversation.tar.gz','SHA256SUMS.txt')
+$names=@{clean=@(Get-ChildItem -File -LiteralPath $clean | ForEach-Object Name | Sort-Object);draft=@(Get-ChildItem -File -LiteralPath $draft | ForEach-Object Name | Sort-Object);public=@(Get-ChildItem -File -LiteralPath $public | ForEach-Object Name | Sort-Object)}
+$rows=@(foreach($name in @($expected | Sort-Object)) {
+  $bytes=@{}
+  foreach($kind in @('clean','draft','public')) {
+    $data=[IO.File]::ReadAllBytes((Join-Path (Get-Variable $kind -ValueOnly) $name))
+    $bytes[$kind]=$data
+  }
+  [PSCustomObject]@{name=$name;clean_size=$bytes.clean.Length;draft_size=$bytes.draft.Length;public_size=$bytes.public.Length;clean_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $clean $name)).Hash.ToLowerInvariant();draft_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $draft $name)).Hash.ToLowerInvariant();public_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $public $name)).Hash.ToLowerInvariant();draft_byte_equal=($bytes.clean.Length -eq $bytes.draft.Length -and [Linq.Enumerable]::SequenceEqual([byte[]]$bytes.clean,[byte[]]$bytes.draft));public_byte_equal=($bytes.clean.Length -eq $bytes.public.Length -and [Linq.Enumerable]::SequenceEqual([byte[]]$bytes.clean,[byte[]]$bytes.public))}
+})
+$readJson={ param($p) Get-Content -Raw -LiteralPath $p | ConvertFrom-Json }
+$publicMeta=&$readJson (Join-Path $root 'tasks\release-0.1.19\publication-evidence\public-release.json')
+$latestMeta=&$readJson (Join-Path $root 'tasks\release-0.1.19\publication-evidence\latest-release.json')
+$protectedBefore=&$readJson (Join-Path $root 'tasks\release-0.1.19\publication-evidence\protected-0.1.18-before.json')
+$protectedAfter=&$readJson (Join-Path $root 'tasks\release-0.1.19\publication-evidence\protected-0.1.18-after.json')
+$note=Get-Content -Raw -LiteralPath (Join-Path $root 'dist\release-0.1.19-clean\source\distribution\private_conversation-v0.1.19.md')
+[PSCustomObject]@{expected=$expected;names=$names;assets=$rows;public_metadata=$publicMeta;latest_metadata=$latestMeta;protected_before=$protectedBefore;protected_after=$protectedAfter;source_note=$note} | ConvertTo-Json -Depth 14 -Compress
+
+Read-only GitHub API GETs via the connected GitHub fetch tool:
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/releases/415388759
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/releases/latest
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/releases/414442757
+
+Orchestration assertions: local exact-name and byte-equality results all true; current API release assets equal the clean files by name/size/SHA-256; public-release.json and latest-release.json match current API identity/body/status; current API body equals the committed note; and current 0.1.18 release identity/status/asset name-ID-size-digest tuples equal both before and after snapshots.

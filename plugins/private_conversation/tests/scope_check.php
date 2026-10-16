@@ -204,17 +204,22 @@ if (!is_file($scopeSource)) {
 }
 $logTestDirectory = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR)
     . DIRECTORY_SEPARATOR . 'private-conversation-scope-check-' . getmypid() . '-' . substr(hash('sha256', microtime(true) . ':' . getmypid()), 0, 12);
+$hookFixtureDirectory = $logTestDirectory . DIRECTORY_SEPARATOR . 'private_conversation';
 if (!@mkdir($logTestDirectory, 0700) && !is_dir($logTestDirectory)) {
     fwrite(STDERR, "FAIL: Could not create isolated logger fixture directory.\n");
     exit(1);
 }
 @chmod($logTestDirectory, 0700);
+if (!mkdir($hookFixtureDirectory, 0700)) {
+    fwrite(STDERR, "FAIL: Could not create isolated hook fixture directory.\n");
+    exit(1);
+}
 $GLOBALS['pcv_fixture_state_directory'] = $logTestDirectory . DIRECTORY_SEPARATOR . 'state';
 if (!pcv_log_set_test_directory($logTestDirectory)) {
     fwrite(STDERR, "FAIL: Logger rejected the isolated fixture directory.\n");
     exit(1);
 }
-register_shutdown_function(static function () use ($logTestDirectory): void {
+register_shutdown_function(static function () use ($logTestDirectory, $hookFixtureDirectory): void {
     $directory = realpath($logTestDirectory);
     $tempRoot = realpath(sys_get_temp_dir());
     if ($directory === false || $tempRoot === false || !pcv_log_path_is_within($directory, $tempRoot)
@@ -226,14 +231,27 @@ register_shutdown_function(static function () use ($logTestDirectory): void {
             @unlink($path);
         }
     }
+    foreach (glob($hookFixtureDirectory . DIRECTORY_SEPARATOR . '*') ?: [] as $path) {
+        if (is_file($path) && !is_link($path)) {
+            @unlink($path);
+        }
+    }
+    @rmdir($hookFixtureDirectory);
     @rmdir($directory);
 });
 require_once $scopeSource;
 
-$postrequestFixtureScope = $logTestDirectory . DIRECTORY_SEPARATOR . 'scope.php';
-$postrequestFixtureReflection = $logTestDirectory . DIRECTORY_SEPARATOR . 'reflection.php';
-$prepostrequestFixtureHook = $logTestDirectory . DIRECTORY_SEPARATOR . 'prepostrequest.php';
-$postrequestFixtureHook = $logTestDirectory . DIRECTORY_SEPARATOR . 'postrequest.php';
+foreach (['installation_guard.php', 'manifest.json'] as $file) {
+    if (!copy(dirname(__DIR__) . '/server/' . $file, $hookFixtureDirectory . DIRECTORY_SEPARATOR . $file)) {
+        fwrite(STDERR, "FAIL: Could not prepare isolated installation guard fixtures.\n");
+        exit(1);
+    }
+}
+
+$postrequestFixtureScope = $hookFixtureDirectory . DIRECTORY_SEPARATOR . 'scope.php';
+$postrequestFixtureReflection = $hookFixtureDirectory . DIRECTORY_SEPARATOR . 'reflection.php';
+$prepostrequestFixtureHook = $hookFixtureDirectory . DIRECTORY_SEPARATOR . 'prepostrequest.php';
+$postrequestFixtureHook = $hookFixtureDirectory . DIRECTORY_SEPARATOR . 'postrequest.php';
 $postrequestFixtureScopeSource = "<?php\nrequire_once " . var_export($scopeSource, true) . ";\n";
 $postrequestFixtureReflectionSource = <<<'PHP'
 <?php

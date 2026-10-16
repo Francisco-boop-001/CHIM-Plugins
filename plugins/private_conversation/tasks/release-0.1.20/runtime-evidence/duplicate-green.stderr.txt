@@ -1,0 +1,1 @@
+PHP Parse error:  syntax error, unexpected identifier "s", expecting ")" in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/duplicate_install_check.php on line 261

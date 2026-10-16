@@ -36,12 +36,12 @@ function terminalRemoveTestDirectory(string $path): void
 function checkRegistrationException(string $root): void
 {
     $serverDirectory = $root . DIRECTORY_SEPARATOR . 'webroot' . DIRECTORY_SEPARATOR . 'HerikaServer'
-        . DIRECTORY_SEPARATOR . 'ext' . DIRECTORY_SEPARATOR . 'private_conversation' . DIRECTORY_SEPARATOR . 'server';
+        . DIRECTORY_SEPARATOR . 'ext' . DIRECTORY_SEPARATOR . 'private_conversation';
     $logDirectory = $root . DIRECTORY_SEPARATOR . 'logs';
     if (!mkdir($serverDirectory, 0700, true) || !mkdir($logDirectory, 0700)) {
         throw new RuntimeException('Could not create the isolated registration-error fixture.');
     }
-    foreach (['log.php', 'scope.php', 'prepostrequest.php'] as $file) {
+    foreach (['log.php', 'scope.php', 'prepostrequest.php', 'installation_guard.php', 'manifest.json'] as $file) {
         if (!copy(dirname(__DIR__) . '/server/' . $file, $serverDirectory . DIRECTORY_SEPARATOR . $file)) {
             throw new RuntimeException('Could not copy an isolated registration-error fixture file.');
         }
@@ -82,7 +82,7 @@ $GLOBALS['HERIKA_NAME'] = 'Aela';
 $GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] = true;
 pcvRoutingLogSetState($scope);
 pcvRoutingLogStart('inputtext');
-include __DIR__ . '/webroot/HerikaServer/ext/private_conversation/server/prepostrequest.php';
+include __DIR__ . '/webroot/HerikaServer/ext/private_conversation/prepostrequest.php';
 pcv_log_shutdown_terminal();
 $path = pcv_log_path();
 $text = is_string($path) && is_file($path) ? (string)file_get_contents($path) : '';
@@ -123,12 +123,12 @@ function checkReflectionLoadFailure(string $root, string $hook): void
 {
     $serverDirectory = $root . DIRECTORY_SEPARATOR . $hook . DIRECTORY_SEPARATOR . 'webroot'
         . DIRECTORY_SEPARATOR . 'HerikaServer' . DIRECTORY_SEPARATOR . 'ext'
-        . DIRECTORY_SEPARATOR . 'private_conversation' . DIRECTORY_SEPARATOR . 'server';
+        . DIRECTORY_SEPARATOR . 'private_conversation';
     $logDirectory = $root . DIRECTORY_SEPARATOR . $hook . DIRECTORY_SEPARATOR . 'logs';
     if (!mkdir($serverDirectory, 0700, true) || !mkdir($logDirectory, 0700, true)) {
         throw new RuntimeException('Could not create the isolated reflection-load fixture.');
     }
-    foreach (['log.php', 'scope.php', $hook . '.php'] as $file) {
+    foreach (['log.php', 'scope.php', $hook . '.php', 'installation_guard.php', 'manifest.json'] as $file) {
         if (!copy(dirname(__DIR__) . '/server/' . $file, $serverDirectory . DIRECTORY_SEPARATOR . $file)) {
             throw new RuntimeException('Could not copy an isolated reflection-load fixture file.');
         }

@@ -1,0 +1,16 @@
+RUNTIME_TMPDIR=/tmp/pcv-020-regressions.MYtNyB
+No syntax errors detected in server/json_response_custom.php
+PASS: actual page GET read failure returns a matching reference and suppresses page-open.
+PASS: valid concurrent readback stays accepted with its staged config ID and renders the current state.
+PASS: unavailable readback reports operation=readback, retains staged ID, and says it could not be confirmed.
+PASS: refresh GET rereads eligibility without staging, logging page-open, or holding the session lock.
+PASS: picker uses the helper map, disables ARM below two, and distinguishes empty/missing/stale.
+PASS: stale/single-actor POSTs reject without staging; END succeeds when catalog loading fails.
+PASS: solo POST stages with one eligible actor, ignores submitted actor B, and forces player exclusion.
+PASS: stable actor identity, ordinary event transform, authoritative audience, and presence exclusion.
+PASS: ambiguous speaker prefixes and unsupported modes fail closed; disabled scope is inert.
+PASS: rechat speaker set and pre-generation speaker guard stay within the selected pair.
+PASS: silent bystanders are described generically without actor membership or names.
+PASS: real hooks preserve the eligible-input boundary, responder selection, rechat clamp, audience, and action schema.
+PASS: malformed rechat/Close and outsider generation stop; Director and fresh install remain outside scope.
+PASS: empty-output postrequest is logged as hook observation only

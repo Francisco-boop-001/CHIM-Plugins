@@ -44,6 +44,7 @@ class PackageChecks(unittest.TestCase):
                 self.assertEqual(outer["server"]["mutable_paths"], ["state"])
                 self.assertEqual(inner["config_url"], "../ext/private_conversation/index.php")
                 self.assertIn("server/diagnostics.php", expected)
+                self.assertIn("server/installation_guard.php", expected)
                 self.assertIn("server/log.php", expected)
                 self.assertIn("server/log_reader.php", expected)
                 self.assertIn("server/assets/private-conversation-scene.png", expected)
@@ -148,7 +149,7 @@ class PackageChecks(unittest.TestCase):
 
             discovery = first / "chim-plugin.tar.gz"
             PACKAGE.verify_repository_archive(discovery, ROOT, flat_root=True)
-            self.assertEqual(len(PACKAGE.SERVER_FILES), 20)
+            self.assertEqual(len(PACKAGE.SERVER_FILES), 21)
             with tarfile.open(discovery, "r:gz") as archive:
                 members = archive.getmembers()
                 self.assertEqual([member.name for member in members], list(PACKAGE.SERVER_FILES))

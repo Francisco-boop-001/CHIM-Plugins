@@ -65,7 +65,7 @@ shutdownCheck(mkdir($server, 0700, true) && mkdir($mindPoisoning, 0700, true)
     && mkdir($webRoot . '/lib', 0700, true) && mkdir($logsRoot, 0700) && mkdir($statesRoot, 0700),
     'Could not create the isolated extension layout.');
 $source = dirname(__DIR__) . '/server';
-foreach (['reflection.php', 'reflection_receipt.php', 'log.php', 'prerequest.php'] as $file) {
+foreach (['reflection.php', 'reflection_receipt.php', 'log.php', 'prerequest.php', 'installation_guard.php', 'manifest.json'] as $file) {
     shutdownCheck(copy($source . '/' . $file, $server . '/' . $file), 'Could not copy production ' . $file . '.');
 }
 

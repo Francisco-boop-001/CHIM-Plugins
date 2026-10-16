@@ -1,0 +1,18 @@
+Read-only receipt copy and byte check (run once):
+
+$root='K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev'
+$source=Join-Path $root 'dist\release-0.1.19-clean\clean-build-evidence'
+$target=Join-Path $root 'tasks\release-0.1.19\publication-evidence\clean-build-verification'
+if (Test-Path -LiteralPath $target) { throw "Target already exists: $target" }
+$files=@(Get-ChildItem -File -LiteralPath $source | Sort-Object Name)
+if ($files.Count -ne 14) { throw "Unexpected receipt count: $($files.Count)" }
+if (@($files | Where-Object { $_.Length -gt 4096 -or $_.Extension -notin @('.json','.txt') }).Count -gt 0) { throw 'Non-small or unexpected file in source receipt set' }
+New-Item -ItemType Directory -Path $target | Out-Null
+foreach($file in $files) { Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $target $file.Name) }
+$rows=@(foreach($file in $files) {
+  $copy=Join-Path $target $file.Name
+  [PSCustomObject]@{name=$file.Name;source_bytes=$file.Length;copy_bytes=(Get-Item -LiteralPath $copy).Length;source_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant();copy_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath $copy).Hash.ToLowerInvariant();byte_identical=([Linq.Enumerable]::SequenceEqual([byte[]][IO.File]::ReadAllBytes($file.FullName),[byte[]][IO.File]::ReadAllBytes($copy)))}
+})
+[PSCustomObject]@{source=(Resolve-Path $source).Path;target=(Resolve-Path $target).Path;count=$rows.Count;all_byte_identical=(@($rows | Where-Object { -not $_.byte_identical }).Count -eq 0);files=$rows} | ConvertTo-Json -Depth 6 -Compress
+
+A per-file verification summary is retained in `copy-verification.json` with source/copy byte lengths, SHA-256 hashes, and equality. No archive, source.zip, generated asset, or private-build binary was copied.

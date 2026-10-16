@@ -1,0 +1,5 @@
+Built and verified tasks\release-0.1.20\package-evidence\candidate\SHA256SUMS.txt (381 bytes, sha256 e51d7d230b586ad3f544084b60ad40e4a7fe4fc830d0e35b12061977ad056fee)
+Built and verified tasks\release-0.1.20\package-evidence\candidate\chim-plugin.tar.gz (3053486 bytes, sha256 50405eca2d8a7b6e7dc9a307740b6ab0518366e21cfcbc743b88e88d94cbcd7b)
+Built and verified tasks\release-0.1.20\package-evidence\candidate\private_conversation-0.1.20-mo2.zip (3056680 bytes, sha256 7bd8c4e67e970416c116965a0470328a48e7ca4921750fafabf759a2826290db)
+Built and verified tasks\release-0.1.20\package-evidence\candidate\private_conversation-0.1.20.dwpkg (3475090 bytes, sha256 d5da301dd332d45a97e962da96c8f0af9269d4d402e2083fe7a221e921090e8c)
+Built and verified tasks\release-0.1.20\package-evidence\candidate\private_conversation.tar.gz (3053559 bytes, sha256 e949fe37d1e7fb2f8091e28f0c4af106ca1039a15809401082ea460572798bb8)

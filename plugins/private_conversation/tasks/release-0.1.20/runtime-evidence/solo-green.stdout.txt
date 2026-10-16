@@ -1,0 +1,3 @@
+PASS scene actions hook: narrows enabled actions, never re-enables gated ones, members-only Brawl targets, post-filter registered
+PASS scene actions: opt-in groups, member-only targets, solo partner targets, self actions, post-filter drops the rest
+No syntax errors detected in server/scope.php

@@ -1,0 +1,2 @@
+RUNTIME_TMPDIR=/tmp/pcv-020-checks.GpBwJZ
+No syntax errors detected in tests/duplicate_install_check.php

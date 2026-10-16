@@ -1,0 +1,1 @@
+new-new hook fixture failed: PHP Fatal error:  Cannot redeclare pcv_scope_name_key() (previously declared in /tmp/pcv-duplicate-new-new-58e7c5d349e1/ext/CHIM-PrivateConversation/scope.php:7) in /tmp/pcv-duplicate-new-new-58e7c5d349e1/ext/private_conversation/scope.php on line 7

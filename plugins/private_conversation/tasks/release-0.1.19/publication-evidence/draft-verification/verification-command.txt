@@ -1,0 +1,25 @@
+Read-only checks performed 2026-10-16 21:24 UTC.
+
+Windows PowerShell exact five-file comparison (stdout was serialized as JSON):
+$root='K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev'
+$clean=Join-Path $root 'dist\release-0.1.19-clean\source\dist\release-v0.1.19-clean'
+$download=Join-Path $root 'tasks\release-0.1.19\publication-evidence\draft-downloads'
+$expected=@('chim-plugin.tar.gz','private_conversation-0.1.19-mo2.zip','private_conversation-0.1.19.dwpkg','private_conversation.tar.gz','SHA256SUMS.txt')
+$namesClean=@(Get-ChildItem -File -LiteralPath $clean | ForEach-Object Name | Sort-Object)
+$namesDownload=@(Get-ChildItem -File -LiteralPath $download | ForEach-Object Name | Sort-Object)
+$namesExpected=@($expected | Sort-Object)
+$rows=@(foreach($name in $namesExpected) {
+  $a=[IO.File]::ReadAllBytes((Join-Path $clean $name))
+  $b=[IO.File]::ReadAllBytes((Join-Path $download $name))
+  $equal=($a.Length -eq $b.Length -and [Linq.Enumerable]::SequenceEqual([byte[]]$a,[byte[]]$b))
+  [PSCustomObject]@{name=$name;clean_size=$a.Length;download_size=$b.Length;clean_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $clean $name)).Hash.ToLowerInvariant();download_sha256=(Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $download $name)).Hash.ToLowerInvariant();byte_equal=$equal}
+})
+
+Read-only GitHub API GETs via the connected GitHub fetch tool:
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/releases/415388759
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/releases/414442757
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/git/ref/tags/private_conversation-v0.1.19
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/git/tags/fa7d4599099fdd471ed00936517b7b0f019dbe04
+https://api.github.com/repos/Francisco-boop-001/CHIM-PrivateConversation/git/commits/c7ec6cde8231ebb103ef7d443b09789eb4b29691
+
+The current 0.1.19 API body was compared as a string to the clean committed note at `dist/release-0.1.19-clean/source/distribution/private_conversation-v0.1.19.md`; the saved `draft-release.json` was also compared to the current API fields and body. Current 0.1.18 release asset tuples (name, ID, size, digest) were compared to `publication-evidence/protected-0.1.18-before.json`.

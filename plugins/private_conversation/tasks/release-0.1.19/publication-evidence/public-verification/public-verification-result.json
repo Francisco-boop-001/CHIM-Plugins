@@ -1,0 +1,104 @@
+{
+  "checked_at_utc": "2026-10-16 21:26:25 UTC",
+  "result": "PASS",
+  "public_release": {
+    "id": 415388759,
+    "tag_name": "private_conversation-v0.1.19",
+    "title": "Private Conversation 0.1.19 — ALPHA",
+    "url": "https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/tag/private_conversation-v0.1.19",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-10-16T21:25:32Z",
+    "public_snapshot_matches_current_api": true
+  },
+  "latest_release": {
+    "id": 415388759,
+    "tag_name": "private_conversation-v0.1.19",
+    "latest_snapshot_matches_current_api": true,
+    "points_to_019": true
+  },
+  "assets": [
+    {
+      "name": "chim-plugin.tar.gz",
+      "size": 3051196,
+      "sha256": "2453de55c50c04c6a167432bb00d02eaa2e42ccf353ba64e71e3f3ebe99d141f",
+      "draft_byte_equal_to_clean": true,
+      "anonymous_public_byte_equal_to_clean": true,
+      "api_digest_size_match": true
+    },
+    {
+      "name": "private_conversation-0.1.19-mo2.zip",
+      "size": 3054306,
+      "sha256": "6dcb27863fae36ab3c6deab5f8ba6255aea02a68a56af8c439df95a78774ebb9",
+      "draft_byte_equal_to_clean": true,
+      "anonymous_public_byte_equal_to_clean": true,
+      "api_digest_size_match": true
+    },
+    {
+      "name": "private_conversation-0.1.19.dwpkg",
+      "size": 3464673,
+      "sha256": "d78a969480375d448afe347142ddd320c66a201ed01ab1e43d858aa490d2ccf6",
+      "draft_byte_equal_to_clean": true,
+      "anonymous_public_byte_equal_to_clean": true,
+      "api_digest_size_match": true
+    },
+    {
+      "name": "private_conversation.tar.gz",
+      "size": 3051279,
+      "sha256": "921518e1a750fd2595ac030412fd05ec65909b7b10e5548766c27588f111b34c",
+      "draft_byte_equal_to_clean": true,
+      "anonymous_public_byte_equal_to_clean": true,
+      "api_digest_size_match": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 381,
+      "sha256": "096cce8e8dcbf72aa0085be890baee7d33814f8e33c0a3fd4fb60f4a1df2e56a",
+      "draft_byte_equal_to_clean": true,
+      "anonymous_public_byte_equal_to_clean": true,
+      "api_digest_size_match": true
+    }
+  ],
+  "release_body": {
+    "committed_note": "distribution/private_conversation-v0.1.19.md",
+    "public_api_body_exact_match": true,
+    "public_snapshot_body_matches_current_api": true,
+    "character_count": 6432
+  },
+  "protected_0_1_18": {
+    "id": 414442757,
+    "tag_name": "private_conversation-v0.1.18",
+    "draft": false,
+    "prerelease": true,
+    "exact_before_after_and_current_api_asset_set_match": true,
+    "assets": [
+      {
+        "name": "private_conversation-0.1.18-mo2.zip",
+        "id": 645776056,
+        "size": 3054313,
+        "digest": "sha256:4690b7cccc54d6cca9485ab4a30b4f923da72b3d16aaf7e06f9612b1d12786b6"
+      },
+      {
+        "name": "private_conversation-0.1.18.dwpkg",
+        "id": 645776046,
+        "size": 3464681,
+        "digest": "sha256:24e38a5fed36bb3bb3e02ba959c29020107279e588ee91ab261b1e20f5a2806f"
+      },
+      {
+        "name": "private_conversation.tar.gz",
+        "id": 645776057,
+        "size": 3051282,
+        "digest": "sha256:7c534361b27d85cdb0a26cbc454526208e0770963b8201321be2632fb55a9e1b"
+      },
+      {
+        "name": "SHA256SUMS.txt",
+        "id": 645776058,
+        "size": 296,
+        "digest": "sha256:3d0d2628f651228aa36ce40b726326ab5450a26bbbd048d5a60175f5e83bdfd2"
+      }
+    ]
+  },
+  "limitations": [
+    "No Plugin Manager installation, MO2 import, server runtime, or gameplay was performed."
+  ]
+}

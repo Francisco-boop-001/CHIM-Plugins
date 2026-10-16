@@ -1,0 +1,14 @@
+RUNTIME_TMPDIR=/tmp/pcv-020-final.rGzQ79
+No syntax errors detected in server/installation_guard.php
+No syntax errors detected in server/preprocessing.php
+No syntax errors detected in server/prerequest.php
+No syntax errors detected in server/json_response_custom.php
+No syntax errors detected in server/context_pre.php
+No syntax errors detected in server/context.php
+No syntax errors detected in server/prepostrequest.php
+No syntax errors detected in server/postrequest.php
+No syntax errors detected in server/index.php
+No syntax errors detected in server/diagnostics.php
+No syntax errors detected in server/scope.php
+No syntax errors detected in tests/reflection_ack_shutdown_check.php
+PASS the listener hook follows the turn plan within the scene; wrap-up guards the relationship queue

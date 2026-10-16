@@ -75,7 +75,9 @@ try {
     $soloResolved = pcvResolveScopeNames($solo + ['actions' => ['personal', 'intimate']], $known, 'Hawke');
     saCheck($v('ExtCmdStartSelfMasturbation', '', $soloResolved) === null, 'A solo self-directed moment is kept.');
     saCheck($v('Consume', '{"target":"0003133C:Mead"}', $soloResolved) === null, 'Drinking alone is kept.');
-    saCheck($v('ExtCmdKiss', '{"target":"Bruce"}', $soloResolved) === 'target_outside_scene', 'Solo cannot reach anyone else.');
+    saCheck($v('ExtCmdKiss', '{"target":"Bruce"}', $soloResolved) === 'action_not_allowed', 'Partner actions are not offered in solo scenes.');
+    saCheck($v('ExtCmdStartSelfMasturbation', '{"target":"Bruce"}', $soloResolved) === 'target_outside_scene',
+        'An offered self-directed action cannot target another NPC in a solo scene.');
     saCheck($v('Brawl', '{"target":"Bruce"}', $soloResolved) === 'action_not_allowed', 'Solo never brawls.');
 
     // Post-filter over CHIM action strings.
@@ -111,9 +113,10 @@ try {
         "Lidia|command|ExtCmdStartSelfMasturbation@\r\n",
         "Lidia|command|ExtCmdPutOnClothes@\r\n",
         "Lidia|command|ExtCmdRemoveClothes@{\"target\":\"Lidia\"}\r\n",
+        "Lidia|command|ExtCmdStartSelfMasturbation@{\"target\":\"Bruce\"}\r\n",
     ];
-    saCheck(array_values(pcvSceneActionPostFilter($soloActions)) === array_slice($soloActions, 5),
-        'Solo partner actions need a valid in-scene target; self-directed actions remain available.');
+    saCheck(array_values(pcvSceneActionPostFilter($soloActions)) === array_slice($soloActions, 5, 3),
+        'Solo partner actions are rejected and offered self-actions still reject an outside target.');
 
     unset($GLOBALS['PCV_REQUEST_SCOPE']);
     saCheck(pcvSceneActionPostFilter(['x|command|Attack@{}']) === ['x|command|Attack@{}'], 'Outside a scene the filter changes nothing.');

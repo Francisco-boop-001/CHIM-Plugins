@@ -1,0 +1,8 @@
+{
+  "command": "py -3 tests/package_check.py",
+  "cwd": "K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev",
+  "exit_code": 0,
+  "stdout": "package-check.stdout.txt",
+  "stderr": "package-check.stderr.txt",
+  "captured_at_utc": "2026-10-16T23:18:02.9748582Z"
+}

@@ -1,0 +1,3 @@
+RUNTIME_TMPDIR=/tmp/pcv-020-checks.SQpRbJ
+No syntax errors detected in server/installation_guard.php
+No syntax errors detected in server/json_response_custom.php

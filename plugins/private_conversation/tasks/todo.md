@@ -438,12 +438,33 @@ Full-core beta remains NOT READY. The controlled-ALPHA candidate decision and ac
 - [x] Correct the operator checklist to distinguish disposable acceptance from the separately authorized, backed-up live ALPHA test.
 - [x] Run final scoped JSON, link, LF/newline, diff-whitespace and SHA-256 checks; report exact hashes to the lead.
 - [x] Builder: create and verify the candidate assets and record actual member/hash output.
-- [ ] Lead: review the source allowlist, commit/tag/publish the ALPHA release, verify fresh public assets and record publication evidence.
+- [x] Lead: review the source allowlist, commit/tag/publish the ALPHA release, verify fresh public assets and record publication evidence.
 - [ ] Full HTTP pair/END/wrap/removal, public ACK scheduling, native recovery, and gameplay remain NOT RUN for 0.1.19; beta certification remains pending.
 
-Plan and source assessment: `tasks/release-0.1.19/plan.md` and `tasks/release-0.1.19/source-report.md`. Release operations remain lead-owned.
+Plan and source assessment: `tasks/release-0.1.19/plan.md` and `tasks/release-0.1.19/source-report.md`. Publication is complete; final verification is in tasks/release-0.1.19/publication-evidence.md.
 
 
-### Prepublication review
+### Final release review
 
-Source/docs are accepted. The focused four package checks, 20-file payload delta, and independent 16-assert archive review passed. The clean committed-source build, tag and draft/public asset checks, publication, and canonical main/hub advancement remain lead-owned and pending.
+Source/docs and the PCV-only hub snapshot are accepted. The focused four package checks, 20-file payload delta, independent 16-assert archive review, clean committed-source build, tag, draft/public asset comparisons, publication, and canonical main/hub advancement are complete; see tasks/release-0.1.19/publication-evidence.md. The public ALPHA remains distinct from beta certification: exact-build full HTTP pair/END/wrap/removal, fresh public ACK scheduling, native recovery, and gameplay remain NOT RUN.
+
+
+## Private Conversation 0.1.20 ALPHA release preparation - 2026-10-16
+
+- [x] Read the required Ponytail, CHIM release, and prerelease workflow instructions plus the 0.1.18/0.1.19 source, package, publication, and hub receipts.
+- [x] Record the current PCV and hub remotes, refs, release trees, untracked protected evidence, and accepted duplicate-copy ownership design in tasks/release-0.1.20/plan.md.
+- [x] Open the exclusive test-only lease and record registered distro names/status, test/live VHD metadata, WSL_DISTRO_NAME, PHP version, uid, temp path, and mounted source path. The live distro was not entered; the final Windows-only postcheck found all WSL distros stopped. The live VHD size and timestamp remain metadata only, not a content hash.
+- [x] Capture solo RED before the scope fix and solo GREEN afterward. Raw GREEN streams and the reported RED marker are in tasks/release-0.1.20/runtime-evidence.
+- [x] Review the accepted solo and duplicate-copy diffs and run the bounded test-distro fixtures. Solo action checks and duplicate owner/state/HTTP refusal gates passed in both required path/load-order configurations.
+- [x] Run the bounded guard regression and final syntax/turn-hook checks. Page, scope, and postrequest terminal fixtures passed; the regression runner stopped at the ACK shutdown fixture's explicit missing disposable PostgreSQL precondition before connecting. The final command passed turn_hooks_check.php and syntax for 11 touched product PHP files plus the ACK fixture. ACK shutdown behavior remains NOTRUN, and one directory_unavailable logger warning remains unattributed.
+- [x] Finish README/distribution notes and manifest version for ALPHA 0.1.20 while preserving the schema/channel contract and compatibility reference. Document the limited solo-helper proof, duplicate recovery, state-migration limit, and unsupported multiple unguarded-old-copy case.
+- [x] Add only server/installation_guard.php to the package runtime allowlist and update exact package member/count assertions to 21 server files.
+- [x] Run py -3 tests/package_check.py (4 tests, exit 0) and build the task-owned working-tree candidate under tasks/release-0.1.20/package-evidence/candidate. The candidate is not a clean committed-source release build.
+- [x] Independently inventory asset members, source-byte equality, MO2 inner-DWPkg equality, and all four SHA256SUMS entries; see package-evidence/candidate-inventory.stdout.txt.
+- [x] Prepare the exact source staging allowlist and hash manifest, run git diff --check, and record a review section. Do not stage before root accepts the source gate.
+- [ ] After root source acceptance, stage only the reviewed allowlist, create the accepted PCV source commit and annotated tag, rebuild from clean exported source, and compare every candidate asset byte-for-byte.
+- [ ] After fresh public downloads verify against the approved build, publish the normal-flag ALPHA release and advance only the PCV subtree in the hub with path/mode/blob proofs.
+
+### Review
+
+Solo action behavior and duplicate owner election/inactive HTTP refusal passed their bounded fixtures. Package contract tests passed and the current working-tree candidate is inventoried with exact hashes, but this is not the clean committed-source build required for publication. The guarded ACK shutdown behavior remains NOTRUN because no disposable PostgreSQL target was configured; no connection was made. The retained postrequest logger directory_unavailable warning is unattributed. Full CHIM bootstrap/schema refresh, live install, providers/database, public ACK scheduling, native recovery, client sync, and Skyrim gameplay remain unverified. The release remains ALPHA. The overall source gate, staging, commit/tag, publication, and hub update remain pending. CHIM core, Mind Poisoning, live installation, and game data remain outside this change.

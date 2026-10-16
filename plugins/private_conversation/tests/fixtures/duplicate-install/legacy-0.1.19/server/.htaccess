@@ -1,0 +1,3 @@
+<If "%{REQUEST_FILENAME} =~ m#(?:^|/)state(?:/|$)#i">
+    Require all denied
+</If>

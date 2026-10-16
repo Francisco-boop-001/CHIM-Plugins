@@ -1,0 +1,23 @@
+# Private Conversation 0.1.20 — ALPHA
+
+This ALPHA release is prepared for controlled testing. A normal GitHub release flag is intended for Plugin Manager discovery; it does not make the package beta or stable. The solo and focused duplicate ownership/HTTP gates passed. The bounded request-hook regression runner passed page_check.php, scope_check.php, and postrequest_terminal_check.php, then stopped before the database-backed ACK shutdown fixture because its guarded disposable PostgreSQL target was not configured; no database connection was made. A separate final run passed turn_hooks_check.php and syntax-checked all 11 touched product PHP files plus the ACK fixture. One postterminal logger directory_unavailable warning is retained in the raw evidence and remains unattributed. These checks do not constitute a full CHIM bootstrap or live runtime proof.
+
+## What changed
+
+Solo scenes now expose personal actions and the three self-directed intimate actions only. Physical group actions are removed even if a caller hands the solo scene a physical group.
+
+When a guarded 0.1.20 copy is present, one deterministic copy owns hook registration and handling. With two guarded 0.1.20 copies, the stable private_conversation path takes precedence over the repository-slug path. Any single unguarded pre-0.1.20 copy remains the owner while a new copy is installed, regardless of hook load order. The 0.1.20 copy stays inactive until the older duplicate is removed. Two unguarded 0.1.19 copies can still collide even if a guarded 0.1.20 copy is present. Upgrade/replace or remove the extra old copy before relying on 0.1.20. PCV does not automatically migrate runtime state between install paths.
+
+An inactive copy reports the owning installation in CLI diagnostics and refuses its UI request with HTTP 409 before mutation or refresh side effects.
+
+## Evidence and limits
+
+The solo action hook fixture was captured failing before the source fix. After the fix, scene_actions_hook_check.php and scene_actions_check.php passed, and PHP lint reported no syntax errors for server/scope.php. The offering fixture narrows synthetic ENABLED_FUNCTIONS and passes context_pre-shaped FUNC_LIST values plus action-schema enum values through pcvSceneActionListAllowed(); it does not invoke CHIM core action reconstruction. The separate post-filter assertion checks that disallowed serialized actions and self-actions targeting another NPC are removed. These fixtures do not establish full CHIM/SHARMAT dispatch or generated-action behavior.
+
+The duplicate-install fixture passed with an exact 0.1.19 source-tree copy and a generated Plugin Manager identity fixture. It covered new/new ownership and mixed 0.1.19/0.1.20 copies in both physical-folder placements and both hook load orders, plus generated-manifest single-copy ownership. The elected owner loaded the real state/scope functions and completed `pcv_stage()` ARM, `pcv_read()`, END, and readback against its path-keyed state store. Separately, loopback HTTP checks confirmed the inactive refresh, Logs, and POST routes return 409, name the owner, preserve its seeded state, and create no inactive-copy store. CLI diagnostics also refused from the inactive copy with the owner path.
+
+The ARM/END result is compositional proof through the actual hook-loaded state API, not an ARM/END POST through the owner Plugin Page. The inactive page boundary and owner state API are separate fixture checks; this is not a full CHIM database/catalog bootstrap or live installation.
+
+Duplicate-copy ownership and bounded temporary-copy HTTP fixtures passed, including the actual owner state API and inactive-route refusal; they do not exercise owner-page ARM/END or a full CHIM database/catalog bootstrap. The broader guard runner passed the page, scope, and terminal-hook fixtures, then stopped at the ACK shutdown fixture's explicit missing disposable-database guard before making a connection. A separate final run passed turn-hook behavior and syntax checks; it did not execute ACK shutdown behavior. One directory_unavailable logger warning from the terminal-hook check remains retained and unattributed. Full CHIM bootstrap/schema refresh, live installation, provider/database behavior, public ACK scheduling, native recovery, and Skyrim gameplay are not established by these checks. The release remains ALPHA and is not beta or stable certification.
+
+See [README — Install and update](../README.md#install-and-update) for the supported installation routes. Install one PCV source at a time and verify downloaded assets against the release's published checksums.

@@ -1,0 +1,6 @@
+Private Conversation logger: directory_unavailable request_id=e8840655-f2e2-4d70-bed0-202b3cc6e03e config_id=123e4567-e89b-42d3-a456-426614174000
+PHP Fatal error:  Uncaught RuntimeException: Refusing a connection outside the guarded disposable PostgreSQL target. in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/reflection_ack_shutdown_check.php:7
+Stack trace:
+#0 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/reflection_ack_shutdown_check.php(38): shutdownCheck()
+#1 {main}
+  thrown in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/reflection_ack_shutdown_check.php on line 7

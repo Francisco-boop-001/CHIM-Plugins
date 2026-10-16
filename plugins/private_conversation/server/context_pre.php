@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+if (!(require __DIR__ . '/installation_guard.php')) {
+    return;
+}
+
 require_once __DIR__ . '/scope.php';
 
 $requestType = is_string($GLOBALS['gameRequest'][0] ?? null) ? $GLOBALS['gameRequest'][0] : 'other';

@@ -1153,6 +1153,11 @@ function pcvSceneAllowedActionCodes(array $resolvedScope): array
             $codes[] = $code;
         }
     }
+    if (($resolvedScope['scene_mode'] ?? 'pair') === 'solo') {
+        $codes = array_intersect($codes, array_merge($groups['personal'], [
+            'ExtCmdRemoveClothes', 'ExtCmdPutOnClothes', 'ExtCmdStartSelfMasturbation',
+        ]));
+    }
     return array_values(array_unique($codes));
 }
 

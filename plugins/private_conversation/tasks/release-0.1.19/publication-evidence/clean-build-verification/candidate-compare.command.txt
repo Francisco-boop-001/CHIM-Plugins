@@ -1,0 +1,18 @@
+$script = @'
+from pathlib import Path
+import hashlib, json
+root = Path(r'K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev')
+clean = root / 'dist' / 'release-0.1.19-clean' / 'source' / 'dist' / 'release-v0.1.19-clean'
+candidate = root / 'tasks' / 'release-0.1.19' / 'package-evidence' / 'private-build-0.1.19'
+names = ['SHA256SUMS.txt','chim-plugin.tar.gz','private_conversation-0.1.19-mo2.zip','private_conversation-0.1.19.dwpkg','private_conversation.tar.gz']
+for d in (clean,candidate):
+    if not d.is_dir(): raise SystemExit(f'missing release directory: {d}')
+    present = sorted(p.name for p in d.iterdir() if p.is_file())
+    if present != sorted(names): raise SystemExit(json.dumps({'directory':str(d),'members':present}))
+items=[]
+for name in names:
+    a=(clean/name).read_bytes(); b=(candidate/name).read_bytes()
+    items.append({'name':name,'clean_size':len(a),'candidate_size':len(b),'clean_sha256':hashlib.sha256(a).hexdigest(),'candidate_sha256':hashlib.sha256(b).hexdigest(),'byte_identical':a==b})
+print(json.dumps({'clean_release_dir':str(clean),'candidate_dir':str(candidate),'all_five_byte_identical':all(x['byte_identical'] for x in items),'files':items},sort_keys=True))
+if not all(x['byte_identical'] for x in items): raise SystemExit(1)
+'@; $script | py -3 -

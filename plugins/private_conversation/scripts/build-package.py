@@ -25,6 +25,7 @@ SERVER_FILES = (
     "context_pre.php",
     "diagnostics.php",
     "index.php",
+    "installation_guard.php",
     "json_response_custom.php",
     "log.php",
     "log_reader.php",

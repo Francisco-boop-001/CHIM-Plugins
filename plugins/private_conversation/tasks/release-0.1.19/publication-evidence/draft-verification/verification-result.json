@@ -1,0 +1,78 @@
+{
+  "checked_at_utc": "2026-10-16 21:24:20 UTC",
+  "result": "PASS",
+  "source_identity": {
+    "tag": "private_conversation-v0.1.19",
+    "tag_object": "fa7d4599099fdd471ed00936517b7b0f019dbe04",
+    "tag_target_commit": "c7ec6cde8231ebb103ef7d443b09789eb4b29691",
+    "commit_tree": "dc76ae7ac1551622767135b47487b6b6118aaa43",
+    "clean_tree_receipt_matches": true,
+    "tag_signature": "unsigned"
+  },
+  "draft_release": {
+    "id": 415388759,
+    "tag_name": "private_conversation-v0.1.19",
+    "title": "Private Conversation 0.1.19 — ALPHA",
+    "draft": true,
+    "prerelease": false,
+    "published_at": null,
+    "asset_count": 5,
+    "saved_metadata_matches_current_api": true
+  },
+  "assets": [
+    {
+      "name": "chim-plugin.tar.gz",
+      "size": 3051196,
+      "sha256": "2453de55c50c04c6a167432bb00d02eaa2e42ccf353ba64e71e3f3ebe99d141f",
+      "api_digest_size_match": true,
+      "clean_to_draft_download_byte_equal": true
+    },
+    {
+      "name": "private_conversation-0.1.19-mo2.zip",
+      "size": 3054306,
+      "sha256": "6dcb27863fae36ab3c6deab5f8ba6255aea02a68a56af8c439df95a78774ebb9",
+      "api_digest_size_match": true,
+      "clean_to_draft_download_byte_equal": true
+    },
+    {
+      "name": "private_conversation-0.1.19.dwpkg",
+      "size": 3464673,
+      "sha256": "d78a969480375d448afe347142ddd320c66a201ed01ab1e43d858aa490d2ccf6",
+      "api_digest_size_match": true,
+      "clean_to_draft_download_byte_equal": true
+    },
+    {
+      "name": "private_conversation.tar.gz",
+      "size": 3051279,
+      "sha256": "921518e1a750fd2595ac030412fd05ec65909b7b10e5548766c27588f111b34c",
+      "api_digest_size_match": true,
+      "clean_to_draft_download_byte_equal": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 381,
+      "sha256": "096cce8e8dcbf72aa0085be890baee7d33814f8e33c0a3fd4fb60f4a1df2e56a",
+      "api_digest_size_match": true,
+      "clean_to_draft_download_byte_equal": true
+    }
+  ],
+  "release_body": {
+    "committed_note": "distribution/private_conversation-v0.1.19.md",
+    "api_body_exact_match": true,
+    "saved_draft_body_matches_current_api": true,
+    "character_count": 6432
+  },
+  "protected_0_1_18": {
+    "id": 414442757,
+    "tag_name": "private_conversation-v0.1.18",
+    "draft": false,
+    "prerelease": true,
+    "asset_count": 4,
+    "exact_asset_name_id_size_digest_set_matches_before_snapshot": true
+  },
+  "limitations": [
+    "The 0.1.19 release is still a draft, so public download behavior is not verified.",
+    "No installation, runtime, or gameplay check was performed.",
+    "The annotated 0.1.19 tag is unsigned."
+  ]
+}

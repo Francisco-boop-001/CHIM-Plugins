@@ -1,0 +1,62 @@
+{
+  "hub": {
+    "base_commit": "3feee95f9754b05902da8b77efc7d8454f4fb754",
+    "staged_tree_reported_by_staging_gate": "9012b1ecae0d4d07af9627a225bb611303ba4532",
+    "changed_paths": 37,
+    "approved_shared_documents": [
+      "README.md",
+      "docs/deployment-migration.md",
+      "docs/development.md"
+    ],
+    "protected_paths_compared_to_base": 239,
+    "protected_path_mode_or_blob_mismatches": 0,
+    "protected_paths_staged": 0
+  },
+  "pcv": {
+    "release_commit": "c7ec6cde8231ebb103ef7d443b09789eb4b29691",
+    "release_tree": "dc76ae7ac1551622767135b47487b6b6118aaa43",
+    "staged_paths": 256,
+    "missing_paths": 0,
+    "extra_paths": 0,
+    "mode_or_blob_mismatches": 0,
+    "server_payload_files": 20,
+    "dwpkg_file_count": 22,
+    "dwpkg_server_blob_mismatches": 0,
+    "flat_tar_file_count": 20,
+    "flat_tar_server_blob_mismatches": 0,
+    "dwpkg_sha256": "d78a969480375d448afe347142ddd320c66a201ed01ab1e43d858aa490d2ccf6",
+    "flat_chim_plugin_tar_gz_sha256": "2453de55c50c04c6a167432bb00d02eaa2e42ccf353ba64e71e3f3ebe99d141f"
+  },
+  "shared_document_sha256": {
+    "README.md": "f4ca6a61eee3fbebeafb9b4b797b6201659df2ed213948791928d53c782c2bde",
+    "docs/deployment-migration.md": "9754eb909b1c647823256737d44b56d08d57f5380c04d97c10d3bf038b89231b",
+    "docs/development.md": "b3df8a12210cd167acdb4f67fac30547f343b5d531615e4de033cca4698386d2"
+  },
+  "checks": [
+    {
+      "command": "git ls-tree -r --full-tree <release-commit> plus git ls-files --stage; compare every plugins/private_conversation path, mode, and blob ID",
+      "exit_code": 0,
+      "result": "256 entries matched; no missing, extra, or mismatched entry"
+    },
+    {
+      "command": "git ls-tree -r --full-tree HEAD plus git ls-files --stage; compare paths outside plugins/private_conversation and the three approved shared documents",
+      "exit_code": 0,
+      "result": "239 protected entries matched path, mode, and blob ID; no missing, extra, or mismatched entry"
+    },
+    {
+      "command": "Read the 20 server blobs from the DWPkg ZIP and flat TAR.GZ; calculate Git blob IDs and compare to the release commit server/ tree",
+      "exit_code": 0,
+      "result": "20/20 matched in each archive; DWPkg has 22 total files and the flat archive has 20"
+    },
+    {
+      "command": "git show :<shared-document>; calculate SHA-256 of staged bytes",
+      "exit_code": 0,
+      "result": "Three staged document hashes recorded above; worktree has no unstaged changes"
+    }
+  ],
+  "limits": [
+    "Git path/mode/blob identities are the accepted release and staging boundary.",
+    "The repository-wide source ZIP was not used to claim raw subtree byte equality.",
+    "No runtime or test command was run for this review."
+  ]
+}
