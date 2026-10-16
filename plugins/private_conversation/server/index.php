@@ -359,10 +359,11 @@ function pcv_render_page(
     $lastTurn =$status === 'active' && is_string($state['config_id'] ?? null) && function_exists('pcv_log_read_last_turn')
         ? pcv_log_read_last_turn($state['config_id']) : null;
     if (is_array($lastTurn)) {
-        $spoke = $lastTurn['outcome'] === 'postrequest_observed';
-        $scopeSummary .= '<p class="last-turn">Last scene turn: ' . ($spoke ? 'spoke' : 'ended without speech')
-            . ' (' . pcv_html(substr($lastTurn['timestamp'], 11, 8)) . ' UTC).'
-            . ($spoke ? '' : ' A silent rechat is normal when CHIM has used its rechat budget.') . '</p>';
+        $observed = $lastTurn['outcome'] === 'postrequest_observed';
+        $scopeSummary .= '<p class="last-turn">Last scene turn: ' . ($observed
+            ? 'completion hook observed; speech delivery and playback are unknown.'
+            : 'completion hook not observed; request reason, speech delivery and playback are unknown. Check CHIM/native logs for the actual reason.')
+            . ' (' . pcv_html(substr($lastTurn['timestamp'], 11, 8)) . ' UTC).</p>';
     }
     if ($pending) {
         if ($pendingEnd) {

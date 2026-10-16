@@ -1,0 +1,28 @@
+{
+  "pcv_server_changed_files": [
+    "index.php"
+  ],
+  "manifest_pins_routing_logger_state_unchanged": true,
+  "mp_head_unchanged": true,
+  "gaming_vhd": {
+    "baseline_length": 183463051264,
+    "current_length": 183463051264,
+    "baseline_write_utc": "2026-10-15T18:09:41.3800718Z",
+    "current_write_utc": "2026-10-15T18:16:14.6184104Z",
+    "mtime_equal": false,
+    "attribution": "unknown",
+    "live_registration": "D:\\DwemerAI4Skyrim3",
+    "test_registration": "E:\\WSL\\DwemerAI4Skyrim3-test",
+    "last_observed_live_state": "Stopped",
+    "last_observed_test_state": "Stopped"
+  },
+  "final_explicit_test": {
+    "distro": "DwemerAI4Skyrim3-test",
+    "in_distro_assertion_passed": true,
+    "fixture_exit": 0,
+    "gaming_state_before_after": "Stopped",
+    "test_state_final": "Stopped",
+    "gaming_write_utc_after": "2026-10-15T18:16:14.6184104Z",
+    "test_write_utc_after": "2026-10-15T18:26:50.5904669Z"
+  }
+}

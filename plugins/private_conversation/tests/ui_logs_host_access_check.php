@@ -50,8 +50,20 @@ try {
     $html = pcv_render_page('fixture-token', ['status' => 'active', 'pending' => false, 'config_id' => $config,
         'scope' => ['scene_mode' => 'pair', 'actor_a' => '101', 'actor_b' => '202', 'exclude_player' => true, 'bystander_mode' => 'exclude']],
         ['101' => 'Lidia', '202' => 'Bruce']);
-    hostCheck(str_contains($html, 'Last scene turn: ended without speech') && str_contains($html, 'rechat budget'),
-        'An active scene shows its last turn and explains a silent rechat.');
+    hostCheck(str_contains($html, 'Last scene turn: completion hook not observed')
+        && str_contains($html, 'request reason, speech delivery and playback are unknown')
+        && str_contains($html, 'Check CHIM/native logs for the actual reason')
+        && !str_contains($html, 'ended without speech') && !str_contains($html, 'rechat budget'),
+        'An unobserved completion hook leaves request reason, delivery, and playback unknown.');
+    pcv_log_event('routing.request_finished', 'info', 'postrequest_observed', null,
+        ['phase' => 'postrequest', 'route' => 'player_speech']);
+    $observed = pcv_render_page('fixture-token', ['status' => 'active', 'pending' => false, 'config_id' => $config,
+        'scope' => ['scene_mode' => 'pair', 'actor_a' => '101', 'actor_b' => '202', 'exclude_player' => true, 'bystander_mode' => 'exclude']],
+        ['101' => 'Lidia', '202' => 'Bruce']);
+    hostCheck(str_contains($observed, 'Last scene turn: completion hook observed')
+        && str_contains($observed, 'speech delivery and playback are unknown')
+        && !str_contains($observed, 'Last scene turn: spoke') && !str_contains($observed, 'rechat budget'),
+        'An observed completion hook does not claim speech delivery or playback.');
     $other = pcv_render_page('fixture-token', ['status' => 'active', 'pending' => false, 'config_id' => '123e4567-e89b-42d3-a456-4266141740ff',
         'scope' => ['scene_mode' => 'pair', 'actor_a' => '101', 'actor_b' => '202', 'exclude_player' => true, 'bystander_mode' => 'exclude']],
         ['101' => 'Lidia', '202' => 'Bruce']);

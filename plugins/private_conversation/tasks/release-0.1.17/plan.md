@@ -5,12 +5,12 @@ User authorization: commit, push and publish Private Conversation. Preserve prio
 Baseline canonical HEAD/main: 1de11b22b7d8603143070f0f884e3c41eb28d054. Local branch fix/mo2-metadata-2026-10-08 contains reviewed MO2 metadata fix. Public latest PCV release is0.1.16; next proposed version0.1.17. Hub remote main b1adf9a610e12d5d81d3cc72fb8f1b1c957b50ff.
 
 - [x] Source owner maintenance_state_http: update server/manifest.json to0.1.17, current PCV-only references in README, new distribution/private_conversation-v0.1.17.md. Preserve MP dependency references and all runtime files. Existing builder/test changes already accepted; fresh package gate after version update. Own source-report.md and fresh candidate evidence under this task. No commits/push/publication until lead gate.
-- [ ] Hub owner maintenance_routing: inspect current hub convention in fresh projects/CHIM-Plugins-release-0.1.17 clone; prepare PCV-only README/doc updates. No PCV snapshot copy until source commit accepted. Preserve all unrelated plugin paths/content. Own hub-report.md. No commit/push until lead gate.
-- [ ] Independent reviewer mo2_package_review: inspect accepted metadata diff and release source scope, then sequentially verify clean-source/clean-tag builds, manifests, actual archive content/reproducibility and preservation evidence. Own package-review.md and review evidence under this task. No product edits, duplicate broad tests or installed environment access.
-- [ ] Lead review source diffs, focused test output and failure paths; explicit allowlist commit and immutable tag.
-- [ ] Verify clean-tag rebuild and draft download bytes; publish dedicated release only after gates. Do not overwrite older tags/assets.
-- [ ] Update plugin hub using existing dedicated-release links/source snapshot convention, verify exact PCV subtree identity and unrelated-tree preservation. Advance mutable main refs only after required versioned assets are public; no force pushes.
-- [ ] Verify public release/ref/assets and hub links, record final judgment.
+- [x] Hub owner maintenance_routing: inspect current hub convention in fresh projects/CHIM-Plugins-release-0.1.17 clone; prepare PCV-only README/doc updates. No PCV snapshot copy until source commit accepted. Preserve all unrelated plugin paths/content. Own hub-report.md. No commit/push until lead gate.
+- [x] Independent reviewer mo2_package_review: inspect accepted metadata diff and release source scope, then sequentially verify clean-source/clean-tag builds, manifests, actual archive content/reproducibility and preservation evidence. Own package-review.md and review evidence under this task. No product edits, duplicate broad tests or installed environment access.
+- [x] Lead review source diffs, focused test output and failure paths; explicit allowlist commit and immutable tag.
+- [x] Verify clean-tag rebuild and draft download bytes; publish dedicated release only after gates. Do not overwrite older tags/assets.
+- [x] Update plugin hub using existing dedicated-release links/source snapshot convention, verify exact PCV subtree identity and unrelated-tree preservation. Advance mutable main refs only after required versioned assets are public; no force pushes.
+- [x] Verify public release/ref/assets and hub links, record final judgment.
 
 ## Acceptance and constraints
 
@@ -21,3 +21,4 @@ Expected external actions: authenticated GitHub release/tag/main pushes and user
 Ownership: source metadata/docs and hub checkout are disjoint. Reviewer checks completed producers sequentially. Reuse original responsible agent for defects. Lead keeps plan/todo/review records; never stages untracked scratch, binary candidate/downloads or unrelated historical files.
 
 Review: source preparation and candidate package gate accepted by the lead and independent reviewer; no blocking findings. Clean committed-source build, upload and publication checks remain.
+Final review: publication-evidence.md records accepted source/package/draft/public/hub gates. Clean committed-source rebuild plus exact remote tag identity established the immutable release source without a redundant rebuild of the same SHA. Dedicated release and both main refs published; concurrent MP 0.1.19 and its evidence preserved. No runtime claims or installed changes.

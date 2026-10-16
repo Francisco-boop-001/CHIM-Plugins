@@ -1,0 +1,20 @@
+# Mind Poisoning subject diagnostics handoff
+
+Copy this prompt to the Mind Poisoning owner. It is a separate MP implementation task; it does not authorize a PCV change.
+
+```text
+Use gpt-6-luna agents at Max effort and Ponytail FULL. Split independent work into coherent tasks with distinct file ownership, use available capacity only where useful, and reuse each responsible agent for follow-up fixes. Do not parallelize dependent tasks or shared-file edits. Others share the workspace; preserve edits. The lead reviews every diff, call path, failure and test output, and writes no product code. Run the smallest meaningful checks; do not repeat broad suites without a remaining risk.
+
+Review MP's subject matching and diagnostics for the trace below. Preserve the existing exact utterance-ID and actor validation. Do not treat every no-subject result as a defect, and do not include raw dialogue in logs or reports.
+
+Observed trace: Caracas, 2026-10-14 21:22–21:35, PCV 0.1.17, MP 0.1.19, client 3.5.1 (2026-10-13), pair Elsa (5124)/Lidia (5126). Seven MP utterance_id_absent events were for incoming Hawke Player-input acknowledgements, not NPC-output IDs. Separately, all 45 correlated NPC ACKs in this pair returned the MP reason no-subjects; reflection-no-subjects is the distinct solo-reflection reason. Aggregate words across those ACK texts were Hawke 0, Aela 0, Elsa 0, Lidia 0, Bloodstone 7, husband 3, you 12 and your 13. Those are totals, not per-ACK mappings. A separate solo Lidia event at 06:34 committed subject npc:2905, affinity 37 to 34.
+
+Source check: the current 0.1.19 authoring server/influence.php has SHA-256 4dced6b050a218dd7fcd87792cd625e1b31c28fbae0e19f4f276d4e84f82ce57. A four-case pure-PHP probe in DwemerAI4Skyrim3-test (PHP 8.2.29), calling its findSubjects helper without application bootstrap, returned: “my husband” → no subject; Hawke with playerName Hawke → canonical Player; Aela → npc:2905; and Elsa/Lidia excluded as speaker/listener while Aela remained. This validates only the helper against synthetic text/catalog data, not an MP request, transaction or live game.
+
+The current resolver's named-subject contract explains the pair `no-subjects` result here: it matches NPC catalog names and recognized aliases, plus Player aliases, in the ACK text; it excludes the event's speaker and listener and does not infer pronouns or relationship phrases. The evidence does not prove a matcher bug. Preserve the distinct solo `reflection-no-subjects` reason. Please:
+1. Confirm how to distinguish an expected missing ID on an incoming Player ACK from absent/invalid IDs on NPC ACKs, without weakening NPC validation.
+2. Check whether the pair `no-subjects` reason is sufficiently explainable through fixed, privacy-safe diagnostics. Do not log dialogue or infer a specific phrase from aggregate word counts. Keep the solo `reflection-no-subjects` reason distinct.
+3. Only as a separate optional, unapproved design question, assess whether deliberate context-grounded references (for example, “my husband”) are desired. Do not implement that redesign in this task. If separately approved later, resolve only from trusted actor/profile relationship context, require an unambiguous third party, and fail closed on ambiguity. Do not add a global “husband” → Player alias or silently change the current named-subject contract.
+
+Do not start, access or write to the stopped live game distro. For any WSL fixture, explicitly invoke `wsl.exe --distribution DwemerAI4Skyrim3-test` and verify inside the distro that `WSL_DISTRO_NAME` is `DwemerAI4Skyrim3-test` before running tests; never rely on an inherited/default distro selector. Use synthetic fixtures and isolated state only. Cover expected Player-ID absence, valid and invalid NPC IDs, speaker/listener exclusion, no named third party, and reason-code separation. Do not implement optional relationship-context redesign without separate authorization. Return exact source revision, the smallest owned MP diff and focused test results; do not use a provider, live database, raw user dialogue, installed gameplay, publish or release.
+```

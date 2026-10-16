@@ -132,13 +132,19 @@ if ($isOrdinaryInput) {
         if ($inGameCommand['command'] === 'end'
             && is_string($endKey) && in_array($endState['status'] ?? null, ['active', 'pending', 'unavailable'], true)) {
             pcvRoutingLogStart($requestType);
-            pcv_stage($endKey, ['enabled' => false], [], null, 'ended_in_game');
+            $ended = pcv_stage($endKey, ['enabled' => false], [], null, 'ended_in_game');
+            if (($ended['status'] ?? null) !== 'off') {
+                pcvBlockRequest('Private Conversation could not confirm that the scene ended. It may still be active or pending; request stopped for safety.', 'state_unavailable', 'preprocessing', $endState, true);
+            }
             pcvEndRequestQuietly('Private Conversation scene ended.', 'ended_in_game', 'preprocessing');
         }
         // 0.1.15 (L7): solo has no closing turn; "wrap up:" ends a stored solo scene instead of becoming its topic.
         if ($inGameCommand['command'] === 'wrap' && is_string($endKey) && pcvWrapEndsScene($endState)) {
             pcvRoutingLogStart($requestType);
-            pcv_stage($endKey, ['enabled' => false], [], null, 'wrapped_up');
+            $ended = pcv_stage($endKey, ['enabled' => false], [], null, 'wrapped_up');
+            if (($ended['status'] ?? null) !== 'off') {
+                pcvBlockRequest('Private Conversation could not confirm that the scene ended. It may still be active or pending; request stopped for safety.', 'state_unavailable', 'preprocessing', $endState, true);
+            }
             pcvEndRequestQuietly('Private Conversation reflection ended.', 'ended_in_game', 'preprocessing');
         }
     }
@@ -331,13 +337,17 @@ $GLOBALS['PCV_REQUEST_SCOPE'] = array_replace($state, [
 ]);
 if ($wrapUp) {
     // The closing reply is already routed from PCV_REQUEST_SCOPE; end the stored scene now so nothing follows it.
+    $ended = null;
     try {
         $wrapKey = pcv_current_playthrough_key();
         if (is_string($wrapKey)) {
-            pcv_stage($wrapKey, ['enabled' => false], [], null, 'wrapped_up');
+            $ended = pcv_stage($wrapKey, ['enabled' => false], [], null, 'wrapped_up');
         }
     } catch (Throwable $error) {
         pcvRoutingLogException('preprocessing', $error, $state);
+    }
+    if (($ended['status'] ?? null) !== 'off') {
+        pcvBlockRequest('Private Conversation could not confirm that the scene ended. It may still be active; request stopped for safety.', 'state_unavailable', 'preprocessing', $state, true);
     }
 }
 if ($route === 'solo_reflection' && is_string($state['config_id'] ?? null) && is_string($state['actor_a_id'] ?? null)) {

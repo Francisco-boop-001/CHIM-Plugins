@@ -1,9 +1,8 @@
 <?php
 declare(strict_types=1);
 
-// Live 0.1.9 finding: request_unobserved covered both failures and CHIM's deliberate stops
-// ("Rechat: pre-roll budget exhausted (2/2) — terminating", main.php:1216, invisible to plugins).
-// An unobserved finish must say which kind of request ended without speech.
+// request_unobserved means the completion hook did not record a terminal outcome. It does not
+// establish why processing stopped or whether speech reached playback.
 
 define('PCV_LOG_TESTING', true);
 require_once dirname(__DIR__) . '/server/log.php';

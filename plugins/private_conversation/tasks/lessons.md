@@ -42,3 +42,6 @@
 - Mistake pattern: inferring that metadata cannot affect MO2 installer validation because the installer does not parse its fields.
   - Corrected rule: trace the selected game's content checker as well as metadata parsing; Skyrim's checker accepts root .ini files, while the installed-mod tree excludes meta.ini and uses the separate validated flag.
   - Prevention: compare real public plugin payloads and both archive/install and installed-mod paths before promising or dismissing a warning remedy. Respect a user's request for online-only investigation; do not retry denied application access.
+- Mistake pattern: treating equal event counts as evidence that missing-ID ACKs belong to unacknowledged NPC output, or treating a completion hook as proof of speech.
+  - Corrected rule: correlate exact utterance/request IDs, producer identity and timestamps before linking records; hook observation, server emission, queueing, playback and ACK are distinct facts.
+  - Prevention: inspect incoming payload shape and native delivery traces before assigning a cause; preserve unknown outcomes when PCV cannot observe the boundary.

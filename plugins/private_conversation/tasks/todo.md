@@ -312,8 +312,46 @@ Review: tasks/mo2-metadata-fix-2026-10-08/final-review.md accepts the minimal me
 ## Publish Private Conversation 0.1.17 — 2026-10-09
 
 - [x] Prepare/review 0.1.17 source metadata and PCV-only hub changes.
-- [ ] Commit scoped source, verify immutable tag/reproducible packages.
-- [ ] Verify draft assets, publish, then advance mutable update refs.
-- [ ] Verify public downloads/refs/hub and record final judgment.
+- [x] Commit scoped source, verify immutable tag/reproducible packages.
+- [x] Verify draft assets, publish, then advance mutable update refs.
+- [x] Verify public downloads/refs/hub and record final judgment.
 
 Plan: tasks/release-0.1.17/plan.md. User authorized commit, push and publication; no installed changes or separate Mind Poisoning work.
+Review: tasks/release-0.1.17/publication-evidence.md accepts the published 0.1.17 PRE-ALPHA release, exact public asset bytes, update manifest and tagged hub snapshot. Concurrent MP 0.1.19 work was preserved. Package proof is not native MO2/sync/gameplay proof; no installed environments were changed.
+
+## PCV diagnostic clarity — 2026-10-15
+
+- [x] Correct last-turn UI claims with focused render verification.
+- [x] Clarify diagnostic boundaries and prepare separate core/MP handoff prompts.
+- [x] Review all diffs, checks and scope preservation.
+
+Plan: tasks/diagnostic-clarity-2026-10-15/plan.md. Live distro remains stopped; only the test distro is authorized for checks. No publication or installation.
+
+Review: tasks/diagnostic-clarity-2026-10-15/final-review.md accepts the local diagnostic wording fix, explicit test-distro render PASS, four-case subject probe and separate handoff prompts. No publication or core/MP implementation. Gaming VHD timestamp change remains unattributed; final explicit test left gaming stopped and its later timestamp stable.
+
+## PCV working-tree ALPHA assessment and END acceptance docs — 2026-10-15
+
+- [x] Capture pre-product-edit hashes and current shared diffs.
+- [x] Scene owner: verify disable-failure handling for direct END, solo wrap-up, and pair/group wrap-up with an isolated test-distro fixture and successful/no-scene controls.
+- [x] Update README overview, compatible manifest description, and operator acceptance evidence/limits.
+- [x] Run bounded Windows-only JSON/link/diff checks; no WSL/runtime command from the documentation owner.
+- [x] Complete final review after lead conclusion.
+
+Plan: tasks/alpha-end-2026-10-15/plan.md. Current working-tree ALPHA assessment only; published 0.1.17 remains PRE-ALPHA. No packaging, install, commit, or publication.
+
+Review: lead accepted after independent aggregate review. The scene owner's RED/GREEN hook fixture and existing END-command fixture passed in the explicitly asserted test distro; the hook test stubs stage results and is not a real storage-fault or live-game check. Manifest JSON and unchanged fields, new Markdown paths/fragments, tracked diff whitespace, and baseline PCV server hashes passed Windows-only checks. See tasks/alpha-end-2026-10-15/final-review.md.
+
+## Private Conversation 0.1.18 ALPHA source metadata and release docs — 2026-10-15
+
+- [x] Capture pre-edit hashes for the authorized release files and confirm the explicit source staging allowlist.
+- [x] Update current README/install version references and manifest version/ALPHA description; preserve 0.1.17 PRE-ALPHA history and manifest compatibility/channel fields.
+- [x] Add 0.1.18 ALPHA distribution notes with accurate END behavior, evidence limits, single-source install guidance, and no fabricated hashes.
+- [x] Run bounded Windows-only JSON/link/name/diff/whitespace checks; write source report and hand off allowlist.
+- [ ] Build owner: candidate package and focused final-tree checks; lead: commit the explicit source allowlist.
+- [ ] Build owner: clean committed-source rebuild and exact package hashes; lead: immutable tag push, draft asset download checks, then publish verified assets.
+- [ ] Hub owner: PCV-only canonical main/hub snapshot and pointers after publication; lead: verify public refs/downloads.
+- [ ] Add publication evidence separately after public verification; do not put it in the initial source commit or invent checksums before actual builder output.
+
+Plan: tasks/release-0.1.18/plan.md. Release operations remain lead-owned; no package/install/commit/tag/push/publication by this metadata owner.
+
+Review: tasks/release-0.1.18/source-report.md records the final metadata/docs scope, pre-edit hashes, invariant checks, verified links, and exact initial staging allowlist. The release gate remains open until the build, commit, tag, publication, hub, and public-download checks are completed by their owners.

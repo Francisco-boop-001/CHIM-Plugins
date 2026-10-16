@@ -1,0 +1,131 @@
+{
+  "captured_at_utc": "2026-10-16T01:11:46.2142543Z",
+  "purpose": "Pre-product-edit baseline; hashes capture shared working-tree state after this task plan/todo entry was created.",
+  "target_file_sha256": [
+    {
+      "path": "README.md",
+      "sha256": "48143DDA6222DAB0B44926CBF93D900C2DAFB8CBF3A93F33641D64332D2A87DE"
+    },
+    {
+      "path": "server/manifest.json",
+      "sha256": "67934E01653FF5F70173523064A3EDF1D45F340840CF6EFBFD5E6DF511D36E3E"
+    },
+    {
+      "path": "docs/operator-acceptance.md",
+      "sha256": "2A56EA2DEB58F7EC84B1483B6854B2383579F483417D1B3F040AC9E76386E01D"
+    },
+    {
+      "path": "tasks/todo.md",
+      "sha256": "88F6914BACDAFE01CDEA19608D942E6A8FA0FB5F0870B8BF4A65CA376E1E51CB"
+    }
+  ],
+  "pcv_server_file_sha256": [
+    {
+      "path": "server/.htaccess",
+      "sha256": "CCD754E3CCB7AC8B8A8EAFD60F087D6E5A4B936C17459720D5C512B5B927C05A"
+    },
+    {
+      "path": "server/context_pre.php",
+      "sha256": "6487A1C098B50276CDFFEC6A0717A3B006880E22D32BF38E39961E8F3EF974AC"
+    },
+    {
+      "path": "server/context.php",
+      "sha256": "B2191A5912195B24C45A320F56F6307A1F0945559EDECF0D35521E6BB1E85D26"
+    },
+    {
+      "path": "server/diagnostics.php",
+      "sha256": "1C658FE6F51FF813E8E34633A014673E2BCFC20FD6B24AD504EE0E3CEFC9CC4F"
+    },
+    {
+      "path": "server/index.php",
+      "sha256": "37D506ABFFF74495C5B8FC3B850D3A09E44D5B7D771AA75A9527CF1847FA09C0"
+    },
+    {
+      "path": "server/json_response_custom.php",
+      "sha256": "989015D8208EBCAA084FFB9D43E1A76A5A047921FAF66C5A6A59A98E21508A52"
+    },
+    {
+      "path": "server/log_reader.php",
+      "sha256": "20E43E24C6AE51CD552AA447DE99454B89D2AF4B8E55AD0DC879E3F151B315A0"
+    },
+    {
+      "path": "server/log.php",
+      "sha256": "60FD05ED1A71E8A45447D0E4D2A29658711491089995DBA4485A977EB2844C89"
+    },
+    {
+      "path": "server/manifest.json",
+      "sha256": "67934E01653FF5F70173523064A3EDF1D45F340840CF6EFBFD5E6DF511D36E3E"
+    },
+    {
+      "path": "server/postrequest.php",
+      "sha256": "92EF5193BDF9875C88E433B2CDC03AF27421188F022663B4F726733888D18431"
+    },
+    {
+      "path": "server/prepostrequest.php",
+      "sha256": "4B4220A6BD8BDC9379BB66ACE4B3C0D76C37EB84DBA4804AFC1CA16E1C38624A"
+    },
+    {
+      "path": "server/preprocessing.php",
+      "sha256": "99C4B79D018567E61D36C4FB69A8B8638AABA9C1F46E308F03D0A1E0F19F3B8A"
+    },
+    {
+      "path": "server/prerequest.php",
+      "sha256": "E4C8DDAAAB6A607F84AA7AA6794D396EDA45AA53D5A69AD48CDA5A14C6B824BD"
+    },
+    {
+      "path": "server/reflection_receipt.php",
+      "sha256": "F2FBA808EC7F1153F059B4A919F855FA95F23761FB4EB5AC3EBC7173340A7F15"
+    },
+    {
+      "path": "server/reflection.php",
+      "sha256": "D33A41331638BE653D7C94119043672D7142E73AC752F8ADB7B7CFC090670540"
+    },
+    {
+      "path": "server/scope.php",
+      "sha256": "ED0158640D31A41CA9C8BEC03555880AEB09D54ABD0116B2CBFAE45D762EBCB9"
+    },
+    {
+      "path": "server/state.php",
+      "sha256": "AA8D7C4E44D76B8503C81CE5DE636C94D9A31A6EBFB048779C1D54C56B5CC519"
+    },
+    {
+      "path": "server/assets/private-conversation-scene.png",
+      "sha256": "E104C8C2D8FEC85185855EEB5026D582E9CAA3795534E3720EB661173F6D76AF"
+    },
+    {
+      "path": "server/assets/style.css",
+      "sha256": "25C99AA25A2E637A91B42F2B09DD61B58CB7D1843A7A48A79A95E898FC511158"
+    },
+    {
+      "path": "server/assets/ui-refresh.js",
+      "sha256": "836896F1E03A43D869ACC60D0D4547577939D21F73BDA40FC0BED907D85B43C3"
+    }
+  ],
+  "preexisting_tracked_edits": [
+    "README.md",
+    "docs/logging-revision-2.md",
+    "server/index.php",
+    "tasks/lessons.md",
+    "tasks/todo.md",
+    "tests/log_shutdown_context_check.php",
+    "tests/ui_logs_host_access_check.php"
+  ],
+  "external_plugin_work": "No core or Mind Poisoning source edits are in this task scope; PCV server hashes provide the local runtime preservation baseline.",
+  "host_vhd_metadata": [
+    {
+      "name": "gaming",
+      "path": "D:\\DwemerAI4Skyrim3\\ext4.vhdx",
+      "length_bytes": 183463051264,
+      "last_write_utc": "2026-10-16T01:05:53.5404705Z",
+      "method": "Windows Get-Item metadata only"
+    },
+    {
+      "name": "test",
+      "path": "E:\\WSL\\DwemerAI4Skyrim3-test\\ext4.vhdx",
+      "length_bytes": 148665008128,
+      "last_write_utc": "2026-10-15T18:26:50.5904669Z",
+      "method": "Windows Get-Item metadata only"
+    }
+  ],
+  "host_vhd_limit": "Metadata only; it does not prove byte-for-byte preservation. No WSL distro was invoked."
+}
