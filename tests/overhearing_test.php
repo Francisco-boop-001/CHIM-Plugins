@@ -44,7 +44,7 @@ function overhearingAddNpc(MemoryStoreDb $db, int $id, string $name): void
     ];
 }
 
-function overhearingBatchResponse(array $messages, array $deltas = []): string
+function overhearingBatchResponse(array $messages, array $deltas = [], array $typeChanges = []): string
 {
     $payload = json_decode($messages[1]['content'] ?? '', true, 64, JSON_THROW_ON_ERROR);
     $recipients = $payload['untrusted_data']['recipients'] ?? null;
@@ -59,7 +59,7 @@ function overhearingBatchResponse(array $messages, array $deltas = []): string
             continue;
         }
         foreach (array_keys($candidates) as $subject) {
-            $rows[] = [
+            $row = [
                 'listener_id' => $listenerId,
                 'subject' => $subject,
                 'subject_mentioned' => true,
@@ -67,6 +67,10 @@ function overhearingBatchResponse(array $messages, array $deltas = []): string
                 'reason' => 'The statement may affect this listener.',
                 'evidence' => str_starts_with($subject, 'npc:') ? 'Jarl Balgruuf' : 'Dragonborn',
             ];
+            if (isset($typeChanges[$listenerId][$subject])) {
+                $row['type_change'] = $typeChanges[$listenerId][$subject];
+            }
+            $rows[] = $row;
         }
     }
     return json_encode(['judgments' => $rows], JSON_THROW_ON_ERROR);
@@ -212,6 +216,42 @@ overhearingCheck(
         && ($recipients[0]['listener_prior_relation_to_speaker']['aff'] ?? null) !== ($recipients[1]['listener_prior_relation_to_speaker']['aff'] ?? null),
     'Each listener needs a separate context with speaker/listener self-relationships excluded.'
 );
+
+$typeIsolation = overhearingExecute(
+    '|Aela|Lydia|Inigo|',
+    true,
+    static fn(array $messages): string => overhearingBatchResponse(
+        $messages,
+        [22 => ['npc:33' => 0, 'player' => 0], 44 => ['npc:33' => 0, 'player' => 0]],
+        [
+            22 => ['npc:33' => ['from' => 'neutral', 'to' => 'suspicious']],
+            44 => ['npc:33' => ['from' => 'romantic', 'to' => 'suspicious']],
+        ]
+    ),
+    static function (MemoryStoreDb $db, array &$event): void {
+        $event['text'] = 'I trust Jarl Balgruuf.';
+        $db->events[100]['source_data'] = 'Aela: ' . $event['text'] . ' (Talking to Lydia)';
+        $db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+        $db->npcs[44]['extended_data']->relationships = (object)[
+            'Jarl Balgruuf' => (object)['aff' => 7, 'type' => 'romantic'],
+        ];
+    }
+);
+overhearingCheck($typeIsolation['status'] === 'committed', 'Type-only proposals for addressed and overheard recipients should keep the batch committed.');
+overhearingCheck(($typeIsolation['db']->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type ?? null) === 'suspicious', 'The addressed listener should apply its own eligible type transition.');
+overhearingCheck(($typeIsolation['db']->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff ?? null) === 99, 'The addressed type-only transition should leave its affinity unchanged.');
+overhearingCheck(($typeIsolation['db']->npcs[44]['extended_data']->relationships->{'Jarl Balgruuf'}->type ?? null) === 'romantic', 'The overhearer should preserve its protected current type.');
+overhearingCheck(($typeIsolation['db']->npcs[44]['extended_data']->relationships->{'Jarl Balgruuf'}->aff ?? null) === 7, 'The overhearer type-only proposal should leave its affinity unchanged.');
+$addressedTypeLedger = $typeIsolation['db']->npcs[22]['plugin_extended_data']->mind_poisoning->events[0] ?? null;
+$overheardTypeLedger = $typeIsolation['db']->npcs[44]['plugin_extended_data']->mind_poisoning->events[0] ?? null;
+overhearingCheck(($addressedTypeLedger->type_changes[0]->after ?? null) === 'suspicious', 'The addressed ledger should contain its confirmed transition.');
+overhearingCheck(($overheardTypeLedger->type_decisions[0]->reason ?? null) === 'protected_type_preserved'
+    && !property_exists($overheardTypeLedger, 'type_changes'), 'The overhearer ledger should record its own preservation decision without a false applied transition.');
+$addressedTypeSummary = overhearingFinishedFor($typeIsolation['records'], 22);
+$overheardTypeSummary = overhearingFinishedFor($typeIsolation['records'], 44);
+overhearingCheck(($addressedTypeSummary[0]['changed_count'] ?? null) === 1
+    && ($overheardTypeSummary[0]['changed_count'] ?? null) === 0, 'Each recipient should report its own relationship change count.');
+
 $addressedFinished = overhearingFinishedFor($positive['records'], 22);
 $overheardFinished = overhearingFinishedFor($positive['records'], 44);
 overhearingCheck(

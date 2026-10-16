@@ -3,7 +3,7 @@
     "mind-poisoning": {
       "name": "mind_poisoning",
       "display_name": "Mind Poisoning",
-      "description": "PRE-ALPHA: conservative affinity updates from identity-checked NPC acknowledgements and Player-origin input, actor-owned reflection, default-off NPC ACK overhearing for the addressed listener plus up to four eligible roster listeners, and CHIM-canonical Player relationship handling. The reserved rechat sentinel is excluded from NPC recipients. Real provider, database-pipeline and game behavior remains unverified.",
+      "description": "PRE-ALPHA: conservative affinity updates with optional single CHIM relationship-type judgments from identity-checked NPC acknowledgements and Player-origin input, actor-owned reflection, default-off NPC ACK overhearing for the addressed listener plus up to four eligible roster listeners, CHIM-canonical Player relationship handling, reserved rechat-sentinel exclusion, and a read-only dashboard. New type behavior has isolated fixture coverage only; no live type-change behavior is claimed.",
       "status": "development_candidate",
       "git_repo": "Francisco-boop-001/CHIM-MindPoisoning",
       "github_url": "https://github.com/Francisco-boop-001/CHIM-MindPoisoning",

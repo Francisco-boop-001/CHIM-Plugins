@@ -430,6 +430,14 @@ function evaluateOverhearingAck(
         ];
     }
     $selected = array_merge($selected, $eligibleExtras);
+    foreach ($selected as &$recipient) {
+        $recipient['current_types'] = relationshipTypeSnapshot(
+            promptNpcCopy($recipient['listener']),
+            $recipient['subjects'],
+            $playerName
+        );
+    }
+    unset($recipient);
 
     $speakerPrompt = promptNpcCopy($speaker);
     try {
@@ -1193,7 +1201,9 @@ function evaluateInfluenceRequest(
         }
 
         $speakerPrompt = ($event['speaker_kind'] ?? 'npc') === 'player' ? [] : promptNpcCopy($speaker);
-        $messages = buildMessages($event, $speakerPrompt, promptNpcCopy($listener), $subjects);
+        $listenerPrompt = promptNpcCopy($listener);
+        $currentTypes = relationshipTypeSnapshot($listenerPrompt, $subjects, $playerName);
+        $messages = buildMessages($event, $speakerPrompt, $listenerPrompt, $subjects, $currentTypes);
         $requestModel ??= __NAMESPACE__ . '\\requestJudgments';
         $requestLog?->context(['connector_id' => $connectorId, 'subject_count' => count($subjects)]);
         $eligibleEvent = ($event['speaker_kind'] ?? 'npc') === 'player' ? 'player_input_eligible' : 'ack_eligible';
@@ -1237,7 +1247,7 @@ function evaluateInfluenceRequest(
             return 'model-invalid';
         }
         try {
-            $judgments = parseJudgments($response, $subjects, $event['text']);
+            $judgments = parseJudgments($response, $subjects, $event['text'], $currentTypes);
         } catch (JudgmentValidationFailure $error) {
             $validationReason = $error->reasonCode;
             $logFields['model_outcome'] = 'invalid';

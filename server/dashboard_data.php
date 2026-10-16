@@ -57,6 +57,22 @@ function dashboardFilters(array $query): array
 function dashboardLoad(string $serverRoot, array $filters): array
 {
     $filters = dashboardFilters($filters);
+    $root = realpath($serverRoot);
+    $relationshipManagerPath = $root === false
+        ? false
+        : realpath($root . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'relationship_manager.php');
+    if (!class_exists(\RelationshipManager::class, false)
+        && $relationshipManagerPath !== false
+        && is_file($relationshipManagerPath)
+        && is_readable($relationshipManagerPath)
+        && str_starts_with($relationshipManagerPath, rtrim((string)$root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
+        try {
+            require_once $relationshipManagerPath;
+        } catch (Throwable) {
+            // A failed optional core helper only makes Player current values unavailable.
+        }
+    }
+
     $manifest = json_decode((string)@file_get_contents(__DIR__ . '/manifest.json'), true);
     $version = is_array($manifest) && is_string($manifest['version'] ?? null) ? $manifest['version'] : 'unknown';
     $model = [
@@ -302,9 +318,9 @@ function dashboardParseLogLine(string $line): ?array
             $clean[$field] = $value;
         }
     }
-    foreach (['payload_bytes', 'subject_count', 'speech_bytes', 'changed_count'] as $field) {
+    foreach (['payload_bytes', 'subject_count', 'speech_bytes', 'changed_count', 'affinity_changed_count'] as $field) {
         $value = $record->{$field} ?? null;
-        $max = $field === 'subject_count' || $field === 'changed_count' ? 8 : 2147483647;
+        $max = $field === 'subject_count' || $field === 'changed_count' || $field === 'affinity_changed_count' ? 8 : 2147483647;
         if (is_int($value) && $value >= 0 && $value <= $max) {
             $clean[$field] = $value;
         }
@@ -324,6 +340,20 @@ function dashboardParseLogLine(string $line): ?array
     $changes = dashboardLogChanges($record->changes ?? null);
     if ($changes !== null) {
         $clean['changes'] = $changes;
+    }
+    $typeDecisions = dashboardTypeDecisions($record->type_decisions ?? null);
+    if ($typeDecisions !== null) {
+        $clean['type_decisions'] = $typeDecisions;
+    }
+    if (($clean['commit_state'] ?? null) === 'confirmed' && ($clean['committed'] ?? null) === true) {
+        $typeChangedCount = $record->type_changed_count ?? null;
+        if (is_int($typeChangedCount) && $typeChangedCount >= 0 && $typeChangedCount <= 8) {
+            $clean['type_changed_count'] = $typeChangedCount;
+        }
+        $typeChanges = dashboardTypeChanges($record->type_changes ?? null);
+        if ($typeChanges !== null) {
+            $clean['type_changes'] = $typeChanges;
+        }
     }
 
     return $clean;
@@ -404,6 +434,112 @@ function dashboardLogChanges(mixed $changes): ?array
         }
     }
     return $clean;
+}
+
+function dashboardCanonicalType(mixed $value): ?string
+{
+    return is_string($value)
+        && strlen($value) <= 50
+        && preg_match('/\A[a-z][a-z0-9_-]{0,49}\z/D', $value) === 1
+            ? $value
+            : null;
+}
+
+function dashboardTypeRecords(mixed $records, string $kind): ?array
+{
+    if (!is_array($records) || !array_is_list($records)) {
+        return null;
+    }
+    $clean = [];
+    $seen = [];
+    foreach (array_slice($records, 0, 8) as $record) {
+        if ($record instanceof \stdClass) {
+            $record = get_object_vars($record);
+        }
+        if (!is_array($record)) {
+            continue;
+        }
+        $subject = dashboardSubject($record['subject'] ?? null);
+        $from = dashboardCanonicalType($kind === 'changes' ? ($record['before'] ?? null) : ($record['from'] ?? null));
+        $to = dashboardCanonicalType($kind === 'changes' ? ($record['after'] ?? null) : ($record['to'] ?? null));
+        if (
+            $subject === null || $from === null || $to === null || isset($seen[$subject])
+            || ($kind === 'changes' && $from === $to)
+        ) {
+            continue;
+        }
+        if ($kind === 'changes') {
+            $clean[] = ['subject' => $subject, 'before' => $from, 'after' => $to];
+            $seen[$subject] = true;
+            continue;
+        }
+        $reason = $record['reason'] ?? null;
+        if (!in_array($reason, ['change_eligible', 'same_type', 'protected_type_preserved', 'custom_type_preserved'], true)) {
+            continue;
+        }
+        $clean[] = ['subject' => $subject, 'from' => $from, 'to' => $to, 'reason' => $reason];
+        $seen[$subject] = true;
+    }
+    return $clean;
+}
+
+function dashboardTypeChanges(mixed $changes): ?array
+{
+    return dashboardTypeRecords($changes, 'changes');
+}
+
+function dashboardTypeDecisions(mixed $decisions): ?array
+{
+    return dashboardTypeRecords($decisions, 'decisions');
+}
+
+function dashboardTypeChangeForSubject(array $changes, string $subject): ?array
+{
+    $matches = array_values(array_filter(
+        $changes,
+        static fn(array $change): bool => ($change['subject'] ?? null) === $subject
+    ));
+    return count($matches) === 1 ? $matches[0] : null;
+}
+
+function dashboardLedgerTypeDecisions(array $entry): array
+{
+    $decisions = dashboardTypeDecisions($entry['type_decisions'] ?? null) ?? [];
+    $seen = [];
+    foreach ($decisions as $decision) {
+        $seen[implode("\x1f", [$decision['subject'], $decision['from'], $decision['to']])] = true;
+    }
+    foreach ($entry['judgments'] ?? [] as $judgment) {
+        if (!is_array($judgment) || !is_array($judgment['type_change'] ?? null)) {
+            continue;
+        }
+        $subject = dashboardSubject($judgment['subject'] ?? null);
+        $from = dashboardCanonicalType($judgment['type_change']['from'] ?? null);
+        $to = dashboardCanonicalType($judgment['type_change']['to'] ?? null);
+        if ($subject === null || $from === null || $to === null) {
+            continue;
+        }
+        $decision = ['subject' => $subject, 'from' => $from, 'to' => $to, 'reason' => null];
+        $key = implode("\x1f", [$subject, $from, $to]);
+        if (!isset($seen[$key]) && count($decisions) < 8) {
+            $decisions[] = $decision;
+            $seen[$key] = true;
+        }
+    }
+    return $decisions;
+}
+
+function dashboardConfirmedTypeChangeEvidence(?array $record): bool
+{
+    if (
+        !is_array($record)
+        || ($record['commit_state'] ?? null) !== 'confirmed'
+        || ($record['committed'] ?? null) !== true
+    ) {
+        return false;
+    }
+    return (is_int($record['type_changed_count'] ?? null) && $record['type_changed_count'] > 0)
+        || (is_array($record['type_changes'] ?? null) && $record['type_changes'] !== []);
 }
 
 /** @return array{active_playthrough:?string,player_name:string,rows:array,limited:bool,invalid_ledgers:bool} */
@@ -863,6 +999,20 @@ function dashboardLedgerInteraction(array $candidate, array $recordIndex, array 
         ? ($names[$ownerId] ?? 'NPC #' . $ownerId)
         : null;
     $relationshipOwner = $relationshipOwnerId === null ? $row : ($owners[$relationshipOwnerId] ?? $row);
+    $typeChanges = $commitState === 'unconfirmed' || $commitState === 'ambiguous'
+        ? []
+        : (dashboardTypeChanges($entry['type_changes'] ?? null) ?? []);
+    $typeDecisions = dashboardLedgerTypeDecisions($entry);
+    $hasUnresolvedTypeProposal = false;
+    foreach ($typeDecisions as $typeDecision) {
+        $reason = $typeDecision['reason'] ?? null;
+        $provenNoChange = in_array($reason, ['protected_type_preserved', 'custom_type_preserved'], true)
+            || ($reason === 'same_type' && ($typeDecision['from'] ?? null) === ($typeDecision['to'] ?? null));
+        if (!$provenNoChange) {
+            $hasUnresolvedTypeProposal = true;
+            break;
+        }
+    }
     $changes = [];
     $allZero = true;
     foreach ($entry['judgments'] as $judgment) {
@@ -884,8 +1034,9 @@ function dashboardLedgerInteraction(array $candidate, array $recordIndex, array 
         $after = $loggedChange['after'] ?? null;
         $confirmed = $loggedChange !== null && $before !== null && $after !== null;
         $current = $subject !== 'player' && !isset($names[$subjectId])
-            ? ['value' => null, 'state' => 'unavailable']
+            ? ['value' => null, 'state' => 'unavailable', 'type' => null, 'type_state' => 'unavailable']
             : dashboardCurrent($relationshipOwner, $subject, $label, $playerName, $nameCounts);
+        $typeTransition = dashboardTypeChangeForSubject($typeChanges, $subject);
         $changes[] = [
             'subject' => $subject,
             'label' => $label,
@@ -895,14 +1046,26 @@ function dashboardLedgerInteraction(array $candidate, array $recordIndex, array 
             'applied' => $delta === 0 ? 0 : ($confirmed ? $after - $before : null),
             'current' => $current['value'],
             'current_state' => $current['state'],
+            'type_before' => $typeTransition['before'] ?? null,
+            'type_after' => $typeTransition['after'] ?? null,
+            'type_event_state' => $typeTransition === null ? 'unavailable' : 'set',
+            'current_type' => $current['type'],
+            'current_type_state' => $current['type_state'],
         ];
     }
     $outcome = is_string($request['outcome'] ?? null) ? $request['outcome'] : 'committed';
     if ($commitState === 'unconfirmed') {
         $outcome = 'unconfirmed';
-    } elseif ($commitState === 'confirmed' && ($request['outcome'] ?? null) !== 'failed' && ($persistence['changed_count'] ?? null) === 0) {
+    } elseif (
+        $commitState === 'confirmed' && ($request['outcome'] ?? null) !== 'failed'
+        && ($persistence['changed_count'] ?? null) === 0
+        && !dashboardConfirmedTypeChangeEvidence($persistence)
+    ) {
         $outcome = 'zero-change';
-    } elseif ($request === null && $commitState === 'none' && $allZero) {
+    } elseif (
+        $request === null && $commitState === 'none' && $allZero && $typeChanges === []
+        && !$hasUnresolvedTypeProposal
+    ) {
         $outcome = 'zero-change';
     }
 
@@ -915,6 +1078,25 @@ function dashboardLedgerInteraction(array $candidate, array $recordIndex, array 
     $speaker = $reflection
         ? $opinionOwner
         : ($speakerKind === 'player' ? 'Player' : ($speakerId === null ? null : ($names[$speakerId] ?? 'NPC #' . $speakerId)));
+    $currentForType = static function (string $subject) use ($names, $playerName, $nameCounts, $relationshipOwner): array {
+        $subjectId = $subject === 'player' ? null : substr($subject, 4);
+        $label = $subject === 'player'
+            ? dashboardLabel($playerName, 'Player')
+            : ($names[$subjectId] ?? 'NPC #' . $subjectId);
+        if ($subject !== 'player' && !isset($names[$subjectId])) {
+            return ['label' => $label, 'current_type' => null, 'current_type_state' => 'unavailable'];
+        }
+        $current = dashboardCurrent($relationshipOwner, $subject, $label, $playerName, $nameCounts);
+        return ['label' => $label, 'current_type' => $current['type'], 'current_type_state' => $current['type_state']];
+    };
+    foreach ($typeChanges as &$typeChange) {
+        $typeChange += $currentForType($typeChange['subject']);
+    }
+    unset($typeChange);
+    foreach ($typeDecisions as &$typeDecision) {
+        $typeDecision += $currentForType($typeDecision['subject']);
+    }
+    unset($typeDecision);
     $interaction = [
         'request_id' => $request['request_id'] ?? $persistence['request_id'] ?? null,
         'event_id' => $candidate['event_id'],
@@ -934,6 +1116,8 @@ function dashboardLedgerInteraction(array $candidate, array $recordIndex, array 
         'model_ms' => $request['model_ms'] ?? null,
         'persistence_ms' => $request['persistence_ms'] ?? $persistence['persistence_ms'] ?? null,
         'changes' => $changes,
+        'type_decisions' => $typeDecisions,
+        'type_changes' => $typeChanges,
     ];
     if ($reflection) {
         $interaction['source_kind'] = 'reflection';
@@ -993,50 +1177,101 @@ function dashboardMatchedChange(?array $persistence, string $subject, int $delta
 
 function dashboardCurrent(array $listener, string $subject, string $subjectName, string $playerName, array $nameCounts): array
 {
+    $relationship = dashboardCurrentRelationship($listener, $subject, $subjectName, $playerName, $nameCounts);
+    $type = dashboardCurrentRelationshipType($relationship);
+    if ($relationship['state'] !== 'set') {
+        return ['value' => null, 'state' => $relationship['state']] + $type;
+    }
+    $edge = $relationship['edge'];
+    $affinity = $edge->aff ?? 0;
+    if (!is_int($affinity) && !is_float($affinity) && !(is_string($affinity) && is_numeric($affinity))) {
+        return ['value' => null, 'state' => 'invalid'] + $type;
+    }
+    $value = (float)$affinity;
+    if (!is_finite($value) || $value < -100 || $value > 100) {
+        return ['value' => null, 'state' => 'invalid'] + $type;
+    }
+    return ['value' => floor($value) === $value ? (int)$value : $value, 'state' => 'set'] + $type;
+}
+
+function dashboardCurrentRelationship(array $listener, string $subject, string $subjectName, string $playerName, array $nameCounts): array
+{
     $extended = $listener['extended_data'] ?? null;
     if (!$extended instanceof \stdClass) {
-        return ['value' => null, 'state' => 'invalid'];
+        return ['edge' => null, 'state' => 'invalid'];
     }
     $relationshipValue = property_exists($extended, 'relationships') ? $extended->relationships : new \stdClass();
     $relationships = storedRelationshipMap($relationshipValue);
     if (!is_array($relationships)) {
-        return ['value' => null, 'state' => 'invalid'];
+        return ['edge' => null, 'state' => 'invalid'];
     }
     if ($subject === 'player') {
+        if (!class_exists(\RelationshipManager::class, false)
+            || !is_callable([\RelationshipManager::class, 'normalizeTargetName'])
+            || !is_callable([\RelationshipManager::class, 'normalizeRelationshipMap'])) {
+            return ['edge' => null, 'state' => 'unavailable'];
+        }
         $canonicalRelationships = canonicalStoredRelationshipMap($relationships, $playerName);
         if (!is_array($canonicalRelationships)) {
-            return ['value' => null, 'state' => 'invalid'];
+            return ['edge' => null, 'state' => 'invalid'];
         }
         $relationships = $canonicalRelationships;
         $key = array_key_exists('Player', $relationships) ? 'Player' : null;
     } else {
         if (($nameCounts[$subjectName] ?? 0) > 1) {
-            return ['value' => null, 'state' => 'ambiguous'];
+            return ['edge' => null, 'state' => 'ambiguous'];
         }
         $key = $subjectName;
         if (!array_key_exists($key, $relationships)) {
-            return ['value' => null, 'state' => 'unset_default_zero'];
+            return ['edge' => null, 'state' => 'unset_default_zero'];
         }
     }
     if ($key === null) {
-        return ['value' => null, 'state' => 'unset_default_zero'];
+        return ['edge' => null, 'state' => 'unset_default_zero'];
     }
     $edge = $relationships[$key] ?? null;
     if ($subject === 'player' && $key === 'Player' && is_array($edge)) {
         $edge = (object)$edge;
     }
     if (!$edge instanceof \stdClass) {
-        return ['value' => null, 'state' => 'invalid'];
+        return ['edge' => null, 'state' => 'invalid'];
     }
-    $affinity = $edge->aff ?? 0;
-    if (!is_int($affinity) && !is_float($affinity) && !(is_string($affinity) && is_numeric($affinity))) {
-        return ['value' => null, 'state' => 'invalid'];
+    return ['edge' => $edge, 'state' => 'set'];
+}
+
+function dashboardCurrentRelationshipType(array $relationship): array
+{
+    if (($relationship['state'] ?? null) !== 'set') {
+        $state = match ($relationship['state'] ?? null) {
+            'unset_default_zero' => 'unset',
+            'ambiguous' => 'ambiguous',
+            'invalid' => 'invalid',
+            default => 'unavailable',
+        };
+        return ['type' => null, 'type_state' => $state];
     }
-    $value = (float)$affinity;
-    if (!is_finite($value) || $value < -100 || $value > 100) {
-        return ['value' => null, 'state' => 'invalid'];
+    $edge = $relationship['edge'] ?? null;
+    if (!$edge instanceof \stdClass) {
+        return ['type' => null, 'type_state' => 'invalid'];
     }
-    return ['value' => floor($value) === $value ? (int)$value : $value, 'state' => 'set'];
+    if (!property_exists($edge, 'type') || $edge->type === null || $edge->type === '') {
+        return ['type' => null, 'type_state' => 'unset'];
+    }
+    $type = $edge->type;
+    if (
+        !is_string($type) || strlen($type) > 200 || trim($type) === ''
+        || preg_match('//u', $type) !== 1 || preg_match('/[\x00-\x1F\x7F]/', $type) === 1
+    ) {
+        return ['type' => null, 'type_state' => 'invalid'];
+    }
+    if (relationshipTypeAllowedTypes() === null) {
+        return ['type' => null, 'type_state' => 'unavailable'];
+    }
+    $canonical = canonicalRelationshipType($type, [$type]);
+    if (!is_string($canonical)) {
+        return ['type' => $type, 'type_state' => 'invalid'];
+    }
+    return ['type' => $canonical, 'type_state' => 'set'];
 }
 
 function dashboardLogInteractions(array $records, ?string $activeId, bool $databaseAvailable, bool &$limited): array
@@ -1099,10 +1334,18 @@ function dashboardLogInteraction(array $record, ?string $playthroughId, string $
         $persistence = null;
         $commitState = 'none';
     }
+    $typeChanges = $commitState === 'confirmed' && dashboardConfirmedTypeChangeEvidence($persistence)
+        ? (dashboardTypeChanges($persistence['type_changes'] ?? null) ?? [])
+        : [];
+    $typeDecisions = dashboardTypeDecisions($persistence['type_decisions'] ?? $record['type_decisions'] ?? null) ?? [];
     $outcome = is_string($record['outcome'] ?? null) ? $record['outcome'] : 'unknown';
     if ($commitState === 'unconfirmed') {
         $outcome = 'unconfirmed';
-    } elseif ($commitState === 'confirmed' && $outcome === 'committed' && ($persistence['changed_count'] ?? null) === 0) {
+    } elseif (
+        $commitState === 'confirmed' && $outcome === 'committed'
+        && ($persistence['changed_count'] ?? null) === 0
+        && !dashboardConfirmedTypeChangeEvidence($persistence)
+    ) {
         $outcome = 'zero-change';
     }
     $changes = [];
@@ -1123,7 +1366,8 @@ function dashboardLogInteraction(array $record, ?string $playthroughId, string $
             $subjectKnown = $subject === 'player' ? $playerName !== '' : isset($names[$subjectId]);
             $current = $databaseAvailable && $ownerId !== null && isset($owners[$ownerId]) && $subjectKnown
                 ? dashboardCurrent($owners[$ownerId], $subject, $label, $playerName, $nameCounts)
-                : ['value' => null, 'state' => 'unavailable'];
+                : ['value' => null, 'state' => 'unavailable', 'type' => null, 'type_state' => 'unavailable'];
+            $typeTransition = dashboardTypeChangeForSubject($typeChanges, $subject);
             $changes[] = [
                 'subject' => $subject,
                 'label' => $label,
@@ -1133,9 +1377,38 @@ function dashboardLogInteraction(array $record, ?string $playthroughId, string $
                 'applied' => $change['after'] - $change['before'],
                 'current' => $current['value'],
                 'current_state' => $current['state'],
+                'type_before' => $typeTransition['before'] ?? null,
+                'type_after' => $typeTransition['after'] ?? null,
+                'type_event_state' => $typeTransition === null
+                    ? ($commitState === 'unconfirmed' && dashboardTypeChangeForSubject($typeDecisions, $subject) !== null ? 'unconfirmed' : 'unavailable')
+                    : 'set',
+                'current_type' => $current['type'],
+                'current_type_state' => $current['type_state'],
             ];
         }
     }
+    $currentForType = static function (string $subject) use ($databaseAvailable, $ownerId, $owners, $names, $nameCounts, $playerName): array {
+        $subjectId = $subject === 'player' ? null : substr($subject, 4);
+        $label = $subject === 'player'
+            ? dashboardLabel($playerName, 'Player')
+            : ($names[$subjectId] ?? 'NPC #' . $subjectId);
+        if (
+            !$databaseAvailable || $ownerId === null || !isset($owners[$ownerId])
+            || ($subject !== 'player' && !isset($names[$subjectId]))
+        ) {
+            return ['label' => $label, 'current_type' => null, 'current_type_state' => 'unavailable'];
+        }
+        $current = dashboardCurrent($owners[$ownerId], $subject, $label, $playerName, $nameCounts);
+        return ['label' => $label, 'current_type' => $current['type'], 'current_type_state' => $current['type_state']];
+    };
+    foreach ($typeChanges as &$typeChange) {
+        $typeChange += $currentForType($typeChange['subject']);
+    }
+    unset($typeChange);
+    foreach ($typeDecisions as &$typeDecision) {
+        $typeDecision += $currentForType($typeDecision['subject']);
+    }
+    unset($typeDecision);
     $speaker = ($record['speaker_kind'] ?? null) === 'player'
         ? 'Player'
         : ($reflection && $opinionOwnerId !== null
@@ -1167,6 +1440,8 @@ function dashboardLogInteraction(array $record, ?string $playthroughId, string $
         'model_ms' => $record['model_ms'] ?? null,
         'persistence_ms' => $record['persistence_ms'] ?? $persistence['persistence_ms'] ?? null,
         'changes' => $changes,
+        'type_decisions' => $typeDecisions,
+        'type_changes' => $typeChanges,
     ];
     if ($reflection) {
         $interaction['source_kind'] = 'reflection';
@@ -1192,11 +1467,15 @@ function dashboardNormalizedOutcome(array $record): ?string
     if (($record['commit_state'] ?? null) === 'unconfirmed') {
         return 'unconfirmed';
     }
+    $recordOutcome = $record['outcome'] ?? $record['persistence_outcome'] ?? null;
+    if (dashboardConfirmedTypeChangeEvidence($record) && $recordOutcome === 'committed') {
+        return 'committed';
+    }
     if (
         ($record['commit_state'] ?? null) === 'confirmed'
         && ($record['committed'] ?? null) === true
         && ($record['changed_count'] ?? null) === 0
-        && ($record['outcome'] ?? $record['persistence_outcome'] ?? null) === 'committed'
+        && $recordOutcome === 'committed'
     ) {
         return 'zero-change';
     }

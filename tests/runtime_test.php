@@ -766,6 +766,36 @@ same(strlen('I believe Jarl Balgruuf kept his promise.'), (int)($playerSummary['
 check(!str_contains(json_encode($playerRecords, JSON_THROW_ON_ERROR), 'kept his promise'), 'Logs must not expose Player speech or model evidence.');
 unset($GLOBALS['PLAYER_TTS_SOURCE_TEXT']);
 
+resetAckLoggingInteraction();
+[, , , $playerTypeOnlyDb] = baseFixture();
+$playerTypeOnlyDb->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+[$playerTypeOnlyRequest, $playerTypeOnlyInsert] = playerInputFixture($playerTypeOnlyDb);
+$playerTypeOnlyCalls = 0;
+$playerTypeOnlyModel = static function (array $messages) use (&$playerTypeOnlyCalls): string {
+    $playerTypeOnlyCalls++;
+    return validModelResponse([[
+        'subject' => 'npc:33',
+        'delta' => 0,
+        'reason' => 'A lasting Player claim changes the listener opinion.',
+        'evidence' => 'kept his promise',
+        'type_change' => ['from' => 'neutral', 'to' => 'suspicious'],
+    ]]);
+};
+$playerTypeOnlyStatus = handlePlayerInput(
+    $playerTypeOnlyRequest,
+    $playerTypeOnlyInsert,
+    $playerTypeOnlyDb,
+    $playerTypeOnlyModel
+);
+same('committed', $playerTypeOnlyStatus, 'The Player input path should persist a type-only model decision.');
+same(99, $playerTypeOnlyDb->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff, 'A type-only Player input should leave affinity unchanged.');
+same('suspicious', $playerTypeOnlyDb->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'A type-only Player input should persist the validated type transition.');
+same(1, count($playerTypeOnlyDb->history), 'A type-only Player input should retain the atomic history snapshot.');
+same('duplicate', handlePlayerInput($playerTypeOnlyRequest, $playerTypeOnlyInsert, $playerTypeOnlyDb, $playerTypeOnlyModel), 'A type-only Player input replay should be deduplicated.');
+same(1, $playerTypeOnlyCalls, 'A type-only Player replay must stop before another model call.');
+same(1, count($playerTypeOnlyDb->history), 'A type-only Player replay must not create another snapshot.');
+unset($GLOBALS['PLAYER_TTS_SOURCE_TEXT']);
+
 foreach ([
     ['WHISPER', 'STANDARD'],
     ['CLOSE', 'NARRATOR'],
@@ -1069,6 +1099,111 @@ same(true, ChimMindPoisoning\sameJsonValue($beforeRelationships, $db->npcs[22]['
 same(1, count($db->history), 'Zero decisions must still snapshot listener state.');
 
 [$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+$judgments['npc:33']['delta'] = 0;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+same('committed', persistJudgments($event, $subjects, $judgments, $db), 'A valid type-only decision should commit.');
+same('suspicious', $db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'A type-only decision must update the existing relationship edge.');
+same('suspicious', $db->history[0]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'A type-only decision must be present in the same listener history snapshot.');
+same(1, count($db->history), 'A type-only decision must retain one atomic history snapshot.');
+$typeOnlyEntry = $db->npcs[22]['plugin_extended_data']->mind_poisoning->events[0];
+same(['from' => 'neutral', 'to' => 'suspicious'], (array)$typeOnlyEntry->judgments[0]->type_change, 'The ledger should preserve the original type proposal.');
+same('change_eligible', $typeOnlyEntry->type_decisions[0]->reason, 'The ledger should record the bounded type decision reason.');
+same('suspicious', $typeOnlyEntry->type_changes[0]->after, 'The ledger should record only the committed type transition.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = '  ';
+$judgments['npc:33']['delta'] = 0;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+same(['npc:33' => 'neutral'], ChimMindPoisoning\relationshipTypeSnapshot($db->npcs[22], ['npc:33' => $subjects['npc:33']]), 'The model snapshot should treat a whitespace stored type as neutral.');
+same('committed', persistJudgments($event, $subjects, $judgments, $db), 'An empty stored type should use the same neutral default as the relationship snapshot.');
+same('suspicious', $db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'An empty stored type should allow a matching neutral-origin proposal.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 42;
+$judgments['npc:33']['delta'] = 0;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+$beforeMalformedType = serialize($db->npcs[22]);
+same('invalid', persistJudgments($event, $subjects, $judgments, $db), 'A non-string stored type must remain invalid.');
+same($beforeMalformedType, serialize($db->npcs[22]), 'A non-string stored type must not mutate listener state.');
+same([], $db->history, 'A non-string stored type must not create a history snapshot.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+$judgments['npc:33']['delta'] = 0;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'custom_target'];
+$judgments['player']['delta'] = 0;
+$beforeInvalidTypeProposal = serialize($db->npcs[22]);
+same('invalid', persistJudgments($event, $subjects, $judgments, $db), 'Direct storage input must reject custom or unavailable target types.');
+same($beforeInvalidTypeProposal, serialize($db->npcs[22]), 'An invalid direct type proposal must not mutate listener state.');
+same([], $db->history, 'An invalid direct type proposal must not create a history snapshot.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+$judgments['npc:33']['delta'] = 1;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+$judgments['player']['delta'] = -2;
+$staleTypeBefore = null;
+$db->onBegin = static function (int $listenerId, MemoryStoreDb $lockedDb) use (&$staleTypeBefore): void {
+    $lockedDb->npcs[$listenerId]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'romantic';
+    $staleTypeBefore = serialize($lockedDb->npcs[$listenerId]);
+};
+same('stale', persistJudgments($event, $subjects, $judgments, $db), 'A stale type origin must reject the whole decision before affinity changes.');
+same($staleTypeBefore, serialize($db->npcs[22]), 'A stale type origin must preserve the locked listener state.');
+same([], $db->history, 'A stale type origin must not create a history snapshot.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'romantic';
+$judgments['npc:33']['delta'] = 1;
+$judgments['npc:33']['type_change'] = ['from' => 'romantic', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+same('committed', persistJudgments($event, $subjects, $judgments, $db), 'A protected type proposal must still allow its valid affinity change.');
+same('romantic', $db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'A protected romantic type must be preserved.');
+same(100, $db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff, 'Affinity should still apply when a protected type is preserved.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'ally';
+$judgments['npc:33']['delta'] = 1;
+$judgments['npc:33']['type_change'] = ['from' => 'ally', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+same('committed', persistJudgments($event, $subjects, $judgments, $db), 'A custom type proposal must still allow its valid affinity change.');
+same('ally', $db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'An existing custom type must be preserved.');
+same(100, $db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff, 'Affinity should still apply when a custom type is preserved.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$subjects = ['player' => $subjects['player']];
+$judgments = ['player' => ['delta' => -2, 'reason' => 'Lasting change', 'evidence' => 'The Dragonborn is brave.', 'type_change' => ['from' => 'neutral', 'to' => 'suspicious']]];
+$db->npcs[22]['extended_data']->relationships->Player = (object)['aff' => 0, 'type' => 'neutral', 'custom_info' => 'preserve me'];
+same('committed', persistJudgments($event, $subjects, $judgments, $db), 'A combined Player affinity and type decision should commit.');
+same(-2, $db->npcs[22]['extended_data']->relationships->Player->aff, 'A combined Player update should apply its affinity delta.');
+same('suspicious', $db->npcs[22]['extended_data']->relationships->Player->type, 'The Player affinity update must retain its simultaneous type transition.');
+same('preserve me', $db->npcs[22]['extended_data']->relationships->Player->custom_info, 'A combined Player update must preserve sibling edge fields.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$subjects = ['player' => $subjects['player']];
+$judgments = ['player' => ['delta' => 0, 'reason' => 'Lasting change', 'evidence' => 'The Dragonborn is brave.', 'type_change' => ['from' => 'neutral', 'to' => 'suspicious']]];
+$db->npcs[22]['extended_data']->relationships->Dragonborn = (object)['aff' => 50, 'type' => 'neutral', 'custom_info' => 'preserve alias data'];
+same('committed', persistJudgments($event, $subjects, $judgments, $db), 'A type-only Player decision should commit through the alias normalizer.');
+same(50, $db->npcs[22]['extended_data']->relationships->Player->aff, 'Type-only Player persistence must preserve the canonical alias affinity.');
+same('suspicious', $db->npcs[22]['extended_data']->relationships->Player->type, 'Type-only Player persistence must write under the canonical key.');
+same('preserve alias data', $db->npcs[22]['extended_data']->relationships->Player->custom_info, 'Type-only Player persistence must preserve alias metadata.');
+check(!property_exists($db->npcs[22]['extended_data']->relationships, 'Dragonborn'), 'A real type-only Player change must remove its old name alias.');
+check(property_exists($db->npcs[22]['extended_data']->relationships, 'Other NPC'), 'Player alias collapse must preserve unrelated relationship edges.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff = 'invalid';
+$db->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+$judgments['npc:33']['delta'] = 0;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+$beforeInvalidTypeOnlyAffinity = serialize($db->npcs[22]);
+same('invalid', persistJudgments($event, $subjects, $judgments, $db), 'A type-only write must reject malformed affinity on the same edge.');
+same($beforeInvalidTypeOnlyAffinity, serialize($db->npcs[22]), 'An invalid type-only edge must not change listener state.');
+same([], $db->history, 'An invalid type-only edge must not create history.');
+
+[$event, $subjects, $judgments, $db] = baseFixture();
 $db->failSnapshot = true;
 $beforeNpc = unserialize(serialize($db->npcs[22]));
 same('failed', persistJudgments($event, $subjects, $judgments, $db), 'Snapshot failure must fail the commit.');
@@ -1207,9 +1342,9 @@ same(true, $db->npcs[22]['extended_data']->unrelated->preserve, 'Unrelated exten
 same('Unrelated ambient name', $GLOBALS['PLAYER_NAME'] ?? null, 'Canonicalization must restore an existing PLAYER_NAME value.');
 require_once __DIR__ . '/../server/dashboard_data.php';
 same(
-    ['value' => 47, 'state' => 'set'],
+    ['value' => 47, 'state' => 'set', 'type' => 'romantic', 'type_state' => 'set'],
     ChimMindPoisoning\dashboardCurrent($db->npcs[22], 'player', 'Player', 'Dragonborn', []),
-    'The dashboard must display the same canonical Player affinity that persistence wrote.'
+    'The dashboard must display the same canonical Player affinity and type that persistence wrote.'
 );
 unset($GLOBALS['PLAYER_NAME']);
 $restoredUnsetMap = ChimMindPoisoning\canonicalStoredRelationshipMap([
@@ -1247,6 +1382,83 @@ try {
     $belowFloorRejected = true;
 }
 check($belowFloorRejected, 'Evicted event ids at or below the floor must not become eligible again.');
+
+$legacyOrdinaryLedger = (object)['mind_poisoning' => (object)[
+    'playthrough_id' => '1',
+    'floor_event_id' => 0,
+    'events' => [[
+        'event_id' => 1,
+        'utterance_id' => 'legacy_ordinary_entry',
+        'judgments' => ['historical-shape'],
+    ]],
+]];
+$legacyOrdinaryNamespace = ChimMindPoisoning\storedLedgerNamespace($legacyOrdinaryLedger);
+same('historical-shape', $legacyOrdinaryNamespace['events'][0]['judgments'][0] ?? null, 'Legacy ordinary ledger entries must retain their historical judgment validation behavior.');
+
+$reorderedHistoricalTypeChange = ['to' => 'suspicious', 'from' => 'old_custom'];
+same(['to', 'from'], array_keys($reorderedHistoricalTypeChange), 'The regression fixture must represent JSONB-reordered nested type keys.');
+$typedOrdinaryLedger = (object)['mind_poisoning' => (object)[
+    'playthrough_id' => '1',
+    'floor_event_id' => 0,
+    'events' => [[
+        'event_id' => 2,
+        'utterance_id' => 'typed_ordinary_entry',
+        'judgments' => [[
+            'subject' => 'npc:33',
+            'delta' => 0,
+            'reason' => 'Historical type decision',
+            'evidence' => 'A saved interaction.',
+            'type_change' => $reorderedHistoricalTypeChange,
+        ]],
+        'type_decisions' => [[
+            'subject' => 'npc:33',
+            'from' => 'old_custom',
+            'to' => 'suspicious',
+            'reason' => 'change_eligible',
+        ]],
+        'type_changes' => [[
+            'subject' => 'npc:33',
+            'before' => 'old_custom',
+            'after' => 'suspicious',
+        ]],
+    ]],
+]];
+$typedOrdinaryNamespace = ChimMindPoisoning\storedLedgerNamespace($typedOrdinaryLedger);
+check(is_array($typedOrdinaryNamespace), 'A historical type proposal with JSONB-reordered keys and custom tokens must remain valid.');
+same($reorderedHistoricalTypeChange, $typedOrdinaryNamespace['events'][0]['judgments'][0]['type_change'] ?? null, 'Historical type proposal key order must not be rewritten during validation.');
+$invalidTypedLedger = unserialize(serialize($typedOrdinaryLedger));
+$invalidTypedLedger->mind_poisoning->events[0]['type_decisions'][0]['reason'] = 'unbounded_reason';
+same(null, ChimMindPoisoning\storedLedgerNamespace($invalidTypedLedger), 'Optional ledger type fields must reject reasons outside the closed contract.');
+
+$typedReflectionLedger = (object)['mind_poisoning' => (object)[
+    'playthrough_id' => '1',
+    'floor_event_id' => 0,
+    'reflection_state' => ['basis' => str_repeat('a', 64), 'subjects' => ['npc:33']],
+    'events' => [[
+        'event_id' => 3,
+        'utterance_id' => 'typed_reflection_entry',
+        'source_kind' => 'reflection',
+        'judgments' => [[
+            'subject' => 'npc:33',
+            'delta' => 0,
+            'reason' => 'Historical reflection type decision',
+            'evidence' => 'A saved reflection.',
+            'type_change' => $reorderedHistoricalTypeChange,
+        ]],
+        'type_decisions' => [[
+            'subject' => 'npc:33',
+            'from' => 'old_custom',
+            'to' => 'suspicious',
+            'reason' => 'change_eligible',
+        ]],
+        'type_changes' => [[
+            'subject' => 'npc:33',
+            'before' => 'old_custom',
+            'after' => 'suspicious',
+        ]],
+    ]],
+]];
+check(is_array(ChimMindPoisoning\storedLedgerNamespace($typedReflectionLedger)), 'Reflection history must accept JSONB-reordered nested type keys too.');
 
 [$event, $subjects, $judgments, $db] = baseFixture();
 $db->npcs[22]['plugin_extended_data']->mind_poisoning = (object)[
@@ -1287,6 +1499,33 @@ same(1, count($db->history), 'Composed hook should snapshot the changed listener
 same('duplicate', handleSpeechAck($ack, $db, $model), 'An acknowledged utterance should be deduped before another model call.');
 same(1, $modelCalls, 'Preflight dedupe must avoid a second model call.');
 same(1, count($db->history), 'Preflight duplicate must not create a second snapshot.');
+
+[$typeOnlyEvent, , , $typeOnlyDb] = baseFixture();
+$typeOnlyDb->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+$typeOnlyDb->events[100] = $typeOnlyEvent + ['type' => 'chat', 'delivery_state' => 'spoken'];
+$typeOnlyAck = ['_speech', 0, 10, json_encode([
+    'speaker' => 'Aela',
+    'listener' => 'Lydia',
+    'speech' => $typeOnlyEvent['text'],
+    'utterance_id' => $typeOnlyEvent['utterance_id'],
+], JSON_THROW_ON_ERROR)];
+$typeOnlyCalls = 0;
+$typeOnlyModel = static function (array $messages) use (&$typeOnlyCalls): string {
+    $typeOnlyCalls++;
+    return validModelResponse([
+        ['subject' => 'npc:33', 'delta' => 0, 'reason' => 'The lasting claim changes her opinion.', 'evidence' => 'I trust Jarl Balgruuf.', 'type_change' => ['from' => 'neutral', 'to' => 'suspicious']],
+        ['subject' => 'player', 'delta' => 0, 'reason' => 'No durable change to the Player relation.', 'evidence' => 'The Dragonborn is brave.'],
+    ]);
+};
+$typeOnlyStatus = handleSpeechAck($typeOnlyAck, $typeOnlyDb, $typeOnlyModel);
+same('committed', $typeOnlyStatus, 'The ordinary ACK path should persist a type-only model decision.');
+same(99, $typeOnlyDb->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff, 'A type-only ACK should leave affinity unchanged.');
+same('suspicious', $typeOnlyDb->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'A type-only ACK should persist its validated type transition.');
+same('neutral', $typeOnlyDb->npcs[22]['plugin_extended_data']->mind_poisoning->events[0]->type_changes[0]->before, 'The ordinary ledger should record the confirmed transition origin.');
+same(1, count($typeOnlyDb->history), 'A type-only ACK should retain the atomic history snapshot.');
+same('duplicate', handleSpeechAck($typeOnlyAck, $typeOnlyDb, $typeOnlyModel), 'An ordinary type-only ACK replay should be deduplicated.');
+same(1, $typeOnlyCalls, 'An ordinary type-only replay must stop before another model call.');
+same(1, count($typeOnlyDb->history), 'An ordinary type-only replay must not create another snapshot.');
 
 foreach ([
     ['NPC-only', 'I trust Jarl Balgruuf.', ['subject' => 'npc:33', 'delta' => 1, 'reason' => 'Supported NPC claim.', 'evidence' => 'I trust Jarl Balgruuf.'], 'Jarl Balgruuf', 1],
@@ -2398,24 +2637,30 @@ $GLOBALS['ENGINE_PATH'] = $validEnginePath;
 $linkedDataRoot = $pauseTestRoot . DIRECTORY_SEPARATOR . 'linked-data';
 check(mkdir($linkedDataRoot, 0700), 'The symlink target data directory should be created.');
 check(rmdir($pauseTestData), 'The original empty data directory should be removed.');
-check(symlink($linkedDataRoot, $pauseTestData), 'A valid CHIM data-directory symlink should be created.');
-$linkedDataReason = null;
-same('enabled', ChimMindPoisoning\mindPoisoningPauseStatus($linkedDataReason), 'A valid linked data directory with no control file must preserve default-enabled behavior.');
-same(null, $linkedDataReason, 'A valid linked data directory should not invent a diagnostic reason.');
-check(unlink($pauseTestData), 'The temporary data symlink should be removed.');
+if (@symlink($linkedDataRoot, $pauseTestData)) {
+    $linkedDataReason = null;
+    same('enabled', ChimMindPoisoning\mindPoisoningPauseStatus($linkedDataReason), 'A valid linked data directory with no control file must preserve default-enabled behavior.');
+    same(null, $linkedDataReason, 'A valid linked data directory should not invent a diagnostic reason.');
+    check(unlink($pauseTestData), 'The temporary data symlink should be removed.');
+} else {
+    echo "runtime symlink checks skipped: Windows did not permit symlink creation\n";
+}
 check(mkdir($pauseTestData, 0700), 'The original temporary data directory should be restored.');
 check(rmdir($linkedDataRoot), 'The temporary linked data target should be removed.');
 
 $emptyRoot = $pauseTestRoot . DIRECTORY_SEPARATOR . 'empty-root';
 check(mkdir($emptyRoot, 0700), 'The empty CHIM root fixture should be created.');
-check(symlink($pauseTestRoot . DIRECTORY_SEPARATOR . 'main.php', $emptyRoot . DIRECTORY_SEPARATOR . 'main.php'), 'A valid main.php symlink should be created.');
-$validEnginePath = $GLOBALS['ENGINE_PATH'];
-$GLOBALS['ENGINE_PATH'] = $emptyRoot . DIRECTORY_SEPARATOR;
-$emptyRootReason = null;
-same('enabled', ChimMindPoisoning\mindPoisoningPauseStatus($emptyRootReason), 'A valid CHIM root without a data directory must remain enabled.');
-same(null, $emptyRootReason, 'A missing data directory should not invent a diagnostic reason.');
-$GLOBALS['ENGINE_PATH'] = $validEnginePath;
-@unlink($emptyRoot . DIRECTORY_SEPARATOR . 'main.php');
+if (@symlink($pauseTestRoot . DIRECTORY_SEPARATOR . 'main.php', $emptyRoot . DIRECTORY_SEPARATOR . 'main.php')) {
+    $validEnginePath = $GLOBALS['ENGINE_PATH'];
+    $GLOBALS['ENGINE_PATH'] = $emptyRoot . DIRECTORY_SEPARATOR;
+    $emptyRootReason = null;
+    same('enabled', ChimMindPoisoning\mindPoisoningPauseStatus($emptyRootReason), 'A valid CHIM root without a data directory must remain enabled.');
+    same(null, $emptyRootReason, 'A missing data directory should not invent a diagnostic reason.');
+    $GLOBALS['ENGINE_PATH'] = $validEnginePath;
+    @unlink($emptyRoot . DIRECTORY_SEPARATOR . 'main.php');
+} else {
+    echo "runtime root symlink check skipped: Windows did not permit symlink creation\n";
+}
 @rmdir($emptyRoot);
 
 unset($GLOBALS['runtime_test_interaction_allowed'], $GLOBALS['runtime_test_interaction_generation'], $GLOBALS['runtime_test_relationship_enabled'], $GLOBALS['RELLLM_CONNECTOR']);

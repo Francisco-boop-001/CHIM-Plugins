@@ -397,6 +397,7 @@ $valid = [
 ];
 $parsed = parseJudgments(encoded($valid), $parseSubjects, $parseUtterance);
 check($parsed['npc:3']['delta'] === -2 && $parsed['player']['delta'] === 0 && $parsed['npc:4']['delta'] === 3, 'Negative, zero, positive, and multi-subject judgments should parse exactly.');
+check(array_keys($parsed['npc:3']) === ['delta', 'reason', 'evidence'], 'Legacy affinity-only judgments must retain the exact parser output shape.');
 $fence = str_repeat(chr(96), 3);
 check(parseJudgments($fence . "json\n" . encoded($valid) . "\n" . $fence, $parseSubjects, $parseUtterance) === $parsed, 'A single exact JSON markdown fence should be accepted.');
 check(parseJudgments('not json', [], $parseUtterance) === [], 'No candidates should produce an empty judgment map.');
@@ -490,5 +491,11 @@ $mayPromptEvent = $event;
 $mayPromptEvent['text'] = 'You may trust Jarl Balgruuf.';
 $mayMessages = buildMessages($mayPromptEvent, $speaker, $listener, $maySubjects);
 check(str_contains($mayMessages[0]['content'], 'subject_mentioned'), 'The prompt must provide the mention field required by the parser.');
+check(
+    str_contains($mayMessages[0]['content'], 'type_change')
+        && !str_contains($mayMessages[0]['content'], 'Do not edit relationship types')
+        && json_decode($mayMessages[1]['content'], true, 512, JSON_THROW_ON_ERROR)['untrusted_data']['allowed_relationship_types'] === \RelationshipManager::TYPES,
+    'The ordinary prompt must offer an optional type proposal and platform-backed allowed targets.'
+);
 
 echo "influence checks passed\n";

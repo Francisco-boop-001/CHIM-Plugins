@@ -245,6 +245,79 @@ loggingCheck($debugData['changes'][0]['before'] === 250.12345, 'observed prior a
 loggingCheck($debugData['subject'] === 'npc:12' && $debugData['delta'] === -3, 'subject tokens and bounded deltas should pass.');
 loggingCheck(str_starts_with($debugData['model_reason'], "\n"), 'JSON escaping should preserve but not physically split embedded newlines.');
 
+$typedRecords = [];
+$typedLog = new RequestLog(static function (string $json) use (&$typedRecords): void {
+    $typedRecords[] = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+}, true);
+$typeChanges = [];
+$typeDecisions = [];
+for ($id = 1; $id <= 9; $id++) {
+    $typeChanges[] = ['subject' => 'npc:' . $id, 'before' => 'neutral', 'after' => 'ally', 'secret' => 'drop'];
+    $typeDecisions[] = ['subject' => 'npc:' . $id, 'from' => 'neutral', 'to' => 'ally', 'reason' => 'change_eligible', 'evidence' => 'drop'];
+}
+$typedLog->event('persistence_finished', 'info', [
+    'commit_state' => 'confirmed',
+    'committed' => true,
+    'changed_count' => 8,
+    'affinity_changed_count' => 0,
+    'type_changed_count' => 8,
+    'type_changes' => $typeChanges,
+    'type_decisions' => $typeDecisions,
+]);
+$typed = $typedRecords[0];
+loggingCheck(
+    count($typed['type_changes'] ?? []) === 8
+        && count($typed['type_decisions'] ?? []) === 8
+        && ($typed['type_changes'][0] ?? null) === ['subject' => 'npc:1', 'before' => 'neutral', 'after' => 'ally']
+        && ($typed['type_decisions'][0] ?? null) === ['subject' => 'npc:1', 'from' => 'neutral', 'to' => 'ally', 'reason' => 'change_eligible'],
+    'Confirmed type diagnostics must be bounded to eight records and use only the explicit safe fields.'
+);
+
+$unsafeTypeRecords = [];
+$unsafeTypeLog = new RequestLog(static function (string $json) use (&$unsafeTypeRecords): void {
+    $unsafeTypeRecords[] = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+}, true);
+$unsafeTypeLog->event('persistence_finished', 'info', [
+    'commit_state' => 'confirmed',
+    'committed' => true,
+    'type_changed_count' => 9,
+    'affinity_changed_count' => 0,
+    'type_changes' => [
+        ['subject' => 'npc:1', 'before' => 'neutral', 'after' => str_repeat('a', 51)],
+        ['subject' => 'npc:2', 'before' => 'neutral', 'after' => 'new type: target Lydia'],
+    ],
+    'type_decisions' => [
+        ['subject' => 'npc:1', 'from' => 'neutral', 'to' => 'romantic', 'reason' => 'invented_reason'],
+        ['subject' => 'npc:2', 'from' => 'neutral', 'to' => 'the NPC told me a secret', 'reason' => 'same_type'],
+    ],
+    'credential' => 'must not escape',
+]);
+$unsafeTyped = $unsafeTypeRecords[0];
+loggingCheck(
+    ($unsafeTyped['type_changed_count'] ?? null) === null
+        && ($unsafeTyped['type_changes'] ?? []) === []
+        && ($unsafeTyped['type_decisions'] ?? []) === []
+        && !isset($unsafeTyped['credential']),
+    'Oversized counts, free-text types, unknown reason codes, and unrelated fields must be dropped.'
+);
+
+$unconfirmedTypeRecords = [];
+$unconfirmedTypeLog = new RequestLog(static function (string $json) use (&$unconfirmedTypeRecords): void {
+    $unconfirmedTypeRecords[] = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+}, true);
+$unconfirmedTypeLog->event('persistence_finished', 'error', [
+    'commit_state' => 'unconfirmed',
+    'committed' => false,
+    'type_changed_count' => 1,
+    'type_changes' => [['subject' => 'npc:1', 'before' => 'neutral', 'after' => 'ally']],
+    'type_decisions' => [['subject' => 'npc:1', 'from' => 'neutral', 'to' => 'ally', 'reason' => 'change_eligible']],
+]);
+loggingCheck(
+    !isset($unconfirmedTypeRecords[0]['type_changes'], $unconfirmedTypeRecords[0]['type_changed_count'])
+        && count($unconfirmedTypeRecords[0]['type_decisions'] ?? []) === 1,
+    'Unconfirmed persistence may retain a proposal but must not log an applied type transition.'
+);
+
 $observerDeliveries = [];
 $observerOrder = [];
 $observedLog = new RequestLog(static function (string $json, string $level) use (&$observerDeliveries, &$observerOrder): void {
@@ -264,6 +337,7 @@ $observedLog->event('observer_debug', 'debug', [
     'claim_token' => 'PRIVATE CLAIM TOKEN',
     'raw' => 'PRIVATE RAW FIELD',
     'digest' => 'PRIVATE DIGEST',
+    'type_decisions' => [['subject' => 'npc:9', 'from' => 'neutral', 'to' => 'ally', 'reason' => 'change_eligible']],
 ]);
 $observedSinkRecord = json_decode($observerDeliveries[0][0], true, 512, JSON_THROW_ON_ERROR);
 $observedRecord = $observedRecords[0][0];
@@ -272,6 +346,7 @@ loggingCheck(
     $observerOrder === ['sink', 'observer']
         && $observedRecords[0][1] === 'debug'
         && $observedRecord['level'] === 'debug'
+        && ($observedRecord['type_decisions'][0]['reason'] ?? null) === 'change_eligible'
         && $observedRecord['config_id'] === $validConfigId,
     'observer should receive the sanitized associative record and fixed level after normal delivery.'
 );

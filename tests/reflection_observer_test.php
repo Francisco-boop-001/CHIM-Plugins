@@ -20,7 +20,7 @@ function observerCheck(bool $condition, string $message): void
 
 function runObserverCase(string $case): array
 {
-    if (!in_array($case, ['committed', 'zero', 'provider_failure', 'commit_unconfirmed', 'warning'], true)) {
+    if (!in_array($case, ['committed', 'type_only', 'zero', 'provider_failure', 'commit_unconfirmed', 'warning'], true)) {
         throw new RuntimeException('Unknown observer fixture case.');
     }
     define('CHIM_MIND_POISONING_TEST_FIXTURES_ONLY', true);
@@ -35,7 +35,6 @@ function runObserverCase(string $case): array
     observerCheck(defined('ChimMindPoisoning\\MIND_POISONING_REFLECTION_API_VERSION')
         && constant('ChimMindPoisoning\\MIND_POISONING_REFLECTION_API_VERSION') === 1,
         'Mind Poisoning reflection API version is missing or unsupported.');
-
     if (!class_exists(ObserverUnconfirmedStore::class, false)) {
         final class ObserverUnconfirmedStore implements \ChimMindPoisoning\StoreDb
         {
@@ -63,7 +62,9 @@ function runObserverCase(string $case): array
         @unlink($logDirectory . DIRECTORY_SEPARATOR . 'events.lock');
         @rmdir($logDirectory);
     });
-    observerCheck(pcv_log_set_test_directory($logDirectory), 'Could not set the isolated importer log directory.');
+    $importerSinkAvailable = pcv_log_set_test_directory($logDirectory);
+    observerCheck($importerSinkAvailable || PHP_OS_FAMILY === 'Windows' || !function_exists('posix_geteuid'),
+        'Could not set the isolated importer log directory.');
 
     [$sourceEvent, , , $memory] = baseFixture();
     $eventId = 100;
@@ -71,7 +72,10 @@ function runObserverCase(string $case): array
     $configId = '12345678-1234-4234-8234-123456789abc';
     $speech = 'In my heart, Lydia earned my trust again.';
     $sourceText = 'Aela: I still think Lydia earned my trust. (Talking to explicit_disable_rechat)';
-    $memory->npcs[11]['extended_data']->relationships->Lydia = (object)['aff' => 10, 'type' => 'ally'];
+    $memory->npcs[11]['extended_data']->relationships->Lydia = (object)[
+        'aff' => 10,
+        'type' => $case === 'type_only' ? 'neutral' : 'ally',
+    ];
     $memory->events[$eventId] = array_replace($sourceEvent, [
         'event_id' => $eventId,
         'utterance_id' => $utteranceId,
@@ -112,13 +116,17 @@ function runObserverCase(string $case): array
         if ($case === 'provider_failure') {
             throw new RuntimeException('PRIVATE_PROVIDER_FAILURE_TEXT');
         }
-        return validModelResponse([[
+        $judgment = [
             'subject' => 'npc:22',
             'subject_mentioned' => true,
-            'delta' => $case === 'zero' ? 0 : 3,
+            'delta' => in_array($case, ['zero', 'type_only'], true) ? 0 : 3,
             'reason' => 'The actor recalls Lydia honoring a promise.',
             'evidence' => 'Lydia earned my trust again.',
-        ]]);
+        ];
+        if ($case === 'type_only') {
+            $judgment['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+        }
+        return validModelResponse([$judgment]);
     };
     $status = \ChimMindPoisoning\mindPoisoningEvaluateReflection(
         $registration,
@@ -128,6 +136,45 @@ function runObserverCase(string $case): array
         $model,
         $log
     );
+
+    $persistenceRecord = null;
+    $evaluationRecord = null;
+    foreach ($sinkRecords as $record) {
+        if (($record['event'] ?? null) === 'persistence_finished') {
+            $persistenceRecord = $record;
+        } elseif (($record['event'] ?? null) === 'request_finished') {
+            $evaluationRecord = $record;
+        }
+    }
+    observerCheck(is_array($persistenceRecord) && is_array($evaluationRecord), 'Mind Poisoning did not emit the records needed for importer classification.');
+    if (in_array($case, ['type_only', 'commit_unconfirmed'], true)) {
+        $expectedPersistence = $case === 'type_only'
+            ? ['committed', 'info', null]
+            : ['unconfirmed', 'error', 'commit_unconfirmed'];
+        observerCheck(\pcv_log_mp_persistence_outcome($persistenceRecord) === $expectedPersistence,
+            'The unchanged importer did not classify the real sanitized persistence record as expected.');
+        $expectedEvaluation = $case === 'type_only'
+            ? ['committed', 'info', null]
+            : ['unconfirmed', 'error', 'commit_unconfirmed'];
+        observerCheck(\pcv_log_mp_evaluation_outcome($evaluationRecord, $evaluationRecord['sink_level'] ?? '') === $expectedEvaluation,
+            'The unchanged importer did not classify the real sanitized evaluation record as expected.');
+    }
+
+    if (!$importerSinkAvailable) {
+        $importerRequest =& pcv_log_request_context();
+        return [
+            'case' => $case,
+            'status' => $status,
+            'source' => $sinkRecords,
+            'summary' => $evaluationRecord,
+            'imported' => [],
+            'importer_sink' => 'posix_uid_unavailable',
+            'importer_context' => [
+                'config_id' => $importerRequest['config_id'] ?? null,
+                'correlation' => $importerRequest['correlation'] ?? [],
+            ],
+        ];
+    }
 
     $path = pcv_log_path();
     observerCheck(is_string($path) && is_file($path), 'The real importer did not write its isolated JSONL file.');
@@ -151,7 +198,16 @@ function runObserverCase(string $case): array
 
 function runIsolatedCase(string $name): array
 {
-    $command = [PHP_BINARY, __FILE__, '--case', $name];
+    $command = [PHP_BINARY];
+    if (PHP_OS_FAMILY === 'Windows') {
+        $command = [
+            PHP_BINARY,
+            '-n',
+            '-d', 'extension_dir=' . dirname(PHP_BINARY) . DIRECTORY_SEPARATOR . 'ext',
+            '-d', 'extension=php_mbstring.dll',
+        ];
+    }
+    array_push($command, __FILE__, '--case', $name);
     $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
     if (!is_resource($process)) {
         throw new RuntimeException('Could not start isolated case ' . $name . '.');
@@ -177,8 +233,44 @@ function imported(array $result, string $event, ?string $outcome = null): array
     throw new RuntimeException($result['case'] . ' did not import ' . $event . ' / ' . (string)$outcome . '.');
 }
 
+if (PHP_OS_FAMILY === 'Windows' || !function_exists('posix_geteuid')) {
+    $typeOnly = runIsolatedCase('type_only');
+    $typePersistence = null;
+    foreach ($typeOnly['source'] as $record) {
+        if (($record['event'] ?? null) === 'persistence_finished') {
+            $typePersistence = $record;
+            break;
+        }
+    }
+    observerCheck(($typeOnly['status'] ?? null) === 'committed'
+        && ($typeOnly['summary']['commit_state'] ?? null) === 'confirmed'
+        && ($typeOnly['summary']['changed_count'] ?? null) === 1
+        && ($typeOnly['summary']['changes'] ?? null) === []
+        && ($typeOnly['summary']['type_changed_count'] ?? null) === 1
+        && ($typePersistence['type_changes'][0] ?? null) === ['subject' => 'npc:22', 'before' => 'neutral', 'after' => 'suspicious'],
+        'The real type-only reflection did not report its confirmed relationship transition: ' . json_encode($typeOnly, JSON_UNESCAPED_SLASHES));
+    observerCheck(($typeOnly['importer_sink'] ?? null) === 'posix_uid_unavailable', 'The unsupported importer sink should be reported explicitly.');
+    observerCheck(($typeOnly['importer_context']['config_id'] ?? null) === '12345678-1234-4234-8234-123456789abc'
+        && ($typeOnly['importer_context']['correlation']['event_id'] ?? null) === '100'
+        && ($typeOnly['importer_context']['correlation']['utterance_id'] ?? null) === 'utt_0123456789abcdef'
+        && ($typeOnly['importer_context']['correlation']['linked_request_id'] ?? null) === ($typeOnly['summary']['request_id'] ?? null),
+        'The full importer did not preserve exact in-memory config and event correlation.');
+
+    $unconfirmed = runIsolatedCase('commit_unconfirmed');
+    observerCheck(($unconfirmed['summary']['commit_state'] ?? null) === 'unconfirmed'
+        && ($unconfirmed['summary']['changed_count'] ?? null) === 0
+        && ($unconfirmed['summary']['committed'] ?? null) === false
+        && !array_key_exists('type_changes', $unconfirmed['summary'])
+        && ($unconfirmed['importer_sink'] ?? null) === 'posix_uid_unavailable'
+        && ($unconfirmed['importer_context']['config_id'] ?? null) === '12345678-1234-4234-8234-123456789abc'
+        && ($unconfirmed['importer_context']['correlation']['linked_request_id'] ?? null) === ($unconfirmed['summary']['request_id'] ?? null),
+        'The real unconfirmed persistence did not remain distinct from an applied transition: ' . json_encode($unconfirmed, JSON_UNESCAPED_SLASHES));
+    fwrite(STDOUT, "reflection observer/importer: type-only confirmed and unconfirmed classifications passed; JSONL sink skipped because POSIX UID support is unavailable\n");
+    exit(0);
+}
+
 $cases = [];
-foreach (['committed', 'zero', 'provider_failure', 'commit_unconfirmed', 'warning'] as $name) {
+foreach (['committed', 'type_only', 'zero', 'provider_failure', 'commit_unconfirmed', 'warning'] as $name) {
     $cases[$name] = runIsolatedCase($name);
 }
 foreach ($cases as $result) {
@@ -198,6 +290,25 @@ observerCheck(($committed['context']['commit_state'] ?? null) === 'confirmed' &&
 observerCheck(($committed['context']['changed_count'] ?? null) === 1
     && ($committed['context']['changes'][0] ?? null) === ['subject' => 'npc:22', 'delta' => 3, 'before' => 10, 'after' => 13],
     'Committed change tuple was not imported exactly.');
+$typeOnly = imported($cases['type_only'], 'reflection.persistence_finished', 'committed');
+observerCheck(($cases['type_only']['status'] ?? null) === 'committed'
+    && ($typeOnly['severity'] ?? null) === 'info'
+    && ($typeOnly['context']['commit_state'] ?? null) === 'confirmed'
+    && ($typeOnly['context']['changed_count'] ?? null) === 1
+    && ($typeOnly['context']['changes'] ?? null) === []
+    && !array_key_exists('type_changes', $typeOnly['context']),
+    'The importer must classify a confirmed type-only persistence as committed using changed_count.');
+$typeOnlySourcePersistence = null;
+foreach ($cases['type_only']['source'] as $record) {
+    if (($record['event'] ?? null) === 'persistence_finished') {
+        $typeOnlySourcePersistence = $record;
+        break;
+    }
+}
+observerCheck(($cases['type_only']['summary']['type_changed_count'] ?? null) === 1
+    && ($cases['type_only']['summary']['changed_count'] ?? null) === 1
+    && ($typeOnlySourcePersistence['type_changes'][0] ?? null) === ['subject' => 'npc:22', 'before' => 'neutral', 'after' => 'suspicious'],
+    'The Mind Poisoning source summary must retain the confirmed type transition even though PCV ignores that detail.');
 $modelFinished = imported($cases['committed'], 'reflection.model_finished', 'valid');
 $evaluationResult = imported($cases['committed'], 'reflection.evaluation_result', 'committed');
 observerCheck(is_numeric($modelFinished['context']['model_ms'] ?? null)
@@ -223,4 +334,4 @@ observerCheck(($uncertainSummary['severity'] ?? null) === 'error', 'Unconfirmed 
 $warning = imported($cases['warning'], 'reflection.evaluation_result', 'rejected');
 observerCheck(($cases['warning']['status'] ?? null) === 'paused' && ($warning['severity'] ?? null) === 'warning', 'Warning-level pre-model skip was not imported.');
 observerCheck(($warning['reason'] ?? null) === 'evaluation_rejected', "Skipped evaluation should use the importer's fixed warning reason.");
-fwrite(STDOUT, "reflection observer/importer: 5 cases passed (committed delta, zero change, provider failure, unconfirmed commit, warning skip)\n");
+fwrite(STDOUT, "reflection observer/importer: 6 cases passed (committed delta, type-only commit, zero change, provider failure, unconfirmed commit, warning skip)\n");

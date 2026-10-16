@@ -198,11 +198,11 @@ $player = ['id' => '7', 'extended_data' => (object)['relationships' => new stdCl
 $missing = dashboardCurrent($player, 'npc:9', 'Subject', '', ['Subject' => 1]);
 $player['extended_data']->relationships->Subject = (object)['aff' => 'not-a-number'];
 $malformed = dashboardCurrent($player, 'npc:9', 'Subject', '', ['Subject' => 1]);
-dashboardDataAssert($missing === ['value' => null, 'state' => 'unset_default_zero'], 'Missing edge was not kept distinct from observed zero.');
-dashboardDataAssert($malformed === ['value' => null, 'state' => 'invalid'], 'Malformed affinity was coerced to a numeric value.');
+dashboardDataAssert($missing === ['value' => null, 'state' => 'unset_default_zero', 'type' => null, 'type_state' => 'unset'], 'Missing edge was not kept distinct from observed zero or unset type.');
+dashboardDataAssert($malformed === ['value' => null, 'state' => 'invalid', 'type' => null, 'type_state' => 'unset'], 'Malformed affinity was coerced to a numeric value or unset type.');
 $player['extended_data']->relationships = null;
 dashboardDataAssert(
-    dashboardCurrent($player, 'npc:9', 'Subject', '', ['Subject' => 1]) === ['value' => null, 'state' => 'invalid'],
+    dashboardCurrent($player, 'npc:9', 'Subject', '', ['Subject' => 1]) === ['value' => null, 'state' => 'invalid', 'type' => null, 'type_state' => 'invalid'],
     'Unavailable oversized relationship data was treated as an empty object.'
 );
 $player['extended_data']->relationships = (object)[
@@ -210,17 +210,17 @@ $player['extended_data']->relationships = (object)[
     'Dragonborn' => (object)['aff' => 1, 'type' => 'neutral'],
 ];
 dashboardDataAssert(
-    dashboardCurrent($player, 'player', 'Player', 'Dragonborn', []) === ['value' => 50, 'state' => 'set'],
+    dashboardCurrent($player, 'player', 'Player', 'Dragonborn', []) === ['value' => 50, 'state' => 'set', 'type' => 'romantic', 'type_state' => 'set'],
     'The dashboard must read the core-selected canonical Player edge from stored aliases.'
 );
 $player['extended_data']->relationships->Dragonborn = [1];
 dashboardDataAssert(
-    dashboardCurrent($player, 'player', 'Player', 'Dragonborn', []) === ['value' => null, 'state' => 'invalid'],
+    dashboardCurrent($player, 'player', 'Player', 'Dragonborn', []) === ['value' => null, 'state' => 'invalid', 'type' => null, 'type_state' => 'invalid'],
     'The dashboard must reject malformed array-shaped persisted Player edges.'
 );
 $player['extended_data']->relationships = [];
 dashboardDataAssert(
-    dashboardCurrent($player, 'player', 'Player', 'Dragonborn', []) === ['value' => null, 'state' => 'unset_default_zero'],
+    dashboardCurrent($player, 'player', 'Player', 'Dragonborn', []) === ['value' => null, 'state' => 'unset_default_zero', 'type' => null, 'type_state' => 'unset'],
     'An empty legacy array map should behave as an unset Player edge in the dashboard.'
 );
 
@@ -241,7 +241,7 @@ $active = '17';
 $event = [
     'event_id' => 42,
     'utterance_id' => 'utt_abcdefgh',
-    'judgments' => [['subject' => 'npc:9', 'delta' => 2]],
+    'judgments' => [['subject' => 'npc:9', 'delta' => 2, 'reason' => 'friendlier', 'evidence' => 'shared work']],
 ];
 $database = [
     'active_playthrough' => $active,
@@ -446,7 +446,7 @@ $playerDatabase = $database;
 $playerDatabase['rows'][0]['plugin_extended_data']->mind_poisoning->events = [[
     'event_id' => 43,
     'utterance_id' => 'input_123',
-    'judgments' => [['subject' => 'npc:9', 'delta' => 2]],
+    'judgments' => [['subject' => 'npc:9', 'delta' => 2, 'reason' => 'friendlier', 'evidence' => 'heard from Anora']],
 ]];
 $playerBaseRecord = [
     'request_id' => 'req_player_input',

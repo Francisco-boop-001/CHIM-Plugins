@@ -1,6 +1,6 @@
 # Mind Poisoning dashboard
 
-The read-only Interactions/Logs dashboard ships in the v0.1.8 PRE-ALPHA development-candidate prerelease and remains in the v0.1.12 candidate. It shows retained plugin records and query-time relationship state; it is not a live event monitor or audit guarantee. The empty readable log is shown as an empty source rather than falsely marked truncated. Live web-server authentication and PostgreSQL behavior remain unverified.
+The read-only Interactions/Logs dashboard was introduced in v0.1.8 and is included in the published v0.1.20 PRE-ALPHA package. v0.1.20 also fixes standalone dashboard normalization for canonical Player edges by loading the CHIM relationship helper from the validated server root; the isolated fixture used the pinned core helper. A valid affinity is no longer shown as Invalid because the required helper was absent. If the required helper is missing, the result is Unavailable; malformed relationship data remains Invalid. This correction has isolated fixture coverage, not live-deployment proof. The dashboard shows retained plugin records and query-time relationship state; it is not a live event monitor or audit guarantee. The empty readable log is shown as an empty source rather than falsely marked truncated. Remote web-server authentication and broader database failure/concurrency behavior remain unverified.
 
 ## Page and access
 
@@ -18,7 +18,9 @@ The page accepts GET requests only. Interactions and Logs are ordinary links wit
 
 ## What it shows
 
-The dashboard separates a model proposal, a commit-confirmed applied delta, the historical before/after values, and the current affinity read when the dashboard query runs. An unconfirmed commit is labeled **Unconfirmed**; it is not shown as no change. An unset relationship explicitly defined as default-zero is shown as `0 (default)`. Ambiguous, invalid, and unavailable values remain distinct.
+The dashboard separates a model-proposed affinity delta, a commit-confirmed applied delta, historical before/after values, and the current affinity read at query time. The v0.1.20 type display has passed isolated fixture checks; it shows proposed type decisions, commit-confirmed type changes, and the current type read at query time separately. A proposal does not establish application. `type_decisions` records `{subject, from, to, reason}` with fixed reasons `change_eligible`, `same_type`, `protected_type_preserved`, or `custom_type_preserved`. `type_changes` contains only confirmed transitions as `{subject, before, after}`. For older ledger entries that lack an explicit decision reason, a valid recorded proposal may appear without a reason; malformed or unknown optional type-history entries are skipped. A proposal is not evidence of application. An unconfirmed commit is labeled **Unconfirmed**; it is not shown as no change. An unset relationship explicitly defined as default-zero is shown as `0 (default)`. Ambiguous, invalid, and unavailable values remain distinct.
+
+`changed_count` counts distinct relationships changed by affinity or type; `affinity_changed_count` and `type_changed_count` separate those outcomes. A confirmed type-only change has a positive `changed_count` even when its affinity delta is zero. The existing `changes` array retains its affinity fields.
 
 The v0.1.7 dashboard recognizes explicitly marked Player-origin records, displays the speaker as **Player**, and labels `input_<rowid>` correlation values as **Input event**. It never infers Player from a missing speaker ID. Published v0.1.6 assets remain NPC-origin only.
 
@@ -30,8 +32,8 @@ When the database source is unavailable, retained log records can still appear a
 
 - Log input is limited to the last 2 MiB and 1,000 parsed plugin records. The UI may report that older records are missing. The CHIM log itself can be truncated by CHIM; this view does not provide an archival audit trail.
 - Database reads use a separate read-only transaction. The reader uses the guarded `sql::$connString` compatibility seam after confirming the expected CHIM class file and private property; it does not instantiate `sql` or run the CHIM bootstrap. If a future core version changes that shape, database data is shown as unavailable. The reader caps the NPC catalog at 1,000 rows and selects at most 100 listeners ordered by their newest valid retained event ID. This is a recent-listener sample, not an exhaustive query of global history. Each stored ledger is capped at 64 KiB and each relationships JSON value at 16 KiB. The interaction list is capped at 200 entries.
-- The current affinity value is a query-time read. It can differ from the value immediately after a historical event.
-- Local fixtures and an isolated PostgreSQL synthetic-schema selection check do not prove live CHIM database behavior or concurrency, remote authentication, provider calls, client ACK behavior, or in-game behavior.
+- Current affinity and type values are query-time reads. They can differ from the value immediately after a historical event.
+- Local fixtures and an isolated PostgreSQL synthetic-schema selection check do not prove live CHIM database behavior or concurrency, remote authentication, provider calls, client ACK behavior, or in-game behavior. The v0.1.20 type change has no live/gameplay verification.
 
 ## Local preview
 

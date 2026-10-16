@@ -123,6 +123,36 @@ same(64, strlen($reflectionLedger->reflection_state->basis), 'The bounded actor 
 same(['npc:22'], $reflectionLedger->reflection_state->subjects, 'The processed subject token should be recorded for the unchanged basis.');
 
 resetAckLoggingInteraction();
+[$typeOnlyRegistration, $typeOnlyAck, $typeOnlyDb] = reflectionFixture();
+$typeOnlyDb->npcs[11]['extended_data']->relationships->Lydia->type = 'neutral';
+$typeOnlyRecords = [];
+$typeOnlyStatus = mindPoisoningEvaluateReflection(
+    $typeOnlyRegistration,
+    $typeOnlyAck,
+    $typeOnlyDb,
+    static fn(array $given): bool => $given === $typeOnlyRegistration,
+    static fn(array $messages): string => validModelResponse([[
+        'subject' => 'npc:22',
+        'subject_mentioned' => true,
+        'delta' => 0,
+        'reason' => 'A lasting reflection changes the actor opinion.',
+        'evidence' => 'Lydia earned my trust again.',
+        'type_change' => ['from' => 'neutral', 'to' => 'suspicious'],
+    ]]),
+    captureRequestLog($typeOnlyRecords)
+);
+same('committed', $typeOnlyStatus, 'A reflection may persist a type-only change.');
+same(10, $typeOnlyDb->npcs[11]['extended_data']->relationships->Lydia->aff, 'A type-only reflection should leave affinity unchanged.');
+same('suspicious', $typeOnlyDb->npcs[11]['extended_data']->relationships->Lydia->type, 'A type-only reflection should update the actor-owned type.');
+$typeOnlySummary = lastRequestSummary($typeOnlyRecords);
+same(1, $typeOnlySummary['changed_count'] ?? null, 'A type-only reflection should count as one changed relationship.');
+same([], $typeOnlySummary['changes'] ?? null, 'A type-only reflection should not create an affinity change tuple.');
+same([['subject' => 'npc:22', 'before' => 'neutral', 'after' => 'suspicious']], $typeOnlySummary['type_changes'] ?? null, 'The reflection summary should contain only the confirmed type transition.');
+$typeOnlyEntry = $typeOnlyDb->npcs[11]['plugin_extended_data']->mind_poisoning->events[0];
+same('neutral', $typeOnlyEntry->judgments[0]->type_change->from, 'Reflection history should preserve the validated type origin.');
+same('suspicious', $typeOnlyEntry->type_changes[0]->after, 'Reflection history should preserve the confirmed type result.');
+
+resetAckLoggingInteraction();
 [$emptyMapRegistration, $emptyMapAck, $emptyMapDb] = reflectionFixture();
 $emptyMapDb->npcs[11]['extended_data']->relationships = [];
 $emptyMapModelCalls = 0;

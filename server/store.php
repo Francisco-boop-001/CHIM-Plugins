@@ -109,6 +109,11 @@ function knownLedgerArray(mixed $value): ?array
     return is_array($value) ? $value : null;
 }
 
+function validHistoricalTypeToken(mixed $type): bool
+{
+    return is_string($type) && strlen($type) <= 50 && preg_match('/\A[A-Za-z0-9][A-Za-z0-9_-]{0,49}\z/D', $type) === 1;
+}
+
 function storedLedgerNamespace(object $pluginExtendedData): ?array
 {
     if (!property_exists($pluginExtendedData, 'mind_poisoning')) {
@@ -159,25 +164,109 @@ function storedLedgerNamespace(object $pluginExtendedData): ?array
         ) {
             return null;
         }
-        if (($entry['source_kind'] ?? null) === 'reflection') {
+        $isReflectionEntry = ($entry['source_kind'] ?? null) === 'reflection';
+        if ($isReflectionEntry) {
             $hasReflectionEvents = true;
-            if (!array_is_list($entry['judgments']) || count($entry['judgments']) > 8) {
+            if (!is_array($entry['judgments'] ?? null) || !array_is_list($entry['judgments']) || count($entry['judgments']) > 8) {
                 return null;
             }
             foreach ($entry['judgments'] as $judgment) {
                 $judgmentKeys = is_array($judgment) ? array_keys($judgment) : [];
                 sort($judgmentKeys, SORT_STRING);
+                $typeChange = is_array($judgment) ? ($judgment['type_change'] ?? null) : null;
+                $typeChangeKeys = is_array($typeChange) ? array_keys($typeChange) : [];
+                sort($typeChangeKeys, SORT_STRING);
                 if (
                     !is_array($judgment)
-                    || $judgmentKeys !== ['delta', 'evidence', 'reason', 'subject']
+                    || ($judgmentKeys !== ['delta', 'evidence', 'reason', 'subject']
+                        && $judgmentKeys !== ['delta', 'evidence', 'reason', 'subject', 'type_change'])
                     || !is_string($judgment['subject'] ?? null)
                     || ($judgment['subject'] !== 'player' && preg_match('/\Anpc:[1-9][0-9]*\z/D', $judgment['subject']) !== 1)
                     || !is_int($judgment['delta'] ?? null) || $judgment['delta'] < -5 || $judgment['delta'] > 5
                     || !is_string($judgment['reason'] ?? null) || strlen($judgment['reason']) > 120
                     || !is_string($judgment['evidence'] ?? null) || strlen($judgment['evidence']) > 120
+                    || (array_key_exists('type_change', $judgment) && (
+                        $typeChange !== null && (
+                            !is_array($typeChange)
+                            || array_is_list($typeChange)
+                            || $typeChangeKeys !== ['from', 'to']
+                            || !validHistoricalTypeToken($typeChange['from'] ?? null)
+                            || !validHistoricalTypeToken($typeChange['to'] ?? null)
+                        )
+                    ))
                 ) {
                     return null;
                 }
+            }
+        } elseif (is_array($entry['judgments'] ?? null) && array_is_list($entry['judgments'])) {
+            foreach ($entry['judgments'] as $judgment) {
+                if (!is_array($judgment) || !array_key_exists('type_change', $judgment)) {
+                    continue;
+                }
+                $typeChange = $judgment['type_change'];
+                if ($typeChange === null) {
+                    continue;
+                }
+                $typeChangeKeys = is_array($typeChange) ? array_keys($typeChange) : [];
+                sort($typeChangeKeys, SORT_STRING);
+                if (
+                    !is_array($typeChange) || array_is_list($typeChange)
+                    || $typeChangeKeys !== ['from', 'to']
+                    || !validHistoricalTypeToken($typeChange['from'] ?? null)
+                    || !validHistoricalTypeToken($typeChange['to'] ?? null)
+                ) {
+                    return null;
+                }
+            }
+        }
+        $typeDecisions = [];
+        if (array_key_exists('type_decisions', $entry)) {
+            if (!is_array($entry['type_decisions']) || !array_is_list($entry['type_decisions']) || count($entry['type_decisions']) > 8) {
+                return null;
+            }
+            foreach ($entry['type_decisions'] as $decision) {
+                $keys = is_array($decision) ? array_keys($decision) : [];
+                sort($keys, SORT_STRING);
+                if (
+                    !is_array($decision)
+                    || $keys !== ['from', 'reason', 'subject', 'to']
+                    || !is_string($decision['subject'] ?? null)
+                    || ($decision['subject'] !== 'player' && preg_match('/\Anpc:[1-9][0-9]*\z/D', $decision['subject']) !== 1)
+                    || isset($typeDecisions[$decision['subject']])
+                    || !validHistoricalTypeToken($decision['from'] ?? null)
+                    || !validHistoricalTypeToken($decision['to'] ?? null)
+                    || !in_array($decision['reason'] ?? null, ['change_eligible', 'same_type', 'protected_type_preserved', 'custom_type_preserved'], true)
+                ) {
+                    return null;
+                }
+                $typeDecisions[$decision['subject']] = $decision;
+            }
+        }
+        $typeChanges = [];
+        if (array_key_exists('type_changes', $entry)) {
+            if (!is_array($entry['type_changes']) || !array_is_list($entry['type_changes']) || count($entry['type_changes']) > 8) {
+                return null;
+            }
+            foreach ($entry['type_changes'] as $change) {
+                $keys = is_array($change) ? array_keys($change) : [];
+                sort($keys, SORT_STRING);
+                if (
+                    !is_array($change)
+                    || $keys !== ['after', 'before', 'subject']
+                    || !is_string($change['subject'] ?? null)
+                    || ($change['subject'] !== 'player' && preg_match('/\Anpc:[1-9][0-9]*\z/D', $change['subject']) !== 1)
+                    || isset($typeChanges[$change['subject']])
+                    || !validHistoricalTypeToken($change['before'] ?? null)
+                    || !validHistoricalTypeToken($change['after'] ?? null)
+                    || $change['before'] === $change['after']
+                    || !isset($typeDecisions[$change['subject']])
+                    || ($typeDecisions[$change['subject']]['reason'] ?? null) !== 'change_eligible'
+                    || ($typeDecisions[$change['subject']]['from'] ?? null) !== $change['before']
+                    || ($typeDecisions[$change['subject']]['to'] ?? null) !== $change['after']
+                ) {
+                    return null;
+                }
+                $typeChanges[$change['subject']] = $change;
             }
         }
     }
@@ -448,6 +537,22 @@ function validSubjectsAndJudgments(array $subjects, array $judgments, array $eve
         ) {
             return false;
         }
+        if (array_key_exists('type_change', $judgment) && $judgment['type_change'] !== null) {
+            $typeChange = $judgment['type_change'];
+            $keys = is_array($typeChange) ? array_keys($typeChange) : [];
+            sort($keys, SORT_STRING);
+            if (
+                !is_array($typeChange) || array_is_list($typeChange)
+                || $keys !== ['from', 'to']
+                || !is_string($typeChange['from']) || strlen($typeChange['from']) > 50
+                || !is_string($typeChange['to']) || strlen($typeChange['to']) > 50
+                || ($canonicalFrom = canonicalRelationshipType($typeChange['from'], [$typeChange['from']])) !== $typeChange['from']
+                || ($canonicalTo = canonicalRelationshipType($typeChange['to'])) !== $typeChange['to']
+                || !in_array($canonicalTo, relationshipTypeAllowedTypes() ?? [], true)
+            ) {
+                return false;
+            }
+        }
     }
     foreach ($judgments as $token => $_judgment) {
         if (!is_string($token) || !array_key_exists($token, $subjects)) {
@@ -492,7 +597,9 @@ function nextLedger(
     int $eventId,
     string $utteranceId,
     array $judgments,
-    ?array $reflectionState = null
+    ?array $reflectionState = null,
+    array $typeDecisions = [],
+    array $typeChanges = []
 ): array
 {
     if (($ledger['playthrough_id'] ?? null) !== $playthroughId) {
@@ -517,16 +624,26 @@ function nextLedger(
 
     $details = [];
     foreach ($judgments as $token => $judgment) {
-        $details[] = [
+        $detail = [
             'subject' => $token,
             'delta' => $judgment['delta'],
             'reason' => mb_strcut($judgment['reason'], 0, 120, 'UTF-8'),
             'evidence' => mb_strcut($judgment['evidence'], 0, 120, 'UTF-8'),
         ];
+        if (is_array($judgment['type_change'] ?? null)) {
+            $detail['type_change'] = $judgment['type_change'];
+        }
+        $details[] = $detail;
     }
     $entry = ['event_id' => $eventId, 'utterance_id' => $utteranceId, 'judgments' => $details];
     if ($reflectionState !== null) {
         $entry['source_kind'] = 'reflection';
+    }
+    if ($typeDecisions !== []) {
+        $entry['type_decisions'] = $typeDecisions;
+    }
+    if ($typeChanges !== []) {
+        $entry['type_changes'] = $typeChanges;
     }
     $events[] = $entry;
     usort($events, static fn(array $left, array $right): int => $left['event_id'] <=> $right['event_id']);
@@ -622,6 +739,8 @@ function persistJudgments(
     $playerSpeaker = $speakerKind === 'player';
     $ownerId = $reflection ? ($event['opinion_owner_id'] ?? null) : ($event['listener_id'] ?? null);
     $edgeChanges = [];
+    $typeDecisions = [];
+    $typeChanges = [];
     $done = static function (string $outcome, string $code) use (&$status, &$reason): string {
         $status = $outcome;
         $reason = $code;
@@ -882,11 +1001,62 @@ function persistJudgments(
                 return $done('failed', 'player-relationship-normalization-failed');
             }
         }
+
+        $currentTypes = [];
+        foreach ($judgments as $token => $judgment) {
+            if (!is_array($judgment['type_change'] ?? null)) {
+                continue;
+            }
+            $name = $token === 'player' ? 'Player' : $subjects[$token]['name'];
+            $storedEdge = $token === 'player'
+                ? (isset($canonicalPlayerRelationships['Player']) ? (object)$canonicalPlayerRelationships['Player'] : (object)['aff' => 0, 'type' => 'neutral'])
+                : ($relationships[$name] ?? (object)['aff' => 0, 'type' => 'neutral']);
+            $storedType = $storedEdge instanceof \stdClass ? ($storedEdge->type ?? 'neutral') : null;
+            if (!$storedEdge instanceof \stdClass || !is_string($storedType)) {
+                return $done('invalid', 'relationship-type-invalid');
+            }
+            if (trim($storedType) === '') {
+                $storedType = 'neutral';
+            }
+            $currentType = canonicalRelationshipType($storedType, [$storedType]);
+            if ($currentType === null) {
+                return $done('invalid', 'relationship-type-invalid');
+            }
+            if ($currentType !== $judgment['type_change']['from']) {
+                return $done('stale', 'relationship-type-stale');
+            }
+            $currentTypes[$token] = $currentType;
+        }
+
+        $typeUpdates = [];
+        foreach ($currentTypes as $token => $currentType) {
+            $typeChange = $judgments[$token]['type_change'];
+            $reason = $typeChange['to'] === $currentType
+                ? 'same_type'
+                : relationshipTypePreservationReason($currentType, $typeChange['to']);
+            $reason ??= 'change_eligible';
+            $typeDecisions[] = [
+                'subject' => $token,
+                'from' => $currentType,
+                'to' => $typeChange['to'],
+                'reason' => $reason,
+            ];
+            if ($reason === 'change_eligible') {
+                $typeUpdates[$token] = $typeChange['to'];
+                $typeChanges[] = [
+                    'subject' => $token,
+                    'before' => $currentType,
+                    'after' => $typeChange['to'],
+                ];
+            }
+        }
+
         $updatedExtendedData = clone $extendedData;
         $hasPlayerChange = isset($judgments['player']) && $judgments['player']['delta'] !== 0;
-        $updatedRelationships = (object)($hasPlayerChange ? $canonicalPlayerRelationships : $relationships);
+        $canonicalizePlayerForWrite = $hasPlayerChange || isset($typeUpdates['player']);
+        $updatedRelationships = (object)($canonicalizePlayerForWrite ? $canonicalPlayerRelationships : $relationships);
         $relationshipKeysToRemove = [];
-        if ($hasPlayerChange) {
+        if ($canonicalizePlayerForWrite) {
             foreach ($relationships as $name => $_relationship) {
                 if (!array_key_exists($name, $canonicalPlayerRelationships)) {
                     $relationshipKeysToRemove[] = (string)$name;
@@ -895,7 +1065,9 @@ function persistJudgments(
         }
         $edgeUpdates = [];
         foreach ($judgments as $token => $judgment) {
-            if ($judgment['delta'] === 0) {
+            $hasAffinityChange = $judgment['delta'] !== 0;
+            $hasTypeChange = isset($typeUpdates[$token]);
+            if (!$hasAffinityChange && !$hasTypeChange) {
                 continue;
             }
             $name = $subjects[$token]['name'];
@@ -919,16 +1091,21 @@ function persistJudgments(
             if (!is_finite($beforeAffinity) || $beforeAffinity < -100 || $beforeAffinity > 100) {
                 return $done('invalid', 'affinity-invalid');
             }
-            $nextAffinity = max(-100, min(100, (float)$affinity + $judgment['delta']));
-            $updatedEdge->aff = floor($nextAffinity) === $nextAffinity ? (int)$nextAffinity : $nextAffinity;
+            if ($hasAffinityChange) {
+                $nextAffinity = max(-100, min(100, (float)$affinity + $judgment['delta']));
+                $updatedEdge->aff = floor($nextAffinity) === $nextAffinity ? (int)$nextAffinity : $nextAffinity;
+                $edgeChanges[] = [
+                    'subject' => $token,
+                    'delta' => $judgment['delta'],
+                    'before' => $beforeAffinity,
+                    'after' => $updatedEdge->aff,
+                ];
+            }
+            if ($hasTypeChange) {
+                $updatedEdge->type = $typeUpdates[$token];
+            }
             $updatedRelationships->{$name} = $updatedEdge;
             $edgeUpdates[$name] = $updatedEdge;
-            $edgeChanges[] = [
-                'subject' => $token,
-                'delta' => $judgment['delta'],
-                'before' => $beforeAffinity,
-                'after' => $updatedEdge->aff,
-            ];
         }
         if ($edgeUpdates !== [] || $relationshipKeysToRemove !== []) {
             $updatedExtendedData->relationships = $updatedRelationships;
@@ -968,7 +1145,9 @@ function persistJudgments(
                 $coveredEvent['event_id'],
                 $coveredEvent['utterance_id'],
                 $isFinal ? $judgments : [],
-                $reflectionState
+                $reflectionState,
+                $isFinal ? $typeDecisions : [],
+                $isFinal ? $typeChanges : []
             );
         }
         $updatedPluginExtendedData = clone $pluginExtendedData;
@@ -1059,7 +1238,18 @@ function persistJudgments(
         }
 
         $changes = $committed ? $edgeChanges : [];
-        $changedCount = count(array_filter($changes, static fn(array $change): bool => (float)$change['before'] !== (float)$change['after']));
+        $confirmedTypeChanges = $committed ? $typeChanges : [];
+        $affinityChangedSubjects = [];
+        foreach ($changes as $change) {
+            if ((float)$change['before'] !== (float)$change['after']) {
+                $affinityChangedSubjects[$change['subject']] = true;
+            }
+        }
+        $typeChangedSubjects = [];
+        foreach ($confirmedTypeChanges as $change) {
+            $typeChangedSubjects[$change['subject']] = true;
+        }
+        $changedCount = count($affinityChangedSubjects + $typeChangedSubjects);
         if ($committed && $changedCount === 0 && $reason === 'committed') {
             $reason = 'zero-change';
         }
@@ -1070,6 +1260,10 @@ function persistJudgments(
             'commit_state' => $committed ? 'confirmed' : ($commitAttempted ? 'unconfirmed' : 'not_attempted'),
             'committed' => $committed,
             'changes' => $changes,
+            'type_decisions' => $typeDecisions,
+            'type_changes' => $confirmedTypeChanges,
+            'affinity_changed_count' => count($affinityChangedSubjects),
+            'type_changed_count' => count($typeChangedSubjects),
             'changed_count' => $changedCount,
         ];
         if ($cleanupFailed) {

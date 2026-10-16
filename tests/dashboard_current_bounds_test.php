@@ -11,7 +11,7 @@ foreach ([-100, 100] as $boundary) {
         'Subject' => (object)['aff' => $boundary],
     ]]];
     $current = dashboardCurrent($listener, 'npc:9', 'Subject', '', $identityNames);
-    if ($current !== ['value' => $boundary, 'state' => 'set']) {
+    if ($current !== ['value' => $boundary, 'state' => 'set', 'type' => null, 'type_state' => 'unset']) {
         throw new RuntimeException('Legal affinity boundary was not shown as a set current value.');
     }
 }
@@ -21,7 +21,7 @@ foreach ([250, -250, '1e309'] as $invalidAffinity) {
         'Subject' => (object)['aff' => $invalidAffinity],
     ]]];
     $current = dashboardCurrent($listener, 'npc:9', 'Subject', '', $identityNames);
-    if ($current !== ['value' => null, 'state' => 'invalid']) {
+    if ($current !== ['value' => null, 'state' => 'invalid', 'type' => null, 'type_state' => 'unset']) {
         throw new RuntimeException('Out-of-domain affinity was rendered as a valid current value.');
     }
 }

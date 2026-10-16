@@ -125,6 +125,38 @@ same([], $ledger->events[0]->judgments, 'Earlier reply lines have empty judgment
 same(1, count($ledger->events[1]->judgments), 'Only the final ledger entry carries the reply judgment.');
 
 resetAckLoggingInteraction();
+[$typeOnlyRegistration, $typeOnlyAck, $typeOnlyDb] = reflectionReplyFixture([
+    'Lydia deceived me after I trusted her.',
+    'I still remember that evening clearly.',
+]);
+$typeOnlyDb->npcs[11]['extended_data']->relationships->Lydia->type = 'neutral';
+$typeOnlyStages = [];
+$typeOnlyStatus = mindPoisoningEvaluateReflectionReply(
+    $typeOnlyRegistration,
+    $typeOnlyAck,
+    $typeOnlyDb,
+    reflectionReplyRevalidator($typeOnlyRegistration, $typeOnlyStages),
+    static fn(array $messages): string => validModelResponse([[
+        'subject' => 'npc:22',
+        'subject_mentioned' => true,
+        'delta' => 0,
+        'reason' => 'The full reply supports a lasting type change.',
+        'evidence' => 'Lydia deceived me',
+        'type_change' => ['from' => 'neutral', 'to' => 'suspicious'],
+    ]])
+);
+same('committed', $typeOnlyStatus, 'A type-only full reply should commit.');
+same(10, $typeOnlyDb->npcs[11]['extended_data']->relationships->Lydia->aff, 'A type-only full reply should leave affinity unchanged.');
+same('suspicious', $typeOnlyDb->npcs[11]['extended_data']->relationships->Lydia->type, 'A type-only full reply should persist its type transition.');
+$typeOnlyReplyLedger = $typeOnlyDb->npcs[11]['plugin_extended_data']->mind_poisoning;
+same(2, count($typeOnlyReplyLedger->events), 'A type-only full reply should retain one dedupe entry for every source line.');
+same([], $typeOnlyReplyLedger->events[0]->judgments, 'Earlier full-reply ledger lines must remain judgment-free.');
+check(!property_exists($typeOnlyReplyLedger->events[0], 'type_decisions') && !property_exists($typeOnlyReplyLedger->events[0], 'type_changes'), 'Earlier full-reply ledger lines must not claim the final type effects.');
+same(1, count($typeOnlyReplyLedger->events[1]->judgments), 'Only the final full-reply ledger line may hold the type judgment.');
+same('neutral', $typeOnlyReplyLedger->events[1]->judgments[0]->type_change->from, 'The final ledger judgment should retain the validated origin.');
+same('suspicious', $typeOnlyReplyLedger->events[1]->type_changes[0]->after, 'The final ledger entry should hold the confirmed type transition.');
+
+resetAckLoggingInteraction();
 [$registration, $finalAck, $db, $lines] = reflectionReplyFixture(['First line mentions Lydia.', 'Final line follows.']);
 $earlierAck = ['_speech', 0, 10, json_encode([
     'speaker' => 'Aela', 'listener' => 'Dragonborn', 'speech' => 'First line mentions Lydia.',

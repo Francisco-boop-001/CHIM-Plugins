@@ -541,7 +541,8 @@ function evaluateReflection(
     $requestModel ??= __NAMESPACE__ . '\\requestJudgments';
     $actorPrompt = $actor;
     $actorPrompt['extended_data'] = json_decode(json_encode($extendedData, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), true, 512, JSON_THROW_ON_ERROR);
-    $messages = buildReflectionMessages($event + ['reflection_basis' => $basis], $actorPrompt, $subjects, $history);
+    $currentTypes = relationshipTypeSnapshot($actorPrompt, $subjects, $event['player_name']);
+    $messages = buildReflectionMessages($event + ['reflection_basis' => $basis], $actorPrompt, $subjects, $history, $currentTypes);
     $requestLog?->context(['connector_id' => $connectorId, 'subject_count' => count($subjects)]);
     $requestLog?->event('reflection_model_started', 'debug', ['stage' => 'model', 'connector_id' => $connectorId, 'subject_count' => count($subjects)]);
     $started = hrtime(true);
@@ -562,7 +563,7 @@ function evaluateReflection(
         return $fail('model-invalid', 'model_response_invalid_type');
     }
     try {
-        $judgments = parseJudgments($response, $subjects, $event['text']);
+        $judgments = parseJudgments($response, $subjects, $event['text'], $currentTypes);
     } catch (JudgmentValidationFailure $error) {
         $logFields['model_outcome'] = 'invalid';
         $logFields['reason'] = $error->reasonCode;

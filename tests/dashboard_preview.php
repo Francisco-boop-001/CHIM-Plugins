@@ -298,7 +298,10 @@ function dashboardPreviewSelfTest(): void
     $unavailableHtml = ob_get_clean();
     dashboardPreviewAssert(is_string($unavailableHtml) && str_contains($unavailableHtml, 'Showing log-only history.'), 'Database failure did not produce the log-only warning.');
     dashboardPreviewAssert(str_contains($unavailableHtml, 'Unverified history'), 'Unverified log attribution was not labeled.');
-    dashboardPreviewAssert(str_contains($unavailableHtml, 'Current</dt><dd class="numeric">Unavailable'), 'Current affinity was implied when the database was unavailable.');
+    dashboardPreviewAssert(
+        preg_match('/<dt>Current<\/dt>\s*<dd class="numeric">Unavailable<\/dd>/', $unavailableHtml) === 1,
+        'Current affinity was implied when the database was unavailable.'
+    );
 
     ob_start();
     renderDashboard(dashboardPreviewModel('empty'), ['tab' => 'interactions']);

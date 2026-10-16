@@ -351,6 +351,66 @@ final class RequestLog
         return $changes;
     }
 
+    private static function sanitizeRelationshipType(mixed $value): ?string
+    {
+        return is_string($value)
+            && strlen($value) <= 50
+            && preg_match('/\A[a-z][a-z0-9_-]{0,49}\z/D', $value) === 1
+                ? $value
+                : null;
+    }
+
+    private static function sanitizeTypeChanges(mixed $value): ?array
+    {
+        if (!is_array($value) || !array_is_list($value)) {
+            return null;
+        }
+        $changes = [];
+        $seen = [];
+        foreach (array_slice($value, 0, self::MAX_CHANGES) as $change) {
+            if (!is_array($change)) {
+                continue;
+            }
+            $subject = self::sanitizeSubject($change['subject'] ?? null);
+            $before = self::sanitizeRelationshipType($change['before'] ?? null);
+            $after = self::sanitizeRelationshipType($change['after'] ?? null);
+            if ($subject === null || $before === null || $after === null || $before === $after || isset($seen[$subject])) {
+                continue;
+            }
+            $changes[] = ['subject' => $subject, 'before' => $before, 'after' => $after];
+            $seen[$subject] = true;
+        }
+        return $changes;
+    }
+
+    private static function sanitizeTypeDecisions(mixed $value): ?array
+    {
+        if (!is_array($value) || !array_is_list($value)) {
+            return null;
+        }
+        $decisions = [];
+        $seen = [];
+        foreach (array_slice($value, 0, self::MAX_CHANGES) as $decision) {
+            if (!is_array($decision)) {
+                continue;
+            }
+            $subject = self::sanitizeSubject($decision['subject'] ?? null);
+            $from = self::sanitizeRelationshipType($decision['from'] ?? null);
+            $to = self::sanitizeRelationshipType($decision['to'] ?? null);
+            $reason = $decision['reason'] ?? null;
+            if (
+                $subject === null || $from === null || $to === null
+                || isset($seen[$subject])
+                || !in_array($reason, ['change_eligible', 'same_type', 'protected_type_preserved', 'custom_type_preserved'], true)
+            ) {
+                continue;
+            }
+            $decisions[] = ['subject' => $subject, 'from' => $from, 'to' => $to, 'reason' => $reason];
+            $seen[$subject] = true;
+        }
+        return $decisions;
+    }
+
     private static function sanitizeField(string $key, mixed $value, bool $diagnostic, string $level = 'info'): mixed
     {
         if (in_array($key, self::CONTEXT_FIELDS, true)) {
@@ -388,11 +448,14 @@ final class RequestLog
             'payload_bytes', 'subject_count' => self::boundedInteger($value, 0, PHP_INT_MAX),
             'speech_bytes' => self::boundedInteger($value, 0, 12000),
             'changed_count' => self::boundedInteger($value, 0, 8),
+            'affinity_changed_count', 'type_changed_count' => self::boundedInteger($value, 0, 8),
             'delta' => self::boundedInteger($value, -5, 5),
             'elapsed_ms', 'model_ms', 'persistence_ms' => self::boundedNumber($value, 0, 86_400_000),
             'subject' => self::sanitizeSubject($value),
             'committed', 'cleanup_failed' => is_bool($value) ? $value : null,
             'changes' => self::sanitizeChanges($value),
+            'type_changes' => self::sanitizeTypeChanges($value),
+            'type_decisions' => self::sanitizeTypeDecisions($value),
             'model_reason' => $diagnostic && $level === 'debug' ? self::boundedText($value, 240) : null,
             default => null,
         };
@@ -409,6 +472,9 @@ final class RequestLog
             if ($filtered !== null) {
                 $clean[$key] = $filtered;
             }
+        }
+        if (($clean['commit_state'] ?? null) !== 'confirmed' || ($clean['committed'] ?? null) !== true) {
+            unset($clean['type_changes'], $clean['type_changed_count']);
         }
         if (($clean['speaker_kind'] ?? null) === 'player') {
             unset($clean['speaker_id']);

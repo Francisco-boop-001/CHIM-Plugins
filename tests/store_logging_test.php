@@ -92,6 +92,9 @@ same('committed', $record['persistence_reason'] ?? null, 'Committed reason shoul
 same('confirmed', $record['commit_state'] ?? null, 'Successful commits should be explicitly confirmed.');
 same(true, $record['committed'] ?? null, 'The commit flag should reflect verified commit.');
 same(2, $record['changed_count'] ?? null, 'Only changed edges should be counted.');
+same(2, $record['affinity_changed_count'] ?? null, 'Affinity changes should count distinct relationships with changed values.');
+same(0, $record['type_changed_count'] ?? null, 'Affinity-only writes should report no type transitions.');
+same([], $record['type_changes'] ?? null, 'Affinity-only writes should not claim type transitions.');
 same([
     ['subject' => 'npc:33', 'delta' => 5, 'before' => 99, 'after' => 100],
     ['subject' => 'player', 'delta' => -2, 'before' => 0, 'after' => -2],
@@ -103,6 +106,8 @@ same(1, count($summaries), 'The caller should emit one final request summary.');
 $summary = $summaries[0];
 same('committed', $summary['persistence_outcome'] ?? null, 'Persistence context should be available to the caller final summary.');
 same(2, $summary['changed_count'] ?? null, 'Final request summary should retain the changed-edge count.');
+same(2, $summary['affinity_changed_count'] ?? null, 'Final request summary should retain the affinity change count.');
+same(0, $summary['type_changed_count'] ?? null, 'Final request summary should retain the type change count.');
 
 [$event, $subjects, $judgments, $memory] = baseFixture();
 $judgments['npc:33']['delta'] = 0;
@@ -114,6 +119,9 @@ $record = persistenceRecord($records);
 same(true, $record['committed'] ?? null, 'Zero judgments still verify the commit.');
 same(0, $record['changed_count'] ?? null, 'Zero judgments must report no changed edges.');
 same([], $record['changes'] ?? null, 'Zero judgments must not report affinity values.');
+same(0, $record['affinity_changed_count'] ?? null, 'Zero judgments must report no changed affinities.');
+same(0, $record['type_changed_count'] ?? null, 'Zero judgments must report no type transitions.');
+same([], $record['type_changes'] ?? null, 'Zero judgments must not report applied type transitions.');
 
 [$event, $subjects, $judgments, $memory] = baseFixture();
 $memory->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff = 100;
@@ -127,6 +135,37 @@ same(0, $record['changed_count'] ?? null, 'Clamping to the existing affinity mus
 same([
     ['subject' => 'npc:33', 'delta' => 5, 'before' => 100, 'after' => 100],
 ], $record['changes'] ?? null, 'The committed summary may retain the proposed delta with equal before/after values.');
+
+[$event, $subjects, $judgments, $memory] = baseFixture();
+$memory->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+$judgments['npc:33']['delta'] = 0;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+$records = logRecords(static function (&$records, callable $sink) use ($event, $subjects, $judgments, $memory): void {
+    same('committed', persistJudgments($event, $subjects, $judgments, $memory, new RequestLog($sink, false)), 'A type-only transition should commit.');
+});
+$record = persistenceRecord($records);
+same([], $record['changes'] ?? null, 'Type-only commits must keep affinity diagnostics empty.');
+same([['subject' => 'npc:33', 'before' => 'neutral', 'after' => 'suspicious']], $record['type_changes'] ?? null, 'Only confirmed applied type transitions should be reported.');
+same(0, $record['affinity_changed_count'] ?? null, 'A type-only commit should report no changed affinities.');
+same(1, $record['type_changed_count'] ?? null, 'A type-only commit should count its changed relationship type.');
+same(1, $record['changed_count'] ?? null, 'The union count should count a type-only relationship once.');
+same([['subject' => 'npc:33', 'from' => 'neutral', 'to' => 'suspicious', 'reason' => 'change_eligible']], $record['type_decisions'] ?? null, 'Type proposals should report only the closed decision reason.');
+
+[$event, $subjects, $judgments, $memory] = baseFixture();
+$memory->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'romantic';
+$judgments['npc:33']['delta'] = 1;
+$judgments['npc:33']['type_change'] = ['from' => 'romantic', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+$records = logRecords(static function (&$records, callable $sink) use ($event, $subjects, $judgments, $memory): void {
+    same('committed', persistJudgments($event, $subjects, $judgments, $memory, new RequestLog($sink, false)), 'A protected type proposal with an affinity change should commit.');
+});
+$record = persistenceRecord($records);
+same([['subject' => 'npc:33', 'from' => 'romantic', 'to' => 'suspicious', 'reason' => 'protected_type_preserved']], $record['type_decisions'] ?? null, 'Protected proposals should report their preservation reason.');
+same([], $record['type_changes'] ?? null, 'A preserved type must not be reported as applied.');
+same(1, $record['affinity_changed_count'] ?? null, 'A valid affinity update should remain visible when type policy preserves the type.');
+same(0, $record['type_changed_count'] ?? null, 'A preserved proposal must not increment applied type changes.');
+same(1, $record['changed_count'] ?? null, 'A preserved type proposal should count only its changed affinity.');
 
 foreach ([
     ['value' => 250, 'delta' => -5, 'label' => 'above the affinity range'],
@@ -211,7 +250,26 @@ same('commit-failed', $record['persistence_reason'] ?? null, 'Commit failure sho
 same('unconfirmed', $record['commit_state'] ?? null, 'An attempted but unverified commit must remain explicitly uncertain.');
 same(false, $record['committed'] ?? null, 'Commit failure must not claim commit.');
 same([], $record['changes'] ?? null, 'Commit failure must not report planned affinity values.');
+check(!array_key_exists('type_changes', $record), 'An unconfirmed commit must not claim applied type transitions.');
 same(99, $memory->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->aff, 'Commit failure must roll back the fixture write.');
+
+[$event, $subjects, $judgments, $memory] = baseFixture();
+$memory->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type = 'neutral';
+$judgments['npc:33']['delta'] = 0;
+$judgments['npc:33']['type_change'] = ['from' => 'neutral', 'to' => 'suspicious'];
+$judgments['player']['delta'] = 0;
+$db = new LoggingStoreDb($memory);
+$db->failCommit = true;
+$records = logRecords(static function (&$records, callable $sink) use ($event, $subjects, $judgments, $db): void {
+    same('failed', persistJudgments($event, $subjects, $judgments, $db, new RequestLog($sink, false)), 'An unconfirmed type-only commit must fail.');
+});
+$record = persistenceRecord($records);
+same('unconfirmed', $record['commit_state'] ?? null, 'Unconfirmed type persistence must retain the uncertain commit state.');
+same([['subject' => 'npc:33', 'from' => 'neutral', 'to' => 'suspicious', 'reason' => 'change_eligible']], $record['type_decisions'] ?? null, 'A valid proposal remains visible when commit is unconfirmed.');
+check(!array_key_exists('type_changes', $record), 'Unconfirmed commits must not claim applied type transitions.');
+check(!array_key_exists('type_changed_count', $record), 'Unconfirmed commits must not report confirmed type-change counts.');
+same(0, $record['changed_count'] ?? null, 'Unconfirmed commits must report no confirmed relationship changes.');
+same('neutral', $memory->npcs[22]['extended_data']->relationships->{'Jarl Balgruuf'}->type, 'The fixture must roll back an unconfirmed type write.');
 
 [$event, $subjects, $judgments, $memory] = baseFixture();
 $db = new LoggingStoreDb($memory);

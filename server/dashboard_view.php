@@ -34,6 +34,15 @@ function renderDashboard(array $model, array $filters): void
         return ($signed && $positive ? '+' : '') . $formatted;
     };
     $codeLabel = static fn(string $value): string => ucwords(str_replace(['-', '_'], ' ', $value));
+    $currentTypeDisplay = static function (mixed $value, mixed $state) use ($escape): string {
+        return match (is_string($state) ? $state : '') {
+            'set' => $escape($value),
+            'unset' => 'Not set',
+            'ambiguous' => 'Ambiguous',
+            'invalid' => is_string($value) && $value !== '' ? 'Invalid: <code>' . $escape($value) . '</code>' : 'Invalid',
+            default => 'Unavailable',
+        };
+    };
 
     $outcomeOptions = [
         'committed' => 'Committed',
@@ -49,7 +58,7 @@ function renderDashboard(array $model, array $filters): void
         'event_id', 'playthrough_id', 'speaker_id', 'speaker_kind', 'listener_id', 'addressed_listener_id', 'listener_role', 'batch_id', 'opinion_owner_id', 'source_kind', 'connector_id', 'utterance_id',
         'stage', 'outcome', 'reason', 'model_outcome', 'persistence_outcome', 'persistence_reason',
         'commit_state', 'elapsed_ms', 'model_ms', 'persistence_ms', 'payload_bytes', 'subject_count',
-        'speech_bytes', 'changed_count', 'delta', 'subject', 'committed', 'cleanup_failed', 'changes',
+        'speech_bytes', 'changed_count', 'affinity_changed_count', 'type_changed_count', 'delta', 'subject', 'committed', 'cleanup_failed', 'changes', 'type_changes', 'type_decisions',
     ], true);
     $tab = ($filters['tab'] ?? null) === 'diagnostics' ? 'diagnostics' : 'interactions';
     $q = is_string($filters['q'] ?? null) ? $filters['q'] : '';
@@ -257,6 +266,8 @@ function renderDashboard(array $model, array $filters): void
                             $scopeTerm = $playthroughId === 'unprofiled' ? 'Scope' : 'Playthrough';
                             $scopeValue = $playthroughId === 'unprofiled' ? 'Shared server' : $playthroughId;
                             $changes = is_array($interaction['changes'] ?? null) ? $interaction['changes'] : [];
+                            $typeDecisions = is_array($interaction['type_decisions'] ?? null) ? $interaction['type_decisions'] : [];
+                            $typeChanges = is_array($interaction['type_changes'] ?? null) ? $interaction['type_changes'] : [];
                             ?>
                             <?php if ($day !== $lastDay): ?>
                                 <h3 class="day-heading"><?= $escape($day) ?></h3>
@@ -291,7 +302,7 @@ function renderDashboard(array $model, array $filters): void
                                 <?php endif; ?>
 
                                 <?php if ($changes === []): ?>
-                                    <p class="no-subjects">No subject judgment values were returned for this interaction.</p>
+                                    <p class="no-subjects">No affinity changes were recorded for this interaction.</p>
                                 <?php else: ?>
                                     <div class="change-list" aria-label="Subject affinity values">
                                         <?php foreach ($changes as $change): ?>
@@ -317,13 +328,68 @@ function renderDashboard(array $model, array $filters): void
                                                 $currentState === 'invalid' => 'Invalid',
                                                 default => 'Unavailable',
                                             };
+                                            $typeEventState = strtolower(is_string($change['type_event_state'] ?? null) ? $change['type_event_state'] : '');
+                                            $typeBefore = is_string($change['type_before'] ?? null) ? $change['type_before'] : null;
+                                            $typeAfter = is_string($change['type_after'] ?? null) ? $change['type_after'] : null;
                                             ?>
                                             <dl class="change-row">
                                                 <div class="change-subject"><dt>Subject</dt><dd><?= $escape($subject) ?></dd></div>
                                                 <div><dt>Proposed</dt><dd class="numeric"><?= $escape($proposed ?? 'Unavailable') ?></dd></div>
                                                 <div><dt>Applied</dt><dd class="numeric"><?= $escape($applied) ?></dd></div>
-                                                <div class="change-transition"><dt>At event (before to after)</dt><dd class="numeric"><?php if ($transitionUnavailable): ?>Unavailable<?php else: ?><span>Before <?= $escape($before ?? 'Unavailable') ?></span><span class="transition-arrow" aria-hidden="true">→</span><span>After <?= $escape($after ?? 'Unavailable') ?></span><?php endif; ?></dd></div>
-                                                <div><dt>Current</dt><dd class="numeric"><?= $escape($current) ?></dd></div>
+                                                <div class="change-transition">
+                                                    <dt>At event (before to after)</dt>
+                                                    <dd class="numeric"><?php if ($transitionUnavailable): ?>Unavailable<?php else: ?><span>Before <?= $escape($before ?? 'Unavailable') ?></span><span class="transition-arrow" aria-hidden="true">→</span><span>After <?= $escape($after ?? 'Unavailable') ?></span><?php endif; ?></dd>
+                                                    <dt>Type at event</dt>
+                                                    <dd><?php if ($typeEventState === 'set' && $typeBefore !== null && $typeAfter !== null): ?><?= $escape($typeBefore) ?><span class="transition-arrow" aria-hidden="true">→</span><?= $escape($typeAfter) ?><?php elseif ($typeEventState === 'unconfirmed'): ?>Unconfirmed<?php else: ?>Unavailable<?php endif; ?></dd>
+                                                </div>
+                                                <div>
+                                                    <dt>Current</dt>
+                                                    <dd class="numeric"><?= $escape($current) ?></dd>
+                                                    <dt>Current type</dt>
+                                                    <dd><?= $currentTypeDisplay($change['current_type'] ?? null, $change['current_type_state'] ?? null) ?></dd>
+                                                </div>
+                                            </dl>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if ($typeDecisions !== [] || $typeChanges !== []): ?>
+                                    <div class="change-list" aria-label="Relationship type decisions and transitions">
+                                        <h5>Relationship types</h5>
+                                        <?php foreach ($typeDecisions as $decision): ?>
+                                            <?php if (!is_array($decision)) { continue; } ?>
+                                            <?php
+                                                $subject = $text($decision['label'] ?? null, $text($decision['subject'] ?? null));
+                                                $from = $text($decision['from'] ?? null);
+                                                $to = $text($decision['to'] ?? null);
+                                                $reason = $decision['reason'] ?? null;
+                                                $reasonLabel = match ($reason) {
+                                                    'change_eligible' => 'Change eligible',
+                                                    'same_type' => 'Same type',
+                                                    'protected_type_preserved' => 'Protected type preserved',
+                                                    'custom_type_preserved' => 'Custom type preserved',
+                                                    default => 'Proposal recorded',
+                                                };
+                                                $retainedType = in_array($reason, ['same_type', 'protected_type_preserved', 'custom_type_preserved'], true) ? $from : 'Unavailable';
+                                            ?>
+                                            <dl class="change-row">
+                                                <div class="change-subject"><dt>Subject</dt><dd><?= $escape($subject) ?></dd></div>
+                                                <div><dt>Proposed type change</dt><dd><?= $escape($from) ?><span class="transition-arrow" aria-hidden="true">→</span><?= $escape($to) ?></dd></div>
+                                                <div><dt>Decision</dt><dd><?= $escape($reasonLabel) ?></dd></div>
+                                                <div><dt>Retained type</dt><dd><?= $escape($retainedType) ?></dd></div>
+                                                <div><dt>Current type</dt><dd><?= $currentTypeDisplay($decision['current_type'] ?? null, $decision['current_type_state'] ?? null) ?></dd></div>
+                                            </dl>
+                                        <?php endforeach; ?>
+                                        <?php foreach ($typeChanges as $typeChange): ?>
+                                            <?php if (!is_array($typeChange)) { continue; } ?>
+                                            <?php
+                                                $subject = $text($typeChange['label'] ?? null, $text($typeChange['subject'] ?? null));
+                                                $beforeType = $text($typeChange['before'] ?? null);
+                                                $afterType = $text($typeChange['after'] ?? null);
+                                            ?>
+                                            <dl class="change-row">
+                                                <div class="change-subject"><dt>Subject</dt><dd><?= $escape($subject) ?></dd></div>
+                                                <div><dt>Applied type transition</dt><dd><?= $escape($beforeType) ?><span class="transition-arrow" aria-hidden="true">→</span><?= $escape($afterType) ?></dd></div>
+                                                <div><dt>Current type</dt><dd><?= $currentTypeDisplay($typeChange['current_type'] ?? null, $typeChange['current_type_state'] ?? null) ?></dd></div>
                                             </dl>
                                         <?php endforeach; ?>
                                     </div>
