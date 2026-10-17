@@ -45,3 +45,13 @@
 - Mistake pattern: treating equal event counts as evidence that missing-ID ACKs belong to unacknowledged NPC output, or treating a completion hook as proof of speech.
   - Corrected rule: correlate exact utterance/request IDs, producer identity and timestamps before linking records; hook observation, server emission, queueing, playback and ACK are distinct facts.
   - Prevention: inspect incoming payload shape and native delivery traces before assigning a cause; preserve unknown outcomes when PCV cannot observe the boundary.
+
+
+- Mistake pattern: making a plugin README's first screen a long changelog/release archaeology section instead of helping players decide whether to use it and get started.
+  - Corrected rule: lead with the player workflow: what it does, quickstart, modes/capabilities, concrete examples, expected results, limits, and links to a separate guide and historical release notes.
+  - Prevention: outline from the reader's first-use journey before editing; preserve historical records behind links and keep current safety/integration boundaries visible.
+
+
+- Mistake pattern: treating an operator-confirmed practical check as NOT RUN because its independent log trace is narrower or missing.
+  - Corrected rule: distinguish operator confirmation from log-verified evidence; preserve confirmed outcomes while separately recording unmeasured timing, IDs, or route.
+  - Prevention: record evidence source and the behavior it supports; use NOT RUN only when the outcome itself was not observed or confirmed, not merely when a correlated trace is unavailable.

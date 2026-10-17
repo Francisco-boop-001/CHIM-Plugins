@@ -462,9 +462,35 @@ Source/docs and the PCV-only hub snapshot are accepted. The focused four package
 - [x] Run py -3 tests/package_check.py (4 tests, exit 0) and build the task-owned working-tree candidate under tasks/release-0.1.20/package-evidence/candidate. The candidate is not a clean committed-source release build.
 - [x] Independently inventory asset members, source-byte equality, MO2 inner-DWPkg equality, and all four SHA256SUMS entries; see package-evidence/candidate-inventory.stdout.txt.
 - [x] Prepare the exact source staging allowlist and hash manifest, run git diff --check, and record a review section. Do not stage before root accepts the source gate.
-- [ ] After root source acceptance, stage only the reviewed allowlist, create the accepted PCV source commit and annotated tag, rebuild from clean exported source, and compare every candidate asset byte-for-byte.
-- [ ] After fresh public downloads verify against the approved build, publish the normal-flag ALPHA release and advance only the PCV subtree in the hub with path/mode/blob proofs.
+- [x] Stage the explicit reviewed source allowlist, pass the cached whitespace gate, create the accepted source commit and annotated private_conversation-v0.1.20 tag, rebuild from a clean export, and compare all five assets byte-for-byte.
+- [x] Publish the normal-flag ALPHA release, verify all five anonymous public downloads, advance canonical main and the PCV-only hub non-force, and independently verify the exact subtree and protected paths.
 
 ### Review
 
-Solo action behavior and duplicate owner election/inactive HTTP refusal passed their bounded fixtures. Package contract tests passed and the current working-tree candidate is inventoried with exact hashes, but this is not the clean committed-source build required for publication. The guarded ACK shutdown behavior remains NOTRUN because no disposable PostgreSQL target was configured; no connection was made. The retained postrequest logger directory_unavailable warning is unattributed. Full CHIM bootstrap/schema refresh, live install, providers/database, public ACK scheduling, native recovery, client sync, and Skyrim gameplay remain unverified. The release remains ALPHA. The overall source gate, staging, commit/tag, publication, and hub update remain pending. CHIM core, Mind Poisoning, live installation, and game data remain outside this change.
+Solo action behavior and duplicate owner election/inactive HTTP refusal passed their bounded fixtures. Package checks passed; the exact source commit was clean-built, tagged, published as a normal-flag ALPHA release, and all five anonymous public downloads matched the clean build. Canonical main and the PCV-only hub mirror advanced non-force; independent review proved 356 exact PCV path/mode/blob entries, three authorized shared-doc edits, and 239 protected paths unchanged. The ACK shutdown behavior remains NOTRUN because no disposable PostgreSQL target was configured; no connection was made. One postterminal logger directory_unavailable warning remains unattributed. Full CHIM bootstrap/schema refresh, live install/provider/database operation, public ACK scheduling, native recovery, client sync, and Skyrim gameplay remain unverified. The release is ALPHA, not beta or stable certification. CHIM core, Mind Poisoning, live installation, and game data remain outside this change. See the [final 0.1.20 publication receipt in the canonical PCV repository](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.21/tasks/release-0.1.20/publication-evidence/final-publication-receipt.md).
+
+## Reader-first README refresh (2026-10-16)
+
+- [x] Preserve the current ALPHA identity, existing art, release/download URLs, and safety boundaries; inspect the README and documentation map.
+- [x] Rewrite the README around quickstart, mode/capability map, examples/results, and current limits; check workflow claims against the player guide and keep optional Mind Poisoning integration separate.
+- [x] Complete source-backed review of the player guide and reader-first README; run focused Markdown link, line-ending, and whitespace checks.
+- [x] Prepare the full replacement body for the existing 0.1.20 GitHub release; after lead review, apply the reader-first intro, guide/README links, already-installed quickstart, and End now reminder.
+- [x] Push canonical documentation commit b6f0e82877038746497719d12952f51253fb59e5 and verify the public README and player-guide blobs against it.
+- [x] Mirror only the two PCV documents and one PCV link line to CHIM-Plugins; push non-force and verify the public hub commit and unchanged protected trees.
+
+### Review
+
+The documentation refresh is published. Canonical commit b6f0e82877038746497719d12952f51253fb59e5 is public, and the current 0.1.20 release body matches the reviewed body SHA-256 f43a584592cd504eff14af95c07ea4a7e7f2aeb489007fc571440f9fd6be4b5f. The original body-equals-tag-note evidence refers to initial publication; it is not a claim about the updated body. The PCV-only hub documentation mirror is public at 84dbe4f5c022764372ff23fe65a6b38be229ddf0. The 0.1.20 source tag, five assets, release flags, product code, CHIM core, and Mind Poisoning were not changed by this follow-up. No new runtime or gameplay proof was produced. See [the documentation publication receipt](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.21/tasks/player-docs-2026-10-16/docs-publication-receipt.md).
+
+## Private Conversation 0.1.21 BETA evidence and operator acceptance update - 2026-10-17
+
+- [x] Keep this documentation-only task separate from CHIM core, SHARMAT, Mind Poisoning, installation, and live-server work; preserve immutable 0.1.20 source/package/release artifacts.
+- [x] Record bounded 0.1.20 runtime/log evidence and direct operator confirmations in `tasks/beta-2026-10-17/acceptance-evidence.md`; do not include raw dialogue, private prompts, credentials, or unsupported exact timing/removal-route details.
+- [x] Update `docs/operator-acceptance.md` to distinguish observed/operator-confirmed practical outcomes from independent log proof, and identify version, scope, and evidence limits.
+- [x] Describe 0.1.21 as a metadata-only BETA candidate; the publisher receipt verifies exact equality for all 20 non-manifest payload members. Do not describe the candidate as natively tested.
+- [x] Append the reusable lesson to `tasks/lessons.md`: distinguish operator confirmation from log proof; do not label an operator-confirmed check NOT RUN solely because its independent trace is narrower.
+- [x] Read back the four owned files, confirm no raw dialogue/private prompt material was added, and record a review that marks payload comparison verified and lead acceptance complete while leaving release mechanics to the separate release record.
+
+### Review
+
+Read back the four owned files. The evidence is a dated summary of previously inspected 0.1.20 runtime records and operator confirmations, with no raw dialogue or private prompts. The publisher receipt verifies 20/20 non-manifest runtime-payload identity for the 0.1.21 candidate; this is not a 0.1.21 gameplay claim. Practical repeat, post-END ordinary Standard, and removal remain accepted as operator-confirmed with their stated detail limits. The lead accepted this bounded evidence; release mechanics are recorded separately under `tasks/release-0.1.21/`, and this review does not claim publication.

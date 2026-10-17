@@ -1,6 +1,6 @@
 # Private Conversation: player guide
 
-*Current release: 0.1.20 ALPHA · Part of the World of Drama-Llama.*
+*Current release: 0.1.21 BETA · Part of the World of Drama-Llama.*
 
 Private Conversation (PCV) sets the scene boundaries and passes direction into CHIM's next eligible Standard request. CHIM and the model generate the words; PCV cannot make an actor obey a script. The llama has a clipboard, not mind control.
 
@@ -93,8 +93,12 @@ ARM or an update waits for the next eligible ordinary Standard input. Solo produ
 
 Open **Operational logs** from the Plugin Page for sanitized lifecycle records; the [logging guide](logging-revision-2.md) explains filtered viewing and export. A useful bug report includes PCV version, CHIM version/revision if known, mode and settings, a short reproduction, expected versus observed behavior, and only the relevant bounded log records. Do not send credentials or a full private dump. PCV logs ordinarily omit raw prompt/dialogue; Mind Poisoning owns its separate opinion details.
 
-## What 0.1.20 ALPHA has and has not proven
+## What the 0.1.21 BETA evidence covers
 
-Focused PHP fixtures cover the solo action offering/filter path and duplicate-install ownership/refusal boundaries. They check PCV helpers and HTTP refusal routes; the action fixture does not rebuild CHIM core's action schema. The duplicate fixture's owner state-API ARM/END exercise is not an ARM/END through the owner Plugin Page.
+The publisher verified that 0.1.21 has the same runtime code as exercised 0.1.20: all 20 non-manifest payload members match byte for byte, and the package check passed 4/4. Only the manifest version and description changed. This establishes runtime-payload equivalence; 0.1.21 itself was not separately played in-game.
 
-Full CHIM bootstrap/schema refresh, successful owner-page ARM/END, live provider/database operation, client/audio behavior, Skyrim gameplay, physical privacy, and model compliance remain unverified. Treat the fixture reports as focused code evidence, not a promise about what happens in your current save.
+The 0.1.20 acceptance run showed an ordinary Standard Pair request with Elsa and Lidia followed by native rechat playback. A Solo reflection completed three speech segments, and Mind Poisoning stored an Elsa-to-Bruce opinion change. At END, PCV recorded `ended_in_game` and an empty active scope. The operator also confirmed direct ordinary Standard input after END, repeated Solo reflections, and removal without harm. No request ID or timestamp was retained to correlate the direct post-END input with a specific route log. See the [acceptance evidence](../tasks/beta-2026-10-17/acceptance-evidence.md) for the bounded records and evidence distinctions.
+
+One separate Pair opinion attempt used a generic “vampire coven” reference, which Mind Poisoning resolved to Vampire Fledgling; no Lidia-to-Bruce change is claimed from that attempt. Mind Poisoning owns opinion evaluation and persistence. SHARMAT keeps its own action gates; this release does not repair an external stale lock. Director and independent requests are outside PCV's ordinary Standard scope. END clears stored PCV scope when its write succeeds, but does not cancel generation or speech already queued.
+
+PCV scopes its current request audience; it does not make stored history, memories, profiles, vanilla greetings, actual room placement, or model behavior private. The [0.1.21 release note](../distribution/private_conversation-v0.1.21.md) describes the practical controls and limits. The llama is doing its best with a clipboard; please do not ask it to double as a privacy officer.

@@ -6,7 +6,7 @@
 
 Want two NPCs to trade gossip while the Dragonborn stays out of it, or one to think aloud to no one? PCV stages that conversation. I’m one author who has spent a suspicious amount of time making sure the llama’s clipboard stays out of the scene.
 
-**Current release: 0.1.20 ALPHA.** Private Conversation (PCV) stages a cast and scene boundaries for CHIM’s next eligible ordinary Standard input. CHIM and the model write the response; the llama has a clipboard, not mind control. Start with the quickstart below, or use the [player guide](docs/player-guide.md) for the longer tour.
+**Current release: 0.1.21 BETA.** Private Conversation (PCV) stages a cast and scene boundaries for CHIM’s next eligible ordinary Standard input. CHIM and the model write the response; the llama has a clipboard, not mind control. Start with the quickstart below, or use the [player guide](docs/player-guide.md) for the longer tour.
 
 ## Quick start
 
@@ -68,7 +68,7 @@ Phrase rumors as rumors and allegations as allegations. CHIM may retain a narrat
 
 ## Install and update
 
-PCV 0.1.20 is an ALPHA release. For CHIM Plugin Manager discovery, GitHub release metadata must be published with `draft=false` and `prerelease=false`; that technical flag enables discovery and does not certify beta or stable quality.
+PCV 0.1.21 is a BETA release. For CHIM Plugin Manager discovery, GitHub release metadata uses `draft=false` and `prerelease=false`; those technical flags enable discovery and do not set or certify the maturity label.
 
 Still updating from an old 0.1.4 or 0.1.5 CHIM-Plugins manifest? Those update buttons use literal old-hub asset URLs and cannot move themselves to this repository. See the historical [0.1.4 release](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.4) or [0.1.5 release](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.5), then use one of the current routes below.
 
@@ -78,25 +78,25 @@ Still updating from an old 0.1.4 or 0.1.5 CHIM-Plugins manifest? Those update bu
 2. For an update, use **Update <channel label>** on the installed row, confirm **Install Plugin** or **Update Plugin**, then choose **Back to Plugin Manager**.
 3. Open **Plugin Page** on the PCV row. Use this generated link: it follows the resolved install folder.
 
-The installer uses the flat [chim-plugin.tar.gz](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.20/chim-plugin.tar.gz) asset. Fresh discovery installs normally use `ext/CHIM-PrivateConversation`; an update can retain an existing `ext/private_conversation` folder. MO2 is not needed for this server-plugin route.
+The installer uses the flat [chim-plugin.tar.gz](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.21/chim-plugin.tar.gz) asset. Fresh discovery installs normally use `ext/CHIM-PrivateConversation`; an update can retain an existing `ext/private_conversation` folder. MO2 is not needed for this server-plugin route.
 
 ### MO2 and manual downloads
 
-For MO2, install and enable the [0.1.20 MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.20/private_conversation-0.1.20-mo2.zip) as the one active PCV source, with `CHIM` directly under the game’s Data root. The ZIP already contains `CHIM/server-plugins/private_conversation/0.1.20.dwpkg`; a separate DWPkg download is unnecessary. Its root `meta.ini` includes `validated=true`, an MO2 metadata override—not proof CHIM sees or syncs the package. MO2 may overwrite the displayed version during import; the server version is checked separately below.
+For MO2, install and enable the [0.1.21 MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.21/private_conversation-0.1.21-mo2.zip) as the one active PCV source, with `CHIM` directly under the game’s Data root. The ZIP already contains `CHIM/server-plugins/private_conversation/0.1.21.dwpkg`; a separate DWPkg download is unnecessary. Its root `meta.ini` includes `validated=true`, an MO2 metadata override—not proof CHIM sees or syncs the package. MO2 may overwrite the displayed version during import; the server version is checked separately below.
 
 | Download | Use |
 | --- | --- |
-| [DWPkg](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.20/private_conversation-0.1.20.dwpkg) | Advanced manual sync: rename to `0.1.20.dwpkg` and place at `Data/CHIM/server-plugins/private_conversation/0.1.20.dwpkg`. Do not unpack into Data. |
-| [Legacy repository TAR](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.20/private_conversation.tar.gz) | Candidate-manifest route only; CHIM removes its `private_conversation/` wrapper using `archive_strip_components: 1`. This is not the flat Plugin Manager asset. |
-| [SHA256SUMS.txt](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.20/SHA256SUMS.txt) | Optional release-asset checksum verification. |
+| [DWPkg](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.21/private_conversation-0.1.21.dwpkg) | Advanced manual sync: rename to `0.1.21.dwpkg` and place at `Data/CHIM/server-plugins/private_conversation/0.1.21.dwpkg`. Do not unpack into Data. |
+| [Legacy repository TAR](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.21/private_conversation.tar.gz) | Candidate-manifest route only; CHIM removes its `private_conversation/` wrapper using `archive_strip_components: 1`. This is not the flat Plugin Manager asset. |
+| [SHA256SUMS.txt](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.21/SHA256SUMS.txt) | Optional release-asset checksum verification. |
 
-For MO2/DWPkg sync, start CHIM connected to the game and load a save to trigger sync. Then open **Server Plugins → Automatic Game Plugin Sync → Refresh Status** and confirm the server version is **0.1.20**. The client `SERVER_PLUGIN_SYNC` log is another check; MO2’s displayed version is separate.
+For MO2/DWPkg sync, start CHIM connected to the game and load a save to trigger sync. Then open **Server Plugins → Automatic Game Plugin Sync → Refresh Status** and confirm the server version is **0.1.21**. The client `SERVER_PLUGIN_SYNC` log is another check; MO2’s displayed version is separate.
 
 ### Duplicate-copy recovery
 
 Keep exactly one active PCV source. If the Plugin Page returns **HTTP 409**, read the message to identify the physical owner and open that copy’s Plugin Page. If a scene is active, click **End now on that owner page before switching or removing the duplicate**. PCV state is tied to its installation path; it is not automatically migrated between copies.
 
-One unguarded 0.1.19 copy remains preferred and makes 0.1.20 defer safely with HTTP 409. Two unguarded 0.1.19 copies can still collide even when a guarded 0.1.20 copy is present. Upgrade/replace or remove the extra old copy until one source remains. Installing another copy does not solve two old copies.
+One unguarded 0.1.19 copy remains preferred and makes 0.1.20 defer safely with HTTP 409. The publisher verified that the 0.1.21 runtime payload matches 0.1.20, so the same owner guard applies. Two unguarded 0.1.19 copies can still collide even when a guarded 0.1.20 or 0.1.21 copy is present. Upgrade/replace or remove the extra old copy until one source remains. Installing another copy does not solve two old copies.
 
 Before switching installation routes, back up the server and quiesce old requests. Disabling a game-carried package stops discovery but does not uninstall its server copy; remove it through the server route too. Removing PCV or Mind Poisoning does not undo opinion values already stored by Mind Poisoning.
 
@@ -148,11 +148,11 @@ The default runtime state lives in a private per-install temporary root, separat
 
 The extension-root `.htaccess` protects only legacy extension-local state when Apache honors overrides. If overrides are ignored, the package is not an HTTP access boundary; another server needs an equivalent server-level rule. The denial was checked in isolated Apache fixtures, not against your installed server. See [operator acceptance](docs/operator-acceptance.md) before changing routes or handling live state.
 
-0.1.20 is still **ALPHA**. Focused fixtures passed for the solo action offer/filter path and duplicate-install ownership plus inactive HTTP refusal; the duplicate fixture exercised owner state-API ARM/END/readback, not owner-page ARM/END. The offering fixture checks PCV helper-shaped lists and enums, not a rebuilt CHIM core schema. Full CHIM bootstrap/schema refresh, live provider/database operation, successful owner-page ARM/END, public ACK scheduling, native recovery, client/audio behavior, physical privacy, and Skyrim gameplay remain unverified. The DB-backed ACK shutdown fixture was not run because no disposable PostgreSQL target was configured. Detailed evidence and the retained logger warning are in the [0.1.20 release notes](distribution/private_conversation-v0.1.20.md).
+The publisher verified that 0.1.21 has the same runtime code as exercised 0.1.20: all 20 non-manifest payload members match byte for byte. The 0.1.21 manifest changes only the version and description; 0.1.21 itself was not separately played in-game. In the 0.1.20 run, Pair rechat played, Solo completed three speech segments and Mind Poisoning stored an Elsa-to-Bruce opinion change, and END cleared the stored scope. Direct post-END recovery, repeated Solo use, and removal without harm were operator-confirmed. See the [acceptance evidence](tasks/beta-2026-10-17/acceptance-evidence.md) and the reader-focused [0.1.21 release note](distribution/private_conversation-v0.1.21.md). It is a useful beta, not a force field: history and memories can still mention excluded people, model guidance can be ignored, and vanilla earshot is outside PCV's checks.
 
 ## Release notes and support
 
-The [0.1.20 release notes](distribution/private_conversation-v0.1.20.md) hold the current release details. Recent history: [0.1.19](distribution/private_conversation-v0.1.19.md) and [0.1.18](distribution/private_conversation-v0.1.18.md). The [GitHub releases page](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases) and [distribution folder](distribution/) keep the older release archaeology, so this page can be about using the plugin.
+The [0.1.21 release note](distribution/private_conversation-v0.1.21.md) holds current beta guidance; the [0.1.20 ALPHA note](distribution/private_conversation-v0.1.20.md) preserves the earlier release record. Recent history: [0.1.19](distribution/private_conversation-v0.1.19.md) and [0.1.18](distribution/private_conversation-v0.1.18.md). The [GitHub releases page](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases) and [distribution folder](distribution/) keep the older release archaeology, so this page can be about using the plugin.
 
 [Report issues](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/issues) with PCV/CHIM versions, mode and settings, a short reproduction, expected versus observed behavior, and only relevant bounded logs. Omit credentials and full private dumps. “The llama looked suspicious” is delightful atmosphere and a poor bug report.
 
