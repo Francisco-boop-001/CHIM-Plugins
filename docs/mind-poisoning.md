@@ -2,9 +2,11 @@
 
 Mind Poisoning can change a CHIM character’s opinion of a named person after a line about them. The character may believe the claim, doubt it, or change nothing. It changes CHIM relationship data, not Skyrim’s vanilla relationship rank. The model can still misunderstand a perfectly ordinary name; apparently naming people is harder than it looks.
 
-**0.1.22 is a BETA CANDIDATE.** Check the published release and its checksum before installing. Back up your CHIM database and configuration, then try it on an isolated CHIM database before using it in a live game. The [candidate evidence summary](beta-candidate-evidence.md) and [verification summary](verification-v0.1.22.md) explain what has and has not been checked; isolated source tests do not establish installed behavior.
+**0.1.23 is a BETA CANDIDATE.** Check the published release and its checksum before installing. Back up your CHIM database and configuration, then try it on an isolated CHIM database before using it in a live game. The [candidate evidence summary](beta-candidate-evidence.md) and [verification summary](verification-v0.1.23.md) explain what has and has not been checked; isolated source tests do not establish installed behavior.
 
-This candidate excludes `Vampire` and `Black` when they are generated as aliases from generic wording. Exact catalog names—including `Vampire Fledgling`, `Black Widow`, and literal mononyms—remain available. Other common-word names can still be ambiguous; the model may misunderstand them.
+This release also passes the opinion owner's existing relationship notes about a named subject into ordinary, reflection, and overhearing evaluations. Optional `relation`, `note`, `best`, and `worst` strings are bounded to 160 UTF-8 bytes apiece. They may be stale, incomplete, truncated, or one-sided: they are context, not evidence. Attraction or expectations in one person's note do not establish mutual feelings or an agreement. No new relationship state or label is added, and a listener may still disagree or make no change.
+
+The earlier `Vampire` and `Black` exclusions apply only to generated aliases from generic wording. Exact catalog names—including `Vampire Fledgling`, `Black Widow`, and literal mononyms—remain available. Other common-word names can still be ambiguous; the model may misunderstand them.
 
 ## Install through one route
 
@@ -12,10 +14,10 @@ A clean install through one route creates one server-side copy. Choose the route
 
 ### MO2 route (recommended for a new file-sync install)
 
-1. Install the [0.1.22 plain MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.22/mind_poisoning-0.1.22-mo2.zip) as a normal mod. Keep exactly one enabled Mind Poisoning version. The ZIP has `CHIM` at its data root and contains the DWPkg; do not unpack or add another package.
+1. Install the [0.1.23 plain MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.23/mind_poisoning-0.1.23-mo2.zip) as a normal mod. Keep exactly one enabled Mind Poisoning version. The ZIP has `CHIM` at its data root and contains the DWPkg; do not unpack or add another package.
 2. When updating, choose **Replace**, not **Merge**. Do not click Mind Poisoning **Install** or **Update** in CHIM’s web Plugin Manager while MO2 sync is your route.
 3. In CHIM, enable **Automatic Game Plugin Sync**. Before loading a save on an existing install or after changing routes, check for duplicate folders; if both exist, follow the [recovery guide](deployment-migration.md#mind-poisoning-duplicate-install-recovery) first. For a clean first sync, launch Skyrim through MO2 and load a save to trigger the documented sync.
-4. On **Server Plugins → Automatic Game Plugin Sync**, choose **Refresh Status** and confirm `mind_poisoning` version `0.1.22`. Then open **Plugin Manager → Plugin Page**. The [dashboard guide](dashboard.md) explains access and the local handoff.
+4. On **Server Plugins → Automatic Game Plugin Sync**, choose **Refresh Status** and confirm `mind_poisoning` version `0.1.23`. Then open **Plugin Manager → Plugin Page**. The [dashboard guide](dashboard.md) explains access and the local handoff.
 
 MO2 may warn that this CHIM-only mod does not look like Skyrim game content. That is MO2’s game-file classification; **Ignore** or **Continue**, if offered, does not prove CHIM read or synced the DWPkg. A CHIM “couldn’t read” or sync error is separate and remains undiagnosed. Record its exact text, package path, version, client/server revisions, and relevant sanitized `SERVER_PLUGIN_SYNC` lines rather than guessing at a cause.
 
@@ -23,7 +25,7 @@ MO2 may warn that this CHIM-only mod does not look like Skyrim game content. Tha
 
 If your server already uses CHIM’s canonical Plugin Manager route (available since the 0.1.14 bridge), continue using it and do not add the MO2 copy. Follow CHIM’s [Plugin Guide](https://dwemerdynamics.com/chim/plugin-guide.html) for its current controls. To switch from the Manager route to MO2, keep MO2 sync disabled while removing the Manager-only folder; re-enable sync only after the MO2 copy remains. To switch from MO2 to the Manager, disable MO2 sync first so it cannot recreate its copy. For a 0.1.13-or-older installation, back up the database and configuration first; either upgrade through the [0.1.14 bridge](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/mind_poisoning-v0.1.14), or follow the [version-specific migration and duplicate-folder recovery](deployment-migration.md#mind-poisoning-migration-from-0113-or-older) before using the Manager route.
 
-The separate flat `chim-plugin.tar.gz` is for experimental topic-based discovery in a newer CHIM manager. The pinned `cf5030f` core does not include that feature, and a full 0.1.22 site install has not been verified. The [raw DWPkg](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.22/mind_poisoning-0.1.22.dwpkg) and [server TAR](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.22/mind_poisoning.tar.gz) are advanced options for manual sync and existing manifest/channel installs.
+The separate flat `chim-plugin.tar.gz` is for experimental topic-based discovery in a newer CHIM manager. The pinned `cf5030f` core does not include that feature, and a full 0.1.23 site install has not been verified. The [raw DWPkg](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.23/mind_poisoning-0.1.23.dwpkg) and [server TAR](https://github.com/Francisco-boop-001/CHIM-MindPoisoning/releases/download/mind_poisoning-v0.1.23/mind_poisoning.tar.gz) are advanced options for manual sync and existing manifest/channel installs.
 
 **For existing installs or route changes, check for duplicate copies before loading a save.** Two installed Mind Poisoning copies stop all CHIM conversation requests until one is removed. In an auditor’s 0.1.21/0.1.21 reproduction, CHIM reported `Cannot redeclare ChimMindPoisoning\mindPoisoningEvaluateReflection` during `main.php` globals boot; the web Plugin Manager remained available. After any install or route change, verify that exactly one of `ext/mind_poisoning` or `ext/CHIM-MindPoisoning` exists. A clean first MO2 sync requires the save-load step above; verify its server folder and version before continuing play. If both folders exist, stop game loading, back up the database and configuration, and follow the [recovery guide](deployment-migration.md#mind-poisoning-duplicate-install-recovery):
 
@@ -56,6 +58,10 @@ Overhearing is off by default. If an administrator enables it, one ordinary NPC 
 Mind Poisoning has no player-facing solo-reflection command. If you use a compatible Private Conversation version, follow its [private-reflection workflow](https://github.com/Francisco-boop-001/CHIM-PrivateConversation) rather than typing a special Mind Poisoning command. A reflection evaluates the actor’s opinion. For example, direct the actor to reflect on Farkas keeping watch at the west gate until dawn. The reply may span multiple lines, but it must identify Farkas for Mind Poisoning to assess; it need not retell the remembered event. A hidden instruction alone is not evidence. Use the full catalog name when names could be confused.
 
 The current candidate’s full installed companion behavior is unverified. See the [integration API](integration-api.md) for the source and eligibility boundaries; that document describes the integration, not player controls.
+
+### How existing relationship context is used
+
+The 0.1.23 evaluator can use the opinion owner's existing relationship fields about the subject (`relation`, `note`, `best`, and `worst`), each valid nonempty string capped at 160 UTF-8 bytes. Ordinary talk, reflection, and enabled overhearing use the same bounded context. It adds no model call, new relationship label, or persistent state. These notes can be old, incomplete, truncated, or asymmetric, so treat them as fallible context rather than proof or new spoken evidence. One person's attraction or expectation is not a mutual commitment, and the model can still choose no change.
 
 ## Read Interactions and Logs
 
