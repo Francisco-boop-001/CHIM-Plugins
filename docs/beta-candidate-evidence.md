@@ -1,8 +1,8 @@
-# Mind Poisoning 0.1.21 BETA CANDIDATE — evidence and limits
+# Mind Poisoning 0.1.22 BETA CANDIDATE — evidence and limits
 
-The 0.1.21 GitHub release is configured as a standard release (`prerelease=false`) so a newer CHIM manager can discover its `chim-plugin.tar.gz` asset. The release text and package metadata call it a **BETA CANDIDATE**. GitHub's release classification is a discovery requirement; it does not mean every beta gate passed.
+The 0.1.22 release uses standard GitHub classification (`prerelease=false`) to retain CHIM topic-discovery eligibility. Its release text and package metadata label it **BETA CANDIDATE**; standard classification is not a beta graduation. This page records source-level checks and earlier-version campaigns, not package validation.
 
-## Completed disposable checks
+## Completed disposable checks from 0.1.20
 
 ### B1: native PostgreSQL persistence — 10 scenarios passed
 
@@ -18,12 +18,24 @@ Pause, relationship-feature Off, and interaction Off each made zero model-callba
 
 The unmodified CHIM automatic-backup implementation produced a SQL dump that passed independent content checks and a strict restore into a new empty task-owned database. Ten imported native tables and seven sequence states matched the captured baseline. The environment-local `chim_meta.settings` table is intentionally excluded by the upstream backup; the campaign captured, reapplied, and independently compared those local settings. Six selected filesystem roots were restored and hash-checked. The actual dashboard then read the restored synthetic ledger row, affinity 99, and type `friend`.
 
-## 0.1.21 route and remaining limits
+These passed B1/B3 campaigns cover 0.1.20, not the 0.1.22 package. They remain useful evidence for the unchanged persistence and server-install paths; they are not a substitute for a 0.1.22 cold install or package check.
 
-The B1 and B3 campaigns tested the 0.1.20 package, not a 0.1.21 `chim-plugin.tar.gz` installation. The new root `index.php` entrypoint received a separate local-only access-gate check: a synthetic non-loopback GET defaults to the existing fixed-localhost handoff while preserving the requested path and filters; forwarded requests remain denied by the existing dashboard gate; explicit `local=0` remains denied; POST remains 405. This check does not load dashboard data and does not prove a live CHIM site install.
+## 0.1.21 live observations and the alias defect
 
-An isolated relocated compatibility check verified that `globals.php` exposes the existing reflection API before the vendored PCV loader snapshot runs, and that the dashboard parser accepts logs stamped with the exact release tag after logger normalization. Reflection API v1 and reply API v2 remain unchanged. The fixture uses a vendored PCV loader snapshot, not the full current PCV runtime; actual installed PCV integration remains unverified.
+One installed 0.1.21 reflection-classified case with Private Conversation 0.1.20 produced a combined affinity and relationship-type change. Persistence and terminal records confirmed the commit, and a later dashboard view showed the resulting edge. This is one successful installed reflection case, not broad PCV integration or a reliability estimate. It does not establish review of the actual self-talk for semantic quality, PCV API selection, an independent SQL history snapshot, a core-editor screenshot, audio, full installed-file hashes, or all component versions. See the [public live-acceptance summary](live-acceptance-summary.md).
 
-The topic-discovery route requires a newer CHIM manager than pinned core `cf5030f`, which does not contain topic discovery. Source review of a newer manager shows that a clean install uses `ext/CHIM-MindPoisoning`; when an existing folder has the same valid `git_repo`, the manager reuses that folder in place rather than renaming it. An unknown-source legacy folder may remain. This is source-review evidence, not a live migration guarantee. Inspect the manager result and stop if an unknown-source or duplicate folder remains; do not stack or delete folders blindly. The isolated companion-loader check is limited to its vendored snapshot and does not prove installed compatibility with the full current PCV runtime.
+A separate installed 0.1.21 observation exposed a wrong-subject semantic defect: generic vampire wording matched the generated alias for the catalog character `Vampire Fledgling`, and a judgment was committed to that wrong subject. Persistence succeeded; subject selection was wrong. The public summary omits dialogue, actor/request/event identifiers, and local records.
 
-These checks used disposable synthetic data. They do not establish MO2 or native-client sync, a cold operator following the public guide, full CHIM service integration, provider behavior, real player data, Skyrim relationship state, audible speech, or gameplay. The 0.1.21 site-discovery route itself still needs an isolated end-to-end install check before that specific claim is made.
+The 0.1.22 working-tree fix filters exact `Vampire` and `Black` tokens from generated aliases across the existing first-word, phrase-before-`the`, and bracket-stripped candidate routes. It does not suppress exact catalog names, including `Vampire Fledgling`, `Black Widow`, or literal mononyms such as `Black`, `Guard`, and `King`. Other common-word names such as `May` and `Guard` can still need model semantic judgment. No pronoun-resolution, taxonomy, model-prompt, schema, or wider alias-engine change is claimed.
+
+The focused working-tree regressions first failed on the reproduced generic-alias behavior and then passed with the fix. Four isolated test suites and three PHP syntax checks passed. Their exact scope, harness limits, and the Windows symlink skips are recorded in the [public 0.1.22 verification summary](verification-v0.1.22.md). This is isolated working-tree evidence, not an installed 0.1.22 result.
+
+The earlier 0.1.21 reflection/API compatibility fixture and root entrypoint access-gate check remain limited local checks. The topic-discovery route requires a newer CHIM manager than pinned core `cf5030f`, and the 0.1.22 site-discovery install path remains unverified end to end. If duplicate extension folders or an unexpected route state is present, follow the [duplicate-install recovery steps](deployment-migration.md#mind-poisoning-duplicate-install-recovery) before sending game requests.
+
+## Remaining before a scoped beta
+
+- **B2:** Add an NPC-to-NPC conversation about a named third person with independent review of the actual NPC utterance, a core-editor/history crosscheck, and recorded current-candidate lock/scope/On-Off and save/load checks. Existing zero and older lock/off observations remain valid within their recorded scope; current-candidate checks are unrecorded, not failed.
+- **B3:** Complete a cold 0.1.22 install or upgrade on the chosen supported route, checking installed-file/version hashes and CHIM/client versions. The passed B1 0.1.20 native PostgreSQL campaign (10 scenarios) and B3 0.1.20 server install/upgrade/dashboard/recovery campaign (9 scenarios) remain valid and do not need repeating; they do not validate a 0.1.22 package.
+- **B4:** Record active-versus-paused client acknowledgement and next-turn timing, stalled-provider recovery and the next request, and actual selected-model cost and client/server deadline behavior. The earlier live case's model, persistence, and plugin timings are stage measurements, not full gameplay latency.
+
+Overhearing is default-off and can remain experimental for a scoped beta. The site-discovery route may also remain experimental if the beta scope selects a different validated route. The available evidence does not establish general provider reliability, vanilla Skyrim rank changes, audible playback, or the other untested gameplay paths above.

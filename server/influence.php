@@ -108,9 +108,9 @@ function findSubjects(array $event, array $npcs, string $playerName): array
 
     $entries = [];
     $details = ['player' => ['name' => 'Player', 'id' => null]];
-    $titleStoplist = [
+    $derivedAliasStoplist = [
         'The', 'Jarl', 'Sir', 'Lady', 'Lord', 'Captain', 'Commander', 'General', 'Guard', 'King',
-        'Queen', 'Prince', 'Princess', 'Master', 'Mistress', 'Doctor', 'Dr', 'Sergeant',
+        'Queen', 'Prince', 'Princess', 'Master', 'Mistress', 'Doctor', 'Dr', 'Sergeant', 'Vampire', 'Black',
     ];
     foreach ($npcs as $npc) {
         if (
@@ -147,15 +147,15 @@ function findSubjects(array $event, array $npcs, string $playerName): array
             if ($alias === '' || preg_match('//u', $alias) !== 1) {
                 continue;
             }
-            $title = rtrim($alias, '.');
-            $isTitle = false;
-            foreach ($titleStoplist as $stopword) {
-                if (sameName($stopword, $title)) {
-                    $isTitle = true;
+            $normalizedAlias = rtrim($alias, '.');
+            $isExcludedAlias = false;
+            foreach ($derivedAliasStoplist as $excludedAlias) {
+                if (sameName($excludedAlias, $normalizedAlias)) {
+                    $isExcludedAlias = true;
                     break;
                 }
             }
-            if ($isTitle) {
+            if ($isExcludedAlias) {
                 continue;
             }
             $duplicate = false;

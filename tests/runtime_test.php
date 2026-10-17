@@ -692,6 +692,67 @@ if (defined('CHIM_MIND_POISONING_TEST_FIXTURES_ONLY') && CHIM_MIND_POISONING_TES
     return;
 }
 
+resetAckLoggingInteraction();
+[$genericPhraseEvent, , , $genericPhraseDb] = baseFixture();
+$genericPhraseEvent['speaker_id'] = 5126;
+$genericPhraseEvent['listener_id'] = 5124;
+$genericPhraseEvent['speaker_name'] = 'Elsa';
+$genericPhraseEvent['listener_name'] = 'Lidia';
+$genericPhraseEvent['text'] = 'He sold a safe-house location to a vampire coven while innocents were still inside.';
+$genericPhraseEvent['source_data'] = 'Elsa: ' . $genericPhraseEvent['text'] . ' (Talking to Lidia)';
+$genericPhraseDb->events[100] = $genericPhraseEvent + ['type' => 'chat', 'delivery_state' => 'spoken'];
+$genericPhraseDb->npcs = [
+    5126 => [
+        'id' => 5126, 'npc_name' => 'Elsa',
+        'extended_data' => (object)['relationships' => new stdClass()],
+        'plugin_extended_data' => new stdClass(),
+    ],
+    5124 => [
+        'id' => 5124, 'npc_name' => 'Lidia', 'gamets_last_updated' => 20.0,
+        'extended_data' => (object)['relationships' => new stdClass()],
+        'plugin_extended_data' => new stdClass(),
+    ],
+    5066 => [
+        'id' => 5066, 'npc_name' => 'Vampire Fledgling',
+        'extended_data' => (object)['relationships' => new stdClass()],
+        'plugin_extended_data' => new stdClass(),
+    ],
+];
+$genericPhraseAck = ['_speech', 0, 10, json_encode([
+    'speaker' => 'Elsa',
+    'listener' => 'Lidia',
+    'speech' => $genericPhraseEvent['text'],
+    'utterance_id' => $genericPhraseEvent['utterance_id'],
+], JSON_THROW_ON_ERROR)];
+$genericPhraseBefore = serialize([
+    'npcs' => $genericPhraseDb->npcs,
+    'events' => $genericPhraseDb->events,
+    'history' => $genericPhraseDb->history,
+]);
+$genericPhraseModelCalls = 0;
+$genericPhraseStatus = handleSpeechAck(
+    $genericPhraseAck,
+    $genericPhraseDb,
+    static function (array $messages) use (&$genericPhraseModelCalls): string {
+        $genericPhraseModelCalls++;
+        return validModelResponse([[
+            'subject' => 'npc:5066',
+            'delta' => -3,
+            'reason' => 'The listener distrusts the claim.',
+            'evidence' => 'to a vampire coven',
+        ]]);
+    }
+);
+same('no-subjects', $genericPhraseStatus, 'A generic vampire mention must not enter evaluation as Vampire Fledgling.');
+same(0, $genericPhraseModelCalls, 'A generic category mention must be rejected before the provider seam.');
+same(0, $genericPhraseDb->beginCalls, 'A generic category mention must not begin persistence.');
+same([], $genericPhraseDb->history, 'A generic category mention must not create history.');
+same(
+    $genericPhraseBefore,
+    serialize(['npcs' => $genericPhraseDb->npcs, 'events' => $genericPhraseDb->events, 'history' => $genericPhraseDb->history]),
+    'A generic category mention must not change the catalog, relationships, ledger, event rows, or history.'
+);
+
 // Exercise the player path through the same extracted CHIM route decoder and store contract.
 resetAckLoggingInteraction();
 [$playerAliasRaceEvent, , , $playerAliasRaceDb] = baseFixture();

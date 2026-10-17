@@ -162,6 +162,60 @@ check(isset(findSubjects($unicodeAliasEvent, $aliasNpcs, 'Hawke')['npc:15']), 'T
 $shortAliasEvent = $event;
 $shortAliasEvent['text'] = 'Li arrived.';
 check(!isset(findSubjects($shortAliasEvent, $aliasNpcs, 'Hawke')['npc:16']), 'A first word shorter than three letters should not become an alias.');
+
+$genericAliasEvent = $event;
+$genericAliasEvent['speaker_id'] = 5126;
+$genericAliasEvent['listener_id'] = 5124;
+$genericAliasEvent['speaker_name'] = 'Elsa';
+$genericAliasEvent['listener_name'] = 'Lidia';
+$genericAliasEvent['text'] = 'He sold a safe-house location to a vampire coven while innocents were still inside.';
+$genericAliasNpcs = [
+    ['id' => 5066, 'npc_name' => 'Vampire Fledgling'],
+    ['id' => 5126, 'npc_name' => 'Elsa'],
+    ['id' => 5124, 'npc_name' => 'Lidia'],
+];
+$genericAliasSubjects = findSubjects($genericAliasEvent, $genericAliasNpcs, 'Dragonborn');
+check(
+    !isset($genericAliasSubjects['npc:5066']),
+    'A generic mention of vampires must not resolve the Vampire Fledgling first-word alias.'
+);
+$blackWidowNpcs = [['id' => 5070, 'npc_name' => 'Black Widow']];
+$blackWidowEvent = $genericAliasEvent;
+$blackWidowEvent['text'] = 'He wore black clothing near the safe house.';
+check(
+    !isset(findSubjects($blackWidowEvent, $blackWidowNpcs, 'Dragonborn')['npc:5070']),
+    'A generic adjective must not resolve the Black Widow first-word alias.'
+);
+$blackWidowEvent['text'] = 'Black Widow was seen.';
+check(
+    isset(findSubjects($blackWidowEvent, $blackWidowNpcs, 'Dragonborn')['npc:5070']),
+    'The exact multiword Black Widow catalog name must remain eligible.'
+);
+$fullVampireEvent = $genericAliasEvent;
+$fullVampireEvent['text'] = 'Vampire Fledgling sold the safe-house location.';
+check(
+    isset(findSubjects($fullVampireEvent, $genericAliasNpcs, 'Dragonborn')['npc:5066']),
+    'The exact multiword Vampire Fledgling catalog name must remain eligible.'
+);
+$bruceNpcs = [['id' => 5071, 'npc_name' => 'Bruce Wayne']];
+$bruceEvent = $genericAliasEvent;
+$bruceEvent['text'] = 'Bruce was seen near the safe house.';
+check(
+    isset(findSubjects($bruceEvent, $bruceNpcs, 'Dragonborn')['npc:5071']),
+    'A non-generic Bruce Wayne first-name alias must remain eligible.'
+);
+$genericMononyms = [
+    ['id' => 5072, 'npc_name' => 'Guard'],
+    ['id' => 5073, 'npc_name' => 'King'],
+    ['id' => 5074, 'npc_name' => 'Black'],
+];
+$genericMononymEvent = $genericAliasEvent;
+$genericMononymEvent['text'] = 'The guard spoke to the king dressed in black.';
+$genericMononymSubjects = findSubjects($genericMononymEvent, $genericMononyms, 'Dragonborn');
+check(
+    isset($genericMononymSubjects['npc:5072'], $genericMononymSubjects['npc:5073'], $genericMononymSubjects['npc:5074']),
+    'Exact canonical mononyms remain eligible even when the same words are excluded as derived aliases.'
+);
 $ownAliasEvent = $aliasEvent;
 $ownAliasEvent['speaker_id'] = 10;
 $ownAliasEvent['listener_id'] = 11;
