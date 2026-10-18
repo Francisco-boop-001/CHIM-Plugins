@@ -34,6 +34,12 @@ function renderDashboard(array $model, array $filters): void
         return ($signed && $positive ? '+' : '') . $formatted;
     };
     $codeLabel = static fn(string $value): string => ucwords(str_replace(['-', '_'], ' ', $value));
+    $restorePolicyExplanation =
+        'At this recorded event, CHIM’s effective NEVER_CLEAR_RELATIONSHIP_DATA=true policy triggered Mind Poisoning’s restore-safety guard. '
+        . 'The guard protects against keeping newer relationship scores while restoring older Mind Poisoning processing history, which could let an already-applied event change a score again. '
+        . 'This reason may be recorded before model work or at the persistence backstop after validated model output. '
+        . 'Review the restore policy with the server administrator, and back up the database and configuration before any setting change; do not toggle it blindly. '
+        . 'This historical record does not establish the setting’s current value.';
     $currentTypeDisplay = static function (mixed $value, mixed $state) use ($escape): string {
         return match (is_string($state) ? $state : '') {
             'set' => $escape($value),
@@ -299,6 +305,9 @@ function renderDashboard(array $model, array $filters): void
                                 </p>
                                 <?php if (is_string($interaction['reason'] ?? null) && $interaction['reason'] !== ''): ?>
                                     <p class="reason-line">Reason <code><?= $escape($interaction['reason']) ?></code></p>
+                                    <?php if ($interaction['reason'] === 'restore-policy'): ?>
+                                        <p class="reason-explanation"><?= $escape($restorePolicyExplanation) ?></p>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
                                 <?php if ($changes === []): ?>
@@ -476,6 +485,7 @@ function renderDashboard(array $model, array $filters): void
                             <?php
                             $recordLevel = $text($record['level'] ?? null);
                             $recordEvent = $text($record['event'] ?? null);
+                            $recordReason = $record['reason'] ?? $record['persistence_reason'] ?? null;
                             $correlationLabel = is_string($record['utterance_id'] ?? null) && str_starts_with($record['utterance_id'], 'input_')
                                 ? 'Input event ID'
                                 : 'Utterance ID';
@@ -498,13 +508,16 @@ function renderDashboard(array $model, array $filters): void
                                     <div><dt><?= $escape($correlationLabel) ?></dt><dd><code><?= $escape($text($record['utterance_id'] ?? null)) ?></code></dd></div>
                                     <div><dt>Stage</dt><dd><?= $escape($text($record['stage'] ?? null)) ?></dd></div>
                                     <div><dt>Outcome</dt><dd><?= $escape($text($record['outcome'] ?? $record['model_outcome'] ?? $record['persistence_outcome'] ?? null)) ?></dd></div>
-                                    <div><dt>Reason</dt><dd><code><?= $escape($text($record['reason'] ?? $record['persistence_reason'] ?? null)) ?></code></dd></div>
+                                    <div><dt>Reason</dt><dd><code><?= $escape($text($recordReason)) ?></code></dd></div>
                                     <?php foreach (['Elapsed' => 'elapsed_ms', 'Model' => 'model_ms', 'Persistence' => 'persistence_ms'] as $timeLabel => $timeField): ?>
                                         <?php $recordTime = $formatNumber($record[$timeField] ?? null); ?>
                                         <div><dt><?= $escape($timeLabel) ?></dt><dd class="numeric"><?= $escape($recordTime ?? 'Unavailable') ?><?= $recordTime === null ? '' : ' ms' ?></dd></div>
                                     <?php endforeach; ?>
                                     <div><dt>Commit state</dt><dd><?= $escape($text($record['commit_state'] ?? null)) ?></dd></div>
                                 </dl>
+                                <?php if ($recordReason === 'restore-policy'): ?>
+                                    <p class="reason-explanation"><?= $escape($restorePolicyExplanation) ?></p>
+                                <?php endif; ?>
                                 <pre class="record-json"><code><?= $escape(is_string($recordJson) ? $recordJson : '{}') ?></code></pre>
                             </details>
                         <?php endforeach; ?>

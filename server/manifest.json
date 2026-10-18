@@ -1,9 +1,9 @@
 {
   "name": "mind_poisoning",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "schema_version": 2,
   "git_repo": "Francisco-boop-001/CHIM-MindPoisoning",
-  "description": "BETA CANDIDATE: Conservative affinity updates from identity-checked NPC acknowledgements and Player input, with optional single-type judgments, actor-owned reflection, default-off NPC ACK overhearing, canonical Player handling, sentinel exclusion, and a read-only dashboard. Evaluations may receive existing owner-to-subject relation, note, best, and worst strings (up to 160 UTF-8 bytes each). They are untrusted context; no extra model call or relationship state is added. The topic-discovery asset needs a newer CHIM manager and standard release classification. Isolated PHP checks pass; provider, database, installation, and gameplay remain unverified.",
+  "description": "BETA CANDIDATE: Conservative affinity updates from identity-checked NPC acknowledgements and Player input, with optional single-type judgments, actor-owned reflection, default-off NPC ACK overhearing, canonical Player handling, sentinel exclusion, and a read-only dashboard. Evaluations may receive existing owner-to-subject context bounded to 160 UTF-8 bytes per field. Version 0.1.24 explains restore-policy in Interactions and Logs while retaining the guard; filtered JSONL and its filters are unchanged. APIs, evaluator behavior, and schema are unchanged. Topic discovery needs a newer CHIM manager and standard release classification. Provider, database, installation, and gameplay remain unverified.",
   "status": "development_candidate",
   "config_url": "../ext/mind_poisoning/dashboard.php?local=1",
   "default_channel": "candidate",
