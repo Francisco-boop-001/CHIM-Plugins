@@ -977,3 +977,13 @@ Final lead review: All three task gates and the combined source review are appro
 Authorization: the user requested merge as needed, commit, push and publish. Scope is MP only; installed CHIM, game/modlist and live database/providers remain untouched. Plan and boundaries: release-v0.1.15-plan.md.
 
 Review: 0.1.15 is committed, immutably tagged and published PRE-ALPHA in the dedicated repository and migration hub. Clean-tag rebuilds, both draft downloads and both public downloads match exact bytes/checksums. Update branches advanced after publication and identify 0.1.15. Unrelated dirty work and historical assets remain preserved. Full evidence: release-v0.1.15.md. Companion v2 adoption and live runtime remain unverified; no installation occurred.
+
+## MP 0.1.26 hub documentation — 2026-10-19
+
+- [x] Verify MP's published tag and all public installer/checksum bytes before moving hub links.
+- [x] Replace only the MP README summary/current-download references; point its guides to canonical MP source.
+- [x] Verify PCV 0.1.21 BETA and S&S 0.1.5 sections remain exact; allow only README.md and this task record, then commit/push documentation.
+
+Scope: documentation only. No runtime/plugin snapshots, metadata, assets, tests, tags or release files change. Preserve companion releases and concurrent edits. No live/server/game/WSL/provider access.
+
+Review: both companion sections compare exactly; current MP links target public 0.1.26 with clean-tag and five-file public-download verification. Diff allowlist is README.md and tasks/todo.md only. Publishing the hub is a documentation update, not an install or maturity promotion.
