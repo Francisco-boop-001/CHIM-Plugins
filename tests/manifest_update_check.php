@@ -107,7 +107,7 @@ try {
     updateCheck($entry['git_repo'] === $repo && $entry['github_url'] === 'https://github.com/' . $repo, 'Catalog entry does not use the unique Mind Poisoning repository.');
     updateCheck($manifest['channels']['candidate']['manifest_url'] === 'https://raw.githubusercontent.com/' . $repo . '/main/server/manifest.json', 'Candidate manifest URL does not point to the deployment repository root.');
     updateCheck($manifest['channels']['candidate']['package_urls'] === ['https://github.com/' . $repo . '/releases/download/mind_poisoning-v<version>/mind_poisoning.tar.gz'], 'Candidate package URL must use the versioned deployment release template.');
-    updateCheck($manifest['server_compatibility_reference'] === 'cf5030f15781637498be86debe26fcf102f5690d', 'Compatibility reference changed.');
+    updateCheck($manifest['server_compatibility_reference'] === '57f292415b008cfaf1a4531f0654d2563362ce70', 'Compatibility reference changed.');
 
     $preSchema2Installed = ['name' => 'mind_poisoning', 'version' => '0.1.3', 'git_repo' => $legacyRepo];
     $legacyInstalled = ['name' => 'mind_poisoning', 'version' => '0.1.13', 'schema_version' => 2, 'git_repo' => $legacyRepo];

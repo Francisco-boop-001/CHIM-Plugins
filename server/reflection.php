@@ -85,6 +85,14 @@ function runReflectionEvaluation(
     if ($status === 'event-mismatch' && in_array($reason, ['reflection-ack-mismatch', 'reflection-source-mismatch'], true)) {
         $outcome = 'rejected';
     }
+    if ($status === 'listener-invalid' && in_array($reason, [
+        'restore-policy-ledger-invalid',
+        'restore-policy-owner-invalid',
+        'restore-policy-owner-state-invalid',
+        'restore-policy-timeline-invalid',
+    ], true)) {
+        $outcome = 'rejected';
+    }
     $requestLog?->finish($outcome, $reason, $logFields);
     return $status;
 }
@@ -328,9 +336,6 @@ function evaluateReflection(
     if (mindPoisoningPauseStatus($pauseReason) !== 'enabled') {
         return $fail('paused', $pauseReason ?? 'plugin_paused');
     }
-    if (filter_var($GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
-        return $fail('restore-policy', 'restore-policy');
-    }
     if (!function_exists('chimIsGlobalLlmConnectorEnabled') || !\chimIsGlobalLlmConnectorEnabled('RELLLM_CONNECTOR')) {
         return $fail('disabled', 'connector-disabled');
     }
@@ -416,6 +421,23 @@ function evaluateReflection(
         return $fail('stale', 'reflection-source-stale');
     }
 
+    $restorePolicyInitEventId = null;
+    $restoreSourceIds = $fullReply
+        ? array_map(static fn(array $replySource): mixed => $replySource['event_id'] ?? null, $replySources)
+        : [$source['event_id'] ?? null];
+    $boundaryStatus = captureRestorePolicyEventBoundary(
+        $store,
+        $restoreSourceIds,
+        $gameRequest,
+        false,
+        $requestLog,
+        $logFields,
+        $restorePolicyInitEventId
+    );
+    if ($boundaryStatus !== null) {
+        return $boundaryStatus;
+    }
+
     $identities = $store->npcIdentities();
     $matches = array_values(array_filter($identities, static fn(array $row): bool => sameActorName($row['npc_name'] ?? null, $registration['actor_name'])));
     if (count($matches) !== 1 || (int)($matches[0]['id'] ?? 0) !== $registration['actor_id']) {
@@ -452,6 +474,22 @@ function evaluateReflection(
     ];
     if ($fullReply) {
         $event['reflection_sources'] = $replySources;
+    }
+    if (is_int($restorePolicyInitEventId)) {
+        $event['restore_policy_init_event_id'] = $restorePolicyInitEventId;
+    }
+    if (mindPoisoningRestorePolicyEnabled()) {
+        $baselineFields = ['stage' => 'preflight', 'model_outcome' => 'not_called'];
+        $baselineStatus = prepareRestorePolicyRecipient($event, $actor, $store, $requestLog, $baselineFields);
+        if ($baselineStatus !== null) {
+            $logFields = array_merge($logFields, $baselineFields);
+            return $baselineStatus;
+        }
+        $extendedData = $actor['extended_data'] ?? null;
+        $pluginData = $actor['plugin_extended_data'] ?? null;
+        if (!$extendedData instanceof \stdClass || !$pluginData instanceof \stdClass) {
+            return $fail('invalid', 'reflection-actor-state-invalid');
+        }
     }
     $dedupeSources = $fullReply ? $replySources : [$event];
     foreach ($dedupeSources as $dedupeSource) {

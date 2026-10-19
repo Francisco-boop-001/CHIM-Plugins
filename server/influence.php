@@ -790,12 +790,14 @@ function recentPriorJudgments(array $listener, array $event, array $subjects): a
     }
 
     $knownSubjects = array_fill_keys(array_keys($subjects), true);
+    $restorePolicyInitEventId = $event['restore_policy_init_event_id'] ?? null;
     $prior = [];
     foreach ($events as $entry) {
         $entryJudgments = $entry instanceof \stdClass ? ($entry->judgments ?? null) : null;
         if (
             !$entry instanceof \stdClass
             || !is_int($entry->event_id ?? null) || $entry->event_id < 1
+            || (is_int($restorePolicyInitEventId) && $restorePolicyInitEventId > 0 && $entry->event_id <= $restorePolicyInitEventId)
             || !is_string($entry->utterance_id ?? null) || trim($entry->utterance_id) === ''
             || $entry->event_id === ($event['event_id'] ?? null)
             || $entry->utterance_id === ($event['utterance_id'] ?? null)

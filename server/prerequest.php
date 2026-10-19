@@ -163,6 +163,13 @@ function finishInfluenceRequest(string $status, array $logFields, ?RequestLog $r
         $reason = 'committed';
     } elseif ($status === 'model-invalid' || ($status === 'failed' && ($logFields['model_outcome'] ?? null) === 'invalid')) {
         $outcome = 'rejected';
+    } elseif ($status === 'listener-invalid' && in_array($reason, [
+        'restore-policy-ledger-invalid',
+        'restore-policy-owner-invalid',
+        'restore-policy-owner-state-invalid',
+        'restore-policy-timeline-invalid',
+    ], true)) {
+        $outcome = 'rejected';
     } elseif ($status === 'failed') {
         $outcome = 'failed';
         $reason = $logFields['reason'] ?? 'evaluation_failed';
@@ -282,7 +289,7 @@ function inspectAckRecipient(
     return ['status' => 'eligible', 'subjects' => $subjects];
 }
 
-/** Return null to keep using the legacy single-listener ACK path. */
+/** Return null to continue through the single-listener ACK path without a completed baseline. */
 function evaluateOverhearingAck(
     array $event,
     array $source,
@@ -299,7 +306,11 @@ function evaluateOverhearingAck(
     if (!overhearingSettingEnabled()) {
         return null;
     }
+    $restorePolicy = mindPoisoningRestorePolicyEnabled();
     if (!$store instanceof WitnessSnapshotStoreDb) {
+        if ($restorePolicy) {
+            return recordRestorePolicyPreflight($requestLog, $logFields, 'restore-policy-audience-unavailable', 'preflight', null, $event);
+        }
         $requestLog?->event('overhearing_audience_skipped', 'warning', [
             'stage' => 'preflight', 'reason' => 'audience_snapshot_unavailable',
         ]);
@@ -313,6 +324,9 @@ function evaluateOverhearingAck(
         $people = overhearingPeopleNames($source['source_people'] ?? null, $peopleReason);
     }
     if (!is_array($people)) {
+        if ($restorePolicy) {
+            return recordRestorePolicyPreflight($requestLog, $logFields, 'restore-policy-audience-invalid', 'preflight', null, $event);
+        }
         $requestLog?->event('overhearing_audience_skipped', 'warning', [
             'stage' => 'preflight', 'reason' => $peopleReason ?? 'audience_people_invalid',
         ]);
@@ -320,6 +334,9 @@ function evaluateOverhearingAck(
     }
     $speakerMembers = array_values(array_filter($people, static fn(string $name): bool => sameActorName($name, $event['speaker_name'])));
     if (count($speakerMembers) !== 1) {
+        if ($restorePolicy) {
+            return recordRestorePolicyPreflight($requestLog, $logFields, 'restore-policy-audience-invalid', 'preflight', null, $event);
+        }
         $requestLog?->event('overhearing_audience_skipped', 'warning', [
             'stage' => 'preflight', 'reason' => 'audience_speaker_invalid',
         ]);
@@ -371,6 +388,31 @@ function evaluateOverhearingAck(
         $recipientEvent['addressed_listener_name'] = $addressedName;
         $recipientEvent['source_people'] = $source['source_people'];
         $recipientEvent['source_delivery_state'] = $source['delivery_state'] ?? null;
+        if ($restorePolicy) {
+            $restorePolicyFields = ['stage' => 'preflight', 'model_outcome' => 'not_called'];
+            $recipientLog = $requestLog?->fork([
+                'event_id' => $event['event_id'],
+                'utterance_id' => $event['utterance_id'],
+                'playthrough_id' => $event['playthrough_id'],
+                'speaker_id' => $event['speaker_id'],
+                'speaker_kind' => 'npc',
+                'listener_id' => $npcId,
+                'addressed_listener_id' => $addressedId,
+                'listener_role' => 'overheard',
+            ]);
+            $restorePolicyStatus = prepareRestorePolicyRecipient(
+                $recipientEvent,
+                $row,
+                $store,
+                $recipientLog,
+                $restorePolicyFields
+            );
+            if ($restorePolicyStatus !== null) {
+                finishInfluenceRequest($restorePolicyStatus, $restorePolicyFields, $recipientLog);
+                $filteredAny = true;
+                continue;
+            }
+        }
         try {
             $preflight = inspectAckRecipient($recipientEvent, $row, $store, $identities, $playerName);
         } catch (Throwable) {
@@ -397,6 +439,9 @@ function evaluateOverhearingAck(
             $requestLog?->event('overhearing_audience_skipped', 'warning', [
                 'stage' => 'preflight', 'reason' => 'audience_cap_reached',
             ]);
+            if ($restorePolicy) {
+                return recordRestorePolicyPreflight($requestLog, $logFields, 'restore-policy-audience-cap', 'preflight', null, $event);
+            }
             return null;
         }
     }
@@ -406,6 +451,36 @@ function evaluateOverhearingAck(
         ]);
     }
     if ($eligibleExtras === []) {
+        if ($restorePolicy) {
+            $addressedEvent = $event + [
+                'listener_role' => 'addressed',
+                'addressed_listener_id' => $addressedId,
+                'addressed_listener_name' => $addressedName,
+            ];
+            $addressedFields = ['stage' => 'preflight', 'model_outcome' => 'not_called'];
+            $addressedLog = $requestLog?->fork([
+                'event_id' => $event['event_id'],
+                'utterance_id' => $event['utterance_id'],
+                'playthrough_id' => $event['playthrough_id'],
+                'speaker_id' => $event['speaker_id'],
+                'speaker_kind' => 'npc',
+                'listener_id' => $addressedId,
+                'addressed_listener_id' => $addressedId,
+                'listener_role' => 'addressed',
+            ]);
+            $addressedStatus = prepareRestorePolicyRecipient(
+                $addressedEvent,
+                $listener,
+                $store,
+                $addressedLog,
+                $addressedFields
+            );
+            if ($addressedStatus !== null) {
+                $logFields = array_merge($logFields, $addressedFields);
+                finishInfluenceRequest($addressedStatus, $addressedFields, $addressedLog);
+                return $addressedStatus;
+            }
+        }
         return null;
     }
     $addressedEvent = $event + [
@@ -413,13 +488,52 @@ function evaluateOverhearingAck(
         'addressed_listener_id' => $addressedId,
         'addressed_listener_name' => $addressedName,
     ];
-    try {
-        $addressedPreflight = inspectAckRecipient($event, $listener, $store, $identities, $playerName);
-    } catch (Throwable) {
-        $requestLog?->event('overhearing_audience_skipped', 'error', [
-            'stage' => 'preflight', 'reason' => 'addressed_preflight_failed',
-        ]);
-        return null;
+    $addressedPolicyFields = ['stage' => 'preflight', 'model_outcome' => 'not_called'];
+    $addressedPolicyLog = $restorePolicy ? $requestLog?->fork([
+        'event_id' => $event['event_id'],
+        'utterance_id' => $event['utterance_id'],
+        'playthrough_id' => $event['playthrough_id'],
+        'speaker_id' => $event['speaker_id'],
+        'speaker_kind' => 'npc',
+        'listener_id' => $addressedId,
+        'addressed_listener_id' => $addressedId,
+        'listener_role' => 'addressed',
+    ]) : null;
+    if ($restorePolicy) {
+        $restorePolicyStatus = prepareRestorePolicyRecipient(
+            $addressedEvent,
+            $listener,
+            $store,
+            $addressedPolicyLog,
+            $addressedPolicyFields
+        );
+        if ($restorePolicyStatus !== null) {
+            $addressedPreflight = [
+                'status' => $restorePolicyStatus,
+                'reason' => $addressedPolicyFields['reason'] ?? $restorePolicyStatus,
+                'commit_state' => $addressedPolicyFields['commit_state'] ?? null,
+                'committed' => $addressedPolicyFields['committed'] ?? null,
+            ];
+            $logFields = array_merge($logFields, $addressedPolicyFields);
+        } else {
+            try {
+                $addressedPreflight = inspectAckRecipient($addressedEvent, $listener, $store, $identities, $playerName);
+            } catch (Throwable) {
+                $requestLog?->event('overhearing_audience_skipped', 'error', [
+                    'stage' => 'preflight', 'reason' => 'addressed_preflight_failed',
+                ]);
+                return null;
+            }
+        }
+    } else {
+        try {
+            $addressedPreflight = inspectAckRecipient($event, $listener, $store, $identities, $playerName);
+        } catch (Throwable) {
+            $requestLog?->event('overhearing_audience_skipped', 'error', [
+                'stage' => 'preflight', 'reason' => 'addressed_preflight_failed',
+            ]);
+            return null;
+        }
     }
     $selected = [];
     if (($addressedPreflight['status'] ?? null) === 'eligible') {
@@ -495,7 +609,7 @@ function evaluateOverhearingAck(
         ]);
     }
     if (!$addressedSelected) {
-        $addressedLog = $requestLog?->fork([
+        $addressedLog = $addressedPolicyLog ?? $requestLog?->fork([
             'event_id' => $event['event_id'],
             'utterance_id' => $event['utterance_id'],
             'playthrough_id' => $event['playthrough_id'],
@@ -506,10 +620,17 @@ function evaluateOverhearingAck(
             'listener_role' => 'addressed',
             'connector_id' => $connectorId,
         ]);
-        finishInfluenceRequest($addressedStatus, [
+        $addressedFinishFields = [
             'stage' => 'preflight', 'model_outcome' => 'not_called',
             'reason' => $addressedReason,
-        ], $addressedLog);
+        ];
+        if (is_string($addressedPreflight['commit_state'] ?? null)) {
+            $addressedFinishFields['commit_state'] = $addressedPreflight['commit_state'];
+        }
+        if (($addressedPreflight['committed'] ?? null) === true) {
+            $addressedFinishFields['committed'] = true;
+        }
+        finishInfluenceRequest($addressedStatus, $addressedFinishFields, $addressedLog);
     }
     $finishBatch = static function (string $primaryStatus, array $primaryFields) use (
         &$logFields,
@@ -849,10 +970,7 @@ function evaluateInfluenceRequest(
         ) {
             return 'routing-helpers-unavailable';
         }
-        if (filter_var($GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
-            return 'restore-policy';
-        }
-
+        $dedupeCheckedBeforeBatch = false;
         if ($playerInputInsert !== null) {
             $logFields['stage'] = 'correlation';
             $profile = $store->activePlaythrough();
@@ -967,12 +1085,6 @@ function evaluateInfluenceRequest(
             }
             $canonicalRelationshipsValidated = true;
 
-            $dedupeReason = null;
-            if (eventAlreadyProcessed($listener, $profile['id'], $source['event_id'], $source['utterance_id'], $dedupeReason)) {
-                $logFields['reason'] = $dedupeReason ?? 'duplicate';
-                return 'duplicate';
-            }
-
             $speaker = [];
             $event = [
                 'utterance_id' => $source['utterance_id'],
@@ -995,6 +1107,22 @@ function evaluateInfluenceRequest(
                 'source_sess' => $source['source_sess'],
                 'source_people' => $source['source_people'],
             ];
+            $restorePolicyInitEventId = null;
+            $boundaryStatus = captureRestorePolicyEventBoundary(
+                $store,
+                [$source['event_id']],
+                $gameRequest,
+                true,
+                $requestLog,
+                $logFields,
+                $restorePolicyInitEventId
+            );
+            if ($boundaryStatus !== null) {
+                return $boundaryStatus;
+            }
+            if (is_int($restorePolicyInitEventId)) {
+                $event['restore_policy_init_event_id'] = $restorePolicyInitEventId;
+            }
         } else {
             $raw = $gameRequest[3] ?? null;
             if (!is_string($raw)) {
@@ -1133,6 +1261,30 @@ function evaluateInfluenceRequest(
                 'player_name' => $playerName,
                 'source_data' => $sourceData,
             ];
+            $restorePolicyInitEventId = null;
+            $boundaryStatus = captureRestorePolicyEventBoundary(
+                $store,
+                [$source['event_id']],
+                $gameRequest,
+                false,
+                $requestLog,
+                $logFields,
+                $restorePolicyInitEventId
+            );
+            if ($boundaryStatus !== null) {
+                return $boundaryStatus;
+            }
+            if (is_int($restorePolicyInitEventId)) {
+                $event['restore_policy_init_event_id'] = $restorePolicyInitEventId;
+            }
+            if (!mindPoisoningRestorePolicyEnabled()) {
+                $dedupeReason = null;
+                if (eventAlreadyProcessed($listener, $event['playthrough_id'], $event['event_id'], $event['utterance_id'], $dedupeReason)) {
+                    $logFields['reason'] = $dedupeReason ?? 'duplicate';
+                    return 'duplicate';
+                }
+                $dedupeCheckedBeforeBatch = true;
+            }
             if ($overhearingRequested) {
                 $batchStatus = evaluateOverhearingAck(
                     $event,
@@ -1159,12 +1311,34 @@ function evaluateInfluenceRequest(
             if (!empty($listenerExtended->relationships_locked) || (int)($listener['lock_profile'] ?? 0) !== 0) {
                 return 'locked';
             }
-            $dedupeReason = null;
-            if (eventAlreadyProcessed($listener, $profile['id'], $source['event_id'], $utteranceId, $dedupeReason)) {
-                $logFields['reason'] = $dedupeReason ?? 'duplicate';
-                return 'duplicate';
-            }
         }
+
+        if (mindPoisoningRestorePolicyEnabled()) {
+            $restorePolicyStatus = prepareRestorePolicyRecipient($event, $listener, $store, $requestLog, $logFields);
+            if ($restorePolicyStatus !== null) {
+                return $restorePolicyStatus;
+            }
+            $listenerExtended = $listener['extended_data'] ?? null;
+            if (!$listenerExtended instanceof \stdClass) {
+                $logFields['reason'] = 'listener_extended_data_invalid';
+                return 'listener-invalid';
+            }
+            $relationshipValue = property_exists($listenerExtended, 'relationships')
+                ? $listenerExtended->relationships
+                : new \stdClass();
+            $storedRelationships = storedRelationshipMap($relationshipValue);
+            if (!is_array($storedRelationships)) {
+                $logFields['reason'] = 'listener_relationships_invalid';
+                return 'listener-invalid';
+            }
+            $canonicalRelationshipsValidated = false;
+        }
+        $dedupeReason = null;
+        if (!$dedupeCheckedBeforeBatch && eventAlreadyProcessed($listener, $event['playthrough_id'], $event['event_id'], $event['utterance_id'], $dedupeReason)) {
+            $logFields['reason'] = $dedupeReason ?? 'duplicate';
+            return 'duplicate';
+        }
+
         $subjects = findSubjects($event, $identities, $playerName);
         $logFields['subject_count'] = count($subjects);
         if (count($subjects) > 8) {

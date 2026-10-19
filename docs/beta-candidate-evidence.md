@@ -1,6 +1,6 @@
-# Mind Poisoning 0.1.23 BETA CANDIDATE — evidence and limits
+# Mind Poisoning 0.1.25 BETA CANDIDATE — evidence and limits
 
-The 0.1.23 release uses standard GitHub classification (`prerelease=false`) to retain CHIM topic-discovery eligibility. Its release text and package metadata label it **BETA CANDIDATE**; standard classification is not a beta graduation. This page records isolated source checks and earlier-version campaigns, not validation of the 0.1.23 package.
+The 0.1.25 candidate keeps the **BETA CANDIDATE** label. Standard GitHub classification (`prerelease=false`) supports CHIM topic discovery; it is not a maturity promotion. This page combines bounded 0.1.25 compatibility evidence with explicitly historical checks for earlier versions. Source and native fixture results do not establish a published installer, provider, or gameplay outcome.
 
 ## Completed disposable checks from 0.1.20
 
@@ -40,7 +40,7 @@ These snippets are untrusted hints that may be stale, incomplete, truncated, or 
 
 The focused `relationship_context_test.php`, `relationship_type_judgments_test.php`, `influence_test.php`, `reflection_test.php`, and `overhearing_test.php` checks passed with the standalone Windows PHP CLI; targeted syntax checks also passed. These isolated tests do not call a provider or database. No provider evaluation, live database persistence, installed 0.1.23 package, or gameplay result is claimed. The prior context-comparison design is not treated as proof of the final 0.1.23 prompts or model behavior; see the [verification summary](verification-v0.1.23.md) for the exact boundary.
 
-## Remaining before a scoped beta
+## Historical 0.1.23 follow-up criteria
 
 - **B2:** Add an NPC-to-NPC conversation about a named third person with independent review of the actual NPC utterance, a core-editor/history crosscheck, and recorded current-candidate lock/scope/On-Off and save/load checks. Existing zero and older lock/off observations remain valid within their recorded scope; current-candidate checks are unrecorded, not failed.
 - **B3:** Complete a cold 0.1.23 install or upgrade on the chosen supported route, checking installed-file/version hashes and CHIM/client versions. The passed B1 0.1.20 native PostgreSQL campaign (10 scenarios) and B3 0.1.20 server install/upgrade/dashboard/recovery campaign (9 scenarios) remain valid and do not need repeating; they do not validate a 0.1.23 package.
@@ -55,3 +55,11 @@ Version 0.1.24 adds explanatory text for `restore-policy` in the dashboard’s *
 Use the recorded **Outcome**, `stage`, and `model_outcome` together. A preflight `not_called` result stopped before model work; the persistence backstop can reject after model work. In the inspected restore path, CHIM can retain newer relationship values while restoring older Mind Poisoning processing history (the deduplication ledger), risking a repeated effect. `restore-policy` describes the recorded event; it does not establish the current effective setting. Do not toggle it blindly: ask the CHIM administrator to review the policy and back up the database/configuration before any change.
 
 The dashboard render check, PHP syntax checks, `manifest_update_check`, `site_runtime_compatibility`, and all eight packaging cases passed for the staged 0.1.24 source; all four candidate installer assets were built and verified locally. The standalone Windows PHP fixtures used `-n`, `mbstring`, and `pgsql` and made no network, database, or provider calls. Clean-tag rebuild and downloaded-asset byte comparison are separate publication gates; the staged-source checks do not establish installed-package behavior, provider behavior, database persistence, or gameplay. The 0.1.23 focused checks and 0.1.20 B1/B3 campaigns remain historical evidence for their recorded scope; they do not verify 0.1.24.
+
+## 0.1.25 preserve-mode compatibility
+
+The 0.1.25 candidate adds an INIT source-row fence and a mismatched-scope baseline when CHIM's effective `NEVER_CLEAR_RELATIONSHIP_DATA` policy is enabled. A baseline preserves loaded relationship values, advances the MP floor to the current maximum event row, clears imported MP event/judgment/reflection context, and skips its triggering event. It can expire already-inserted pending source rows. For a matching loaded scope, the plugin does not replace the namespace with a baseline, but CHIM may have restored an older MP ledger; the separate INIT fence expires source rows from before the load. The disabled-policy path is unchanged. New event IDs are new input, not semantic duplicates.
+
+Focused Windows fixtures passed for ACK, Player input, reflection v2, overhearing boundaries and per-recipient baseline, policy changes, PostgreSQL-shaped string NPC IDs, and dashboard reason rendering. A bounded native fixture also passed against pinned CHIM 3.5.1 revision `57f292415b008cfaf1a4531f0654d2563362ce70`, using a disposable PostgreSQL 15.14 database and PHP 8.2.29. It exercised the actual pinned INIT pruning and NPC-restore order, production store boundaries, synthetic writes and exact retry, a method-level store/INIT lock ordering case, baseline and rollback, and a dump/restore projection. The store committed event 3005 and classified its retry as duplicate; the method-level ordering case kept the relationship delta/receipt while INIT waited; the baseline projection matched after dump/restore.
+
+The native fixture was not a full ACK request. It made no provider/model call and does not establish full concurrent-ACK behavior, broad crash/race handling, multi-host serialization, client retry behavior, installed package behavior, or gameplay. The exact setting label, UI location, and default remain unverified. Source/package-export, clean-tag rebuild, and publication-byte checks are separate release gates. The candidate remains **BETA CANDIDATE**.

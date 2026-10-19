@@ -53,6 +53,18 @@ $interactions = [
         'reason' => '<custom_reason>',
         'changes' => [],
     ],
+    [
+        'timestamp' => '2026-10-18T16:42:07Z',
+        'event_id' => '44',
+        'utterance_id' => 'utt_init01',
+        'request_id' => 'init-boundary',
+        'playthrough_id' => '17',
+        'speaker' => 'Speaker',
+        'listener' => 'Listener',
+        'outcome' => 'skipped',
+        'reason' => 'restore-policy-source-before-init',
+        'changes' => [],
+    ],
 ];
 $records = [
     [
@@ -85,6 +97,15 @@ $records = [
         'outcome' => 'failed',
         'reason' => '<custom_reason>',
     ],
+    [
+        'timestamp' => '2026-10-18T16:42:07Z',
+        'request_id' => 'init-boundary',
+        'level' => 'warning',
+        'event' => 'persistence_finished',
+        'stage' => 'persistence',
+        'outcome' => 'skipped',
+        'persistence_reason' => 'restore-policy-source-before-init',
+    ],
 ];
 $model = [
     'version' => '0.1.23',
@@ -97,8 +118,9 @@ $originalModel = $model;
 $interactionHtml = dashboardRestorePolicyRender($model, ['tab' => 'interactions']);
 $interactionExplanations = dashboardRestorePolicyExplanations($interactionHtml);
 dashboardRestorePolicyAssert(
-    count($interactionExplanations) === 1
+    count($interactionExplanations) === 2
         && str_contains($interactionHtml, '<code>restore-policy</code>')
+        && str_contains($interactionHtml, '<code>restore-policy-source-before-init</code>')
         && str_contains($interactionHtml, '<code>&lt;custom_reason&gt;</code>')
         && !str_contains($interactionHtml, '<custom_reason>'),
     'Interactions must explain the historical restore-policy reason, preserve its raw code, and keep other reasons escaped.'
@@ -109,16 +131,25 @@ $originalFilters = $filters;
 $logsHtml = dashboardRestorePolicyRender($model, $filters);
 $logExplanations = dashboardRestorePolicyExplanations($logsHtml);
 dashboardRestorePolicyAssert(
-    count($logExplanations) === 2
+    count($logExplanations) === 3
         && $interactionExplanations[0] === $logExplanations[0]
         && $logExplanations[0] === $logExplanations[1]
+        && $interactionExplanations[1] === $logExplanations[2]
         && substr_count($logsHtml, '<code>restore-policy</code>') === 2
+        && str_contains($logsHtml, '<code>restore-policy-source-before-init</code>')
         && str_contains($logsHtml, '<code>&lt;custom_reason&gt;</code>')
         && str_contains($logsHtml, '<span class="status status--success">Info</span>')
         && str_contains($logsHtml, '<span class="status status--warning">Warning</span>')
         && str_contains($logsHtml, '<span class="status status--error">Error</span>')
         && str_contains($logsHtml, 'dashboard.php?tab=diagnostics&amp;theme=night&amp;q=restore-policy&amp;outcome=failed&amp;level=warning&amp;download=1'),
     'Logs must explain both primary and persistence-only restore reasons while retaining status, level, escaping, and filtered export.'
+);
+$sourceBoundaryExplanation = $interactionExplanations[1];
+dashboardRestorePolicyAssert(
+    str_contains($sourceBoundaryExplanation, 'latest CHIM INIT boundary')
+        && str_contains($sourceBoundaryExplanation, 'Older pending sources can expire')
+        && str_contains($sourceBoundaryExplanation, 'no affinity change is implied'),
+    'Both tabs must explain the new INIT-boundary reason without claiming an affinity change.'
 );
 $explanation = $interactionExplanations[0];
 $hasHistoricalScope = str_contains($explanation, 'At this recorded event')

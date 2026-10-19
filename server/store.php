@@ -42,6 +42,17 @@ interface WitnessSnapshotStoreDb
     public function eventByIdWithPeople(int $eventId, string $utteranceId): ?array;
 }
 
+/** Optional state and process barrier used only when core preserves relationships across INIT. */
+interface RestorePolicyStoreDb
+{
+    /** @return array{latest_init_event_id: int, max_event_id: int}|null */
+    public function restoreEventBounds(): ?array;
+    public function acquireRestorePolicyBarrier(): bool;
+    public function releaseRestorePolicyBarrier(): void;
+}
+
+require_once __DIR__ . '/restore_policy.php';
+
 function resolvePlaythroughContext(array $profileRows, mixed $playerName): ?array
 {
     $name = static fn(mixed $value): string => is_string($value) ? trim($value) : '';
@@ -726,6 +737,9 @@ function persistJudgments(
     $cleanupFailed = false;
     $cleanupError = null;
     $cleanupReason = '';
+    $restorePolicyBarrierHeld = false;
+    $restorePolicyEnabled = false;
+    $restorePolicyInitId = $event['restore_policy_init_event_id'] ?? null;
     $status = 'failed';
     $reason = 'persistence-failed';
     $stage = 'validation';
@@ -760,8 +774,9 @@ function persistJudgments(
     ]);
 
     try {
-        if (filter_var($GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
-            return $done('restore-policy', 'restore-policy');
+        $restorePolicyEnabled = filter_var($GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        if (!$restorePolicyEnabled && array_key_exists('restore_policy_init_event_id', $event)) {
+            return $done('restore-policy', 'restore-policy-changed');
         }
         if (
             !is_int($event['event_id'] ?? null) || $event['event_id'] < 1
@@ -840,6 +855,37 @@ function persistJudgments(
             ], $replySources)
             : [['event_id' => $event['event_id'], 'utterance_id' => $event['utterance_id']]];
 
+        if ($restorePolicyEnabled) {
+            if (!$store instanceof RestorePolicyStoreDb) {
+                return $done('restore-policy', 'restore-policy-store-unavailable');
+            }
+            if (!is_int($restorePolicyInitId) || $restorePolicyInitId < 1) {
+                return $done('restore-policy', 'restore-policy-boundary-unavailable');
+            }
+            foreach ($coveredEvents as $coveredEvent) {
+                if (!sourceIsAfterRestoreBoundary($coveredEvent['event_id'], $restorePolicyInitId)) {
+                    return $done('restore-policy', 'restore-policy-source-before-init');
+                }
+            }
+            try {
+                if (!$store->acquireRestorePolicyBarrier()) {
+                    return $done('restore-policy', 'restore-policy-lock-unavailable');
+                }
+            } catch (Throwable) {
+                return $done('restore-policy', 'restore-policy-lock-unavailable');
+            }
+            $restorePolicyBarrierHeld = true;
+            $bounds = $store->restoreEventBounds();
+            if (!restorePolicyBoundsMatch($bounds, $restorePolicyInitId)) {
+                return $done('stale', 'restore-policy-init-changed');
+            }
+            foreach ($coveredEvents as $coveredEvent) {
+                if ($coveredEvent['event_id'] > $bounds['max_event_id']) {
+                    return $done('stale', 'restore-policy-source-unavailable');
+                }
+            }
+        }
+
         if (!is_int($ownerId) || $ownerId < 1) {
             return $done('invalid', 'invalid-opinion-owner');
         }
@@ -863,6 +909,18 @@ function persistJudgments(
             || !sameEvent($event, $currentEvent)
         ) {
             return $done('stale', 'event-stale');
+        }
+        if ($restorePolicyEnabled) {
+            $bounds = $store instanceof RestorePolicyStoreDb ? $store->restoreEventBounds() : null;
+            if (!restorePolicyBoundsMatch($bounds, $restorePolicyInitId)) {
+                return $done('stale', 'restore-policy-init-changed');
+            }
+            foreach ($coveredEvents as $coveredEvent) {
+                if (!sourceIsAfterRestoreBoundary($coveredEvent['event_id'], $restorePolicyInitId)
+                    || $coveredEvent['event_id'] > $bounds['max_event_id']) {
+                    return $done('stale', 'restore-policy-source-unavailable');
+                }
+            }
         }
         if ($reflection) {
             try {
@@ -1116,6 +1174,9 @@ function persistJudgments(
         if ($pluginNamespace === null) {
             return $done('invalid', 'ledger-invalid');
         }
+        if ($restorePolicyEnabled && $pluginNamespace !== [] && $pluginNamespace['playthrough_id'] !== $event['playthrough_id']) {
+            return $done('restore-policy', 'restore-policy-baseline-required');
+        }
         if ($pluginNamespace !== [] && $pluginNamespace['playthrough_id'] === $event['playthrough_id']) {
             foreach ($coveredEvents as $coveredEvent) {
                 if ($coveredEvent['event_id'] <= $pluginNamespace['floor_event_id']) {
@@ -1218,19 +1279,38 @@ function persistJudgments(
         return $done('failed', $stage . '-failed');
     } finally {
         if ($cleanupRequired) {
-            try {
-                if (!$committed) {
-                    $cleanupStage = 'rollback';
+            if (!$committed) {
+                $cleanupStage = 'rollback';
+                try {
                     $store->rollback();
+                } catch (Throwable $error) {
+                    $cleanupFailed = true;
+                    $cleanupError ??= $error;
+                    $cleanupReason = $cleanupStage . '-failed';
+                    $status = 'failed';
+                    $reason = $cleanupReason;
                 }
-                $cleanupStage = 'release';
+            }
+            $cleanupStage = 'release';
+            try {
                 $store->release();
             } catch (Throwable $error) {
                 $cleanupFailed = true;
-                $cleanupError = $error;
-                $cleanupReason = $cleanupStage . '-failed';
+                $cleanupError ??= $error;
+                if ($cleanupReason === '') {
+                    $cleanupReason = $cleanupStage . '-failed';
+                }
                 $status = 'failed';
                 $reason = $cleanupReason;
+            }
+        }
+        if ($restorePolicyBarrierHeld) {
+            try {
+                $store->releaseRestorePolicyBarrier();
+            } catch (Throwable) {
+                $cleanupFailed = true;
+                $status = 'failed';
+                $reason = 'restore-policy-main-release-failed';
             }
         }
         if ($store instanceof PostgresStoreDb && $store->cleanupFailed()) {
@@ -1358,7 +1438,7 @@ function deliveryStateNotRegressed(mixed $expected, mixed $current): bool
         : ($expected === 'spoken' && $current === 'spoken');
 }
 
-final class PostgresStoreDb implements StoreDb, WitnessSnapshotStoreDb
+final class PostgresStoreDb implements StoreDb, WitnessSnapshotStoreDb, RestorePolicyStoreDb
 {
     private object $db;
     private ?RequestLog $requestLog;
@@ -1367,6 +1447,7 @@ final class PostgresStoreDb implements StoreDb, WitnessSnapshotStoreDb
     private bool $ownsAdvisoryLock = false;
     private bool $cleanupFailed = false;
     private int $advisoryKey = 0;
+    private bool $ownsRestorePolicyBarrier = false;
 
     public function __construct(?RequestLog $requestLog = null)
     {
@@ -1429,6 +1510,51 @@ final class PostgresStoreDb implements StoreDb, WitnessSnapshotStoreDb
             return null;
         }
         return resolvePlaythroughContext($profiles, $row['player_name']);
+    }
+
+    public function restoreEventBounds(): ?array
+    {
+        $row = $this->one(
+            "SELECT COALESCE((SELECT rowid FROM eventlog WHERE type = 'init' ORDER BY rowid DESC LIMIT 1), 0)::text AS latest_init_event_id,
+                    COALESCE((SELECT MAX(rowid) FROM eventlog), 0)::text AS max_event_id"
+        );
+        $initId = filter_var($row['latest_init_event_id'] ?? null, FILTER_VALIDATE_INT);
+        $maxId = filter_var($row['max_event_id'] ?? null, FILTER_VALIDATE_INT);
+        if ($initId === false || $initId < 0 || $maxId === false || $maxId < $initId) {
+            return null;
+        }
+        return ['latest_init_event_id' => $initId, 'max_event_id' => $maxId];
+    }
+
+    public function acquireRestorePolicyBarrier(): bool
+    {
+        if ($this->ownsRestorePolicyBarrier || !class_exists(\SemaphoreManager::class, false)) {
+            return false;
+        }
+        try {
+            if (!\SemaphoreManager::wait('MAIN', 0, 1003)) {
+                return false;
+            }
+        } catch (Throwable) {
+            return false;
+        }
+        $this->ownsRestorePolicyBarrier = true;
+        return true;
+    }
+
+    public function releaseRestorePolicyBarrier(): void
+    {
+        if (!$this->ownsRestorePolicyBarrier) {
+            return;
+        }
+        $this->ownsRestorePolicyBarrier = false;
+        try {
+            if (!\SemaphoreManager::release('MAIN')) {
+                $this->reportCleanupFailure('main-barrier-release', 'restore-policy-main-release-unconfirmed');
+            }
+        } catch (Throwable) {
+            $this->reportCleanupFailure('main-barrier-release', 'restore-policy-main-release-failed');
+        }
     }
 
     public function acknowledgedEvent(string $utteranceId): ?array

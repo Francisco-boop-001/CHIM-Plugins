@@ -34,12 +34,22 @@ function renderDashboard(array $model, array $filters): void
         return ($signed && $positive ? '+' : '') . $formatted;
     };
     $codeLabel = static fn(string $value): string => ucwords(str_replace(['-', '_'], ' ', $value));
-    $restorePolicyExplanation =
-        'At this recorded event, CHIM’s effective NEVER_CLEAR_RELATIONSHIP_DATA=true policy triggered Mind Poisoning’s restore-safety guard. '
-        . 'The guard protects against keeping newer relationship scores while restoring older Mind Poisoning processing history, which could let an already-applied event change a score again. '
-        . 'This reason may be recorded before model work or at the persistence backstop after validated model output. '
-        . 'Review the restore policy with the server administrator, and back up the database and configuration before any setting change; do not toggle it blindly. '
-        . 'This historical record does not establish the setting’s current value.';
+    $restorePolicyExplanation = static function (string $reason): string {
+        if ($reason === 'restore-policy') {
+            return 'At this recorded event, CHIM’s effective NEVER_CLEAR_RELATIONSHIP_DATA=true policy triggered Mind Poisoning’s restore-safety guard. '
+                . 'The guard protects against keeping newer relationship scores while restoring older Mind Poisoning processing history, which could let an already-applied event change a score again. '
+                . 'This reason may be recorded before model work or at the persistence backstop after validated model output. '
+                . 'Review the restore policy with the server administrator, and back up the database and configuration before any setting change; do not toggle it blindly. '
+                . 'This historical record does not establish the setting’s current value.';
+        }
+        return match ($reason) {
+            'restore-policy-source-before-init' => 'This source is at or before the latest CHIM INIT boundary and was skipped. Older pending sources can expire at that boundary; no affinity change is implied.',
+            'restore-policy-scope-baselined' => 'Mind Poisoning saved a fresh processing-history baseline and skipped the triggering event. Existing relationship values were retained; no affinity change was applied.',
+            'restore-policy-init-changed' => 'The CHIM INIT boundary changed before persistence, so the write was refused. Model work may already have run.',
+            'restore-policy-changed' => 'The effective preserve-on-reload setting changed before persistence, so the write was refused. Model work may already have run; this record does not show the current setting.',
+            default => 'This request stopped at a preserve-on-reload safety check. Check the recorded stage, reason, model outcome, and commit state to see what was reached.',
+        };
+    };
     $currentTypeDisplay = static function (mixed $value, mixed $state) use ($escape): string {
         return match (is_string($state) ? $state : '') {
             'set' => $escape($value),
@@ -305,8 +315,8 @@ function renderDashboard(array $model, array $filters): void
                                 </p>
                                 <?php if (is_string($interaction['reason'] ?? null) && $interaction['reason'] !== ''): ?>
                                     <p class="reason-line">Reason <code><?= $escape($interaction['reason']) ?></code></p>
-                                    <?php if ($interaction['reason'] === 'restore-policy'): ?>
-                                        <p class="reason-explanation"><?= $escape($restorePolicyExplanation) ?></p>
+                                    <?php if (is_string($interaction['reason']) && str_starts_with($interaction['reason'], 'restore-policy')): ?>
+                                        <p class="reason-explanation"><?= $escape($restorePolicyExplanation($interaction['reason'])) ?></p>
                                     <?php endif; ?>
                                 <?php endif; ?>
 
@@ -515,8 +525,8 @@ function renderDashboard(array $model, array $filters): void
                                     <?php endforeach; ?>
                                     <div><dt>Commit state</dt><dd><?= $escape($text($record['commit_state'] ?? null)) ?></dd></div>
                                 </dl>
-                                <?php if ($recordReason === 'restore-policy'): ?>
-                                    <p class="reason-explanation"><?= $escape($restorePolicyExplanation) ?></p>
+                                <?php if (is_string($recordReason) && str_starts_with($recordReason, 'restore-policy')): ?>
+                                    <p class="reason-explanation"><?= $escape($restorePolicyExplanation($recordReason)) ?></p>
                                 <?php endif; ?>
                                 <pre class="record-json"><code><?= $escape(is_string($recordJson) ? $recordJson : '{}') ?></code></pre>
                             </details>

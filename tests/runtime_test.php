@@ -2022,10 +2022,13 @@ same(0, $modelCalls, 'Locked listener must not call the model.');
 
 [$event, $subjects, $judgments, $db] = baseFixture();
 $GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'] = true;
+$GLOBALS['all_fast_commands'] = ['_speech', 'request'];
 $modelCalls = 0;
-same('restore-policy', handleSpeechAck($ack, $db, $model), 'Relationship-preserving restore mode must skip before model evaluation.');
+$restorePolicyRecords = [];
+same('failed', handleSpeechAck($ack, $db, $model, captureRequestLog($restorePolicyRecords)), 'Restore mode must fail closed when the legacy fake lacks the optional event-boundary store capability.');
 same(0, $modelCalls, 'Restore-policy gate must not call the model.');
-unset($GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA']);
+same('restore-policy-store-unavailable', lastRequestSummary($restorePolicyRecords)['reason'] ?? null, 'The legacy fake refusal should report its missing restore-boundary capability.');
+unset($GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'], $GLOBALS['all_fast_commands']);
 
 [$event, $subjects, $judgments, $db] = baseFixture();
 $GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'] = 'false';
@@ -2044,7 +2047,7 @@ same([], $db->history, 'Invalid model output must not snapshot or persist.');
 
 $GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA'] = true;
 [$event, $subjects, $judgments, $db] = baseFixture();
-same('restore-policy', persistJudgments($event, $subjects, $judgments, $db), 'Unsafe relationship-preserving restore policy must fail closed.');
+same('restore-policy', persistJudgments($event, $subjects, $judgments, $db), 'Persistence must refuse restore-mode writes when the legacy fake lacks the optional event-boundary store capability.');
 same(0, $db->beginCalls, 'Restore-policy rejection must happen before transaction begin.');
 unset($GLOBALS['NEVER_CLEAR_RELATIONSHIP_DATA']);
 
