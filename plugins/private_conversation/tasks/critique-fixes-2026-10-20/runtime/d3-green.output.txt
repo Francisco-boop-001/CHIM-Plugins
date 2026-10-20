@@ -1,0 +1,1 @@
+PASS: backward clock refusals remain valid and END recovers corrupt state

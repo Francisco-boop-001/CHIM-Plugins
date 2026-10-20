@@ -220,6 +220,8 @@ if (!pcv_log_set_test_directory($logTestDirectory)) {
     exit(1);
 }
 register_shutdown_function(static function () use ($logTestDirectory, $hookFixtureDirectory): void {
+    // Flush the logger's registered terminal observer before its isolated directory is removed.
+    pcv_log_shutdown_terminal();
     $directory = realpath($logTestDirectory);
     $tempRoot = realpath(sys_get_temp_dir());
     if ($directory === false || $tempRoot === false || !pcv_log_path_is_within($directory, $tempRoot)
@@ -521,6 +523,7 @@ try {
         && str_contains((string)($GLOBALS['responseTemplate']['listener'] ?? ''), '"Bryn"')
         && ($GLOBALS['RECHAT_MODE'] ?? null) === 'tight',
         'The response hook did not constrain listener routing to the pair counterpart.');
+    // Legacy-only <actions> compatibility cleanup. D1's core-shaped <available_actions_list> is tested separately.
     $GLOBALS['head'] = [
         ['role' => 'system', 'content' => "<actions>Travel_To</actions>\n" . $GLOBALS['PROMPT_NEARBY_SECTIONS']],
         ['role' => 'user', 'content' => 'Player previous history remains intact.'],
@@ -529,7 +532,7 @@ try {
     scopeCheck(!str_contains($GLOBALS['head'][0]['content'], '<actions>')
         && str_contains($GLOBALS['head'][0]['content'], 'Aela')
         && ($GLOBALS['head'][1]['content'] ?? null) === 'Player previous history remains intact.',
-        'The final context hook did not remove only action instructions and preserve history.');
+        'The final context hook did not remove the legacy-only action block while preserving context and history.');
     $GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] = true;
     include $hookDir . '/prepostrequest.php';
     scopeCheck(($GLOBALS['RELATIONSHIP_SYSTEM_ENABLED'] ?? null) === true,
@@ -644,6 +647,7 @@ try {
     scopeCheck(($GLOBALS['RECHAT_MODE'] ?? null) === 'tight'
         && ($GLOBALS['RECHAT_PREVIOUS_SPEAKER'] ?? null) === 'Aela',
         'Strict pair rechat was not constrained to the selected counterpart.');
+    // Legacy-only synthetic <actions> cleanup; the D1 core tag is exercised by its dedicated fixture.
     $GLOBALS['head'] = [['role' => 'system', 'content' => $GLOBALS['PROMPT_NEARBY_SECTIONS'] . "\n<actions>Talk</actions>"]];
     include $hookDir . '/context.php';
     $rechatPrepared = array_values(array_filter(scopeCheckLogEntries(), static fn(array $entry): bool => ($entry['event'] ?? null) === 'routing.request_prepared' && ($entry['context']['route'] ?? null) === 'rechat_clamped'));
@@ -666,6 +670,7 @@ try {
     scopeCheck(($GLOBALS['RECHAT_PREVIOUS_SPEAKER'] ?? null) === 'Bryn'
         && str_contains((string)($GLOBALS['PROMPT_NEARBY_SECTIONS'] ?? ''), 'player is included'),
         'Player-included pair continuation lost its selected previous speaker or participant context.');
+    // Legacy-only synthetic <actions> cleanup; this is not core-tag behavior evidence.
     $GLOBALS['head'] = [['role' => 'system', 'content' => $GLOBALS['PROMPT_NEARBY_SECTIONS'] . "\n<actions>Talk</actions>"]];
     include $hookDir . '/context.php';
 

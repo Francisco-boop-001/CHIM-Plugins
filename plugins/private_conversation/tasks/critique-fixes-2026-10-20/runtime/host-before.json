@@ -1,0 +1,13 @@
+{
+  "recorded_at_utc": "2026-10-20T10:01:52.5938313Z",
+  "owner": "PCV confirmed critique fixes",
+  "authorized_distro": "DwemerAI4Skyrim3-test",
+  "coordination": "MP runtime-release.json PASS and direct released-window report; Windows management shows both CHIM distros stopped",
+  "gaming_vhd": {
+    "FullName": "D:\\DwemerAI4Skyrim3\\ext4.vhdx",
+    "Length": 157550641152,
+    "LastWriteTimeUtc": "2026-10-19T23:04:40.9907162Z"
+  },
+  "wsl_status": "  NAME                     STATE           VERSION\r\n\r\n* kali-linux               Running         2\r\n\r\n  docker-desktop           Stopped         2\r\n\r\n  DwemerAI4Skyrim3         Stopped         2\r\n\r\n  DwemerAI4Skyrim3-test    Stopped         2\r\n\r\n\r\n",
+  "source_commit": "a7c7a418fc6a32aaec5d718dc6f3bb39216eb8b8"
+}

@@ -1,0 +1,1 @@
+FAIL: the first refusal timestamp must be clamped to activated_at when the wall clock is behind

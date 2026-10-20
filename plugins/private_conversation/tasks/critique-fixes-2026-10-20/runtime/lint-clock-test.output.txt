@@ -1,0 +1,1 @@
+No syntax errors detected in tests/state_clock_regression_check.php

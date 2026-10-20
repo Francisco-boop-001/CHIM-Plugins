@@ -1,0 +1,1 @@
+No syntax errors detected in tests/scope_check.php

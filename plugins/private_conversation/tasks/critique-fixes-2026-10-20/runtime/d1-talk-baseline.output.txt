@@ -1,0 +1,2 @@
+PASS D1 talk-only: captured and rebuilt available-actions text remains empty.
+Private Conversation logger: directory_unavailable request_id=52215c5f-68a7-4ee0-af9d-4cd084222695 config_id=123e4567-e89b-42d3-a456-426614174000

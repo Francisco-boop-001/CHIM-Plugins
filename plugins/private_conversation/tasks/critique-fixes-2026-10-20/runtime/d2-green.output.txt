@@ -1,0 +1,7 @@
+PASS: actual page GET read failure returns a matching reference and suppresses page-open.
+PASS: valid concurrent readback stays accepted with its staged config ID and renders the current state.
+PASS: unavailable readback reports operation=readback, retains staged ID, and says it could not be confirmed.
+PASS: refresh GET rereads eligibility without staging, logging page-open, or holding the session lock.
+PASS: picker uses the helper map, disables ARM below two, and distinguishes empty/missing/stale.
+PASS: stale/single-actor POSTs reject without staging; END succeeds when catalog loading fails.
+PASS: solo POST stages with one eligible actor, ignores submitted actor B, and forces player exclusion.

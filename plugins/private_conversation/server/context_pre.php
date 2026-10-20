@@ -129,6 +129,12 @@ if (is_array($actionSchema) && array_key_exists('enum', $actionSchema)) {
     }
 }
 
+// main.php captured this string before context_pre; use CHIM's validated scene-filtered rebuild for final prompt formatting.
+if ($actionsOn) {
+    $rebuiltActions = $GLOBALS['PROMPT_ACTIONS_LIST'] ?? '';
+    $GLOBALS['actionsList'] = is_string($rebuiltActions) ? $rebuiltActions : '';
+}
+
 $GLOBALS['FUNCTIONS_ARE_ENABLED'] = $actionsOn;
 $routing = pcvScopeRoutingSnapshot([], $scope, $playerName);
 $GLOBALS['CACHE_PEOPLE'] = $routing['audience'];

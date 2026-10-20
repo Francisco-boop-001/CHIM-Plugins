@@ -597,7 +597,8 @@ function pcv_valid_stored_state(array $state): bool
 
     if (array_key_exists('last_end', $state)) {
         $lastEnd = $state['last_end'];
-        if (!is_array($lastEnd) || count($lastEnd) !== 2 || ($lastEnd['reason'] ?? null) !== 'members_gone'
+        if (!is_array($lastEnd) || count($lastEnd) !== 2
+            || !in_array($lastEnd['reason'] ?? null, ['members_gone', 'evidence_unavailable'], true)
             || !is_int($lastEnd['at'] ?? null) || $lastEnd['at'] < 1) {
             return false;
         }
@@ -1660,7 +1661,7 @@ function pcv_visible_state(array $state, int $now): array
     $pendingConfigId = $pendingScope !== null && pcv_valid_config_id($storedPendingConfigId)
         ? $storedPendingConfigId : null;
     $pending = $pendingScope !== null;
-    // 0.1.13: a scene that ended itself (members gone) is shown on the page for 30 minutes.
+    // 0.1.13: an automatically ended scene is shown on the page for 30 minutes.
     $lastEnd = $scope === null && is_array($state['last_end'] ?? null) && $now - $state['last_end']['at'] <= 1800
         ? $state['last_end'] : null;
     if ($lastEnd !== null) {
@@ -2296,6 +2297,7 @@ function pcv_begin_request(string $key, bool $eligible, ?string $stateDirectory 
         }
 
         $leftScene = null;
+        $autoEndReason = null;
         if (!is_array($blockedPending) && is_array($state['active'])) {
             $activeConfig = $state['active']['config'] ?? null;
             if (is_array($activeConfig) && ($activeConfig['enabled'] ?? null) === true) {
@@ -2312,9 +2314,11 @@ function pcv_begin_request(string $key, bool $eligible, ?string $stateDirectory 
                     if (is_int($refusedSince) && $now - $refusedSince >= PCV_ACTIVE_REFUSAL_END) {
                         $autoEnded = $state['active'];
                         $state['active'] = null;
-                        $state['last_end'] = ['reason' => 'members_gone', 'at' => $now];
+                        $autoEndReason = $allowActiveDrops && is_array($activeEligibleNpcMap ?? $eligibleNpcMap)
+                            ? 'members_gone' : 'evidence_unavailable';
+                        $state['last_end'] = ['reason' => $autoEndReason, 'at' => $now];
                     } elseif (!is_int($refusedSince)) {
-                        $state['active']['refused_since'] = $now;
+                        $state['active']['refused_since'] = max($now, $state['active']['activated_at']);
                     }
                     $changed = true;
                 } elseif ($kept['dropped'] !== []) {
@@ -2374,7 +2378,8 @@ function pcv_begin_request(string $key, bool $eligible, ?string $stateDirectory 
         if (is_array($autoEnded)) {
             $endedId = $autoEnded['config_id'] ?? null;
             pcv_log_set_config_id(is_string($endedId) && pcv_log_valid_uuid($endedId) ? $endedId : null);
-            pcv_log_event('state.scope_ended', 'info', 'ok', 'members_gone', pcv_state_log_context(['enabled' => false] + $autoEnded['config']));
+            pcv_log_event('state.scope_ended', 'info', 'ok', $autoEndReason,
+                pcv_state_log_context(['enabled' => false] + $autoEnded['config']));
         }
         if (is_array($leftScene)) {
             pcv_log_set_config_id(is_string($leftScene['config_id']) && pcv_log_valid_uuid($leftScene['config_id']) ? $leftScene['config_id'] : null);

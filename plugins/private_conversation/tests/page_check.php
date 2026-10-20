@@ -66,6 +66,10 @@ declare(strict_types=1);
 
 function pcv_current_playthrough_key(): ?string { return 'fixture-playthrough'; }
 function pcv_current_player_name(): ?string { return 'Player'; }
+function pcv_valid_scene_card($card): bool
+{
+    return !in_array($GLOBALS['pcv_page_scenario'], ['post_multiline_card', 'post_long_card'], true);
+}
 
 function pcv_read_eligible_npcs(?string $key, array $catalogRows, ?string $playerName, ?string $stateDirectory = null): array
 {
@@ -78,15 +82,16 @@ function pcv_read_eligible_npcs(?string $key, array $catalogRows, ?string $playe
     ];
     $status = match ($scenario) {
         'get_single', 'post_single', 'post_solo' => 'ready',
-        'get_empty' => 'empty',
+        'get_empty', 'get_end_members_gone' => 'empty',
         'get_missing' => 'missing',
+        'get_end_evidence_unavailable' => 'unavailable',
         'get_stale', 'post_stale' => 'stale',
         default => 'ready',
     };
     $known = match ($scenario) {
         'get_single', 'post_single', 'post_solo' => ['101' => 'Aela'],
         'post_stale' => [],
-        'get_empty', 'get_missing', 'get_stale' => [],
+        'get_empty', 'get_missing', 'get_stale', 'get_end_members_gone', 'get_end_evidence_unavailable' => [],
         default => ['101' => 'Aela', '202' => 'Bryn'],
     };
     return [
@@ -110,7 +115,15 @@ function pcv_read(string $key): array
         throw new RuntimeException('private state fixture details');
     }
 
-    if ($count > 1 && $scenario === 'post_readback_unavailable') {
+    if (in_array($scenario, ['get_end_members_gone', 'get_end_evidence_unavailable'], true)) {
+        $state = [
+            'status' => 'off', 'scope' => null, 'pending' => false,
+            'last_end' => [
+                'reason' => $scenario === 'get_end_members_gone' ? 'members_gone' : 'evidence_unavailable',
+                'at' => time(),
+            ],
+        ];
+    } elseif ($count > 1 && $scenario === 'post_readback_unavailable') {
         $state = ['status' => 'unavailable', 'scope' => null, 'pending' => false, 'config_id' => null, 'pending_config_id' => null];
     } elseif ($count > 1 && $scenario === 'post_readback_changed') {
         $state = [
@@ -216,25 +229,27 @@ define('PCV_UI_TEST', true);
 require_once __DIR__ . '/index.php';
 
 $_SERVER['REQUEST_METHOD'] = str_starts_with($scenario, 'get_') ? 'GET' : 'POST';
-$_POST = $_SERVER['REQUEST_METHOD'] === 'GET' ? [] : ($scenario === 'end_catalog_failure' ? [
-    'csrf' => str_repeat('a', 64),
-    'action' => 'end',
-] : ($scenario === 'post_solo' ? [
-    'csrf' => str_repeat('a', 64),
-    'action' => 'arm',
-    'scene_mode' => 'solo',
-    'actor_a' => '101',
-    'actor_b' => ['untrusted'],
-    'exclude_player' => '0',
-    'bystander_mode' => 'silent',
-] : [
+$basePost = [
     'csrf' => str_repeat('a', 64),
     'action' => 'arm',
     'actor_a' => '101',
     'actor_b' => '202',
     'exclude_player' => '1',
     'bystander_mode' => 'silent',
-]));
+];
+$post = match ($scenario) {
+    'end_catalog_failure' => ['csrf' => str_repeat('a', 64), 'action' => 'end'],
+    'post_solo' => [
+        'csrf' => str_repeat('a', 64), 'action' => 'arm', 'scene_mode' => 'solo', 'actor_a' => '101',
+        'actor_b' => ['untrusted'], 'exclude_player' => '0', 'bystander_mode' => 'silent',
+    ],
+    'post_multiline_card' => $basePost + ['card' => "two\nlines"],
+    'post_long_card' => $basePost + ['card' => str_repeat('x', 301)],
+    'post_unicode_card' => $basePost + ['card' => 'Café près de l’auberge — 🌙'],
+    'post_blank_card' => $basePost + ['card' => '   '],
+    default => $basePost,
+};
+$_POST = $_SERVER['REQUEST_METHOD'] === 'GET' ? [] : $post;
 $_GET = $scenario === 'get_refresh' ? ['refresh' => '1'] : [];
 ob_start();
 pcv_run_page();
@@ -260,7 +275,9 @@ PHP);
 
 $scenarios = [
     'get_read_failure', 'post_readback_changed', 'post_readback_unavailable',
-    'get_ready', 'get_refresh', 'get_single', 'get_empty', 'get_missing', 'get_stale', 'post_stale', 'post_single', 'post_solo', 'end_catalog_failure',
+    'get_ready', 'get_refresh', 'get_single', 'get_empty', 'get_missing', 'get_stale',
+    'get_end_members_gone', 'get_end_evidence_unavailable', 'post_stale', 'post_single',
+    'post_solo', 'post_multiline_card', 'post_long_card', 'post_unicode_card', 'post_blank_card', 'end_catalog_failure',
 ];
 try {
     $responses = [];
@@ -342,6 +359,19 @@ try {
         && !str_contains((string)$staleGet['body'], 'No qualifying CHIM presence report is cached'),
         'Unconfirmed fresh nearby and AI activity did not get a generic unknown notice.');
 
+    $membersGone = $responses['get_end_members_gone'];
+    pageCheck(($membersGone['status'] ?? null) === 200
+        && str_contains((string)$membersGone['body'], 'five minutes of consecutive failed eligibility checks')
+        && str_contains((string)$membersGone['body'], 'check that ended the scene found too few eligible NPCs')
+        && !str_contains((string)$membersGone['body'], 'were gone for five minutes'),
+        'The members-gone end must separate the refusal duration from the latest readable eligibility check.');
+    $evidenceUnavailable = $responses['get_end_evidence_unavailable'];
+    pageCheck(($evidenceUnavailable['status'] ?? null) === 200
+        && str_contains((string)$evidenceUnavailable['body'], 'five minutes of consecutive failed eligibility checks')
+        && str_contains((string)$evidenceUnavailable['body'], 'check that ended the scene could not verify eligibility')
+        && str_contains((string)$evidenceUnavailable['body'], 'current eligibility is unknown, not empty'),
+        'The evidence-unavailable end must explain the failed-check duration and the unreadable latest check.');
+
     foreach (['post_stale', 'post_single'] as $scenario) {
         $rejected = $responses[$scenario];
         $rejections = array_values(array_filter($rejected['entries'], static fn(array $entry): bool => ($entry['event'] ?? null) === 'ui.scope_stage_rejected'));
@@ -354,6 +384,30 @@ try {
     pageCheck(str_contains((string)$responses['post_stale']['body'], 'Fresh nearby and AI activity could not be confirmed; current eligibility is unknown')
         && str_contains((string)$responses['post_single']['body'], 'Pair mode requires two distinct nearby CHIM-AI-active characters'),
         'POST rejection did not distinguish stale from insufficient eligibility.');
+
+    foreach (['post_multiline_card' => "two\nlines", 'post_long_card' => str_repeat('x', 301)] as $scenario => $rawCard) {
+        $rejected = $responses[$scenario];
+        $rejections = array_values(array_filter($rejected['entries'], static fn(array $entry): bool =>
+            ($entry['event'] ?? null) === 'ui.scope_stage_rejected'));
+        $logJson = json_encode($rejected['entries'], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+        $rawCardLogValue = substr(json_encode($rawCard, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE), 1, -1);
+        pageCheck(($rejected['status'] ?? null) === 400 && ($rejected['stage_calls'] ?? null) === 0
+            && count($rejections) === 1 && ($rejections[0]['reason'] ?? null) === 'invalid_configuration'
+            && str_contains((string)$rejected['body'], 'The scene card must be one line of at most 300 characters.')
+            && !str_contains((string)$rejected['body'], 'NPC list is unavailable')
+            && !str_contains((string)$rejected['body'], $rawCard)
+            && !str_contains($logJson, $rawCardLogValue),
+            'An invalid scene card must be rejected as configuration before staging, with a useful notice and no raw input in logs.');
+    }
+
+    $unicodeCard = $responses['post_unicode_card'];
+    pageCheck(($unicodeCard['status'] ?? null) === 200 && ($unicodeCard['stage_calls'] ?? null) === 1
+        && ($unicodeCard['stage_desired']['card'] ?? null) === 'Café près de l’auberge — 🌙',
+        'A valid Unicode scene card must still stage unchanged.');
+    $blankCard = $responses['post_blank_card'];
+    pageCheck(($blankCard['status'] ?? null) === 200 && ($blankCard['stage_calls'] ?? null) === 1
+        && !array_key_exists('card', $blankCard['stage_desired'] ?? []),
+        'A blank scene card must still stage as an omitted optional value.');
 
     $solo = $responses['post_solo'];
     $soloAccepted = array_values(array_filter($solo['entries'], static fn(array $entry): bool =>

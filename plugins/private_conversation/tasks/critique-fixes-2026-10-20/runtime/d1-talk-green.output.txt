@@ -1,0 +1,1 @@
+PASS D1 talk-only: captured and rebuilt available-actions text remains empty.

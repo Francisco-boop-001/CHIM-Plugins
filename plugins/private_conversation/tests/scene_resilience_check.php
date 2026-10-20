@@ -2,12 +2,13 @@
 declare(strict_types=1);
 
 // 0.1.13 E4: unreadable presence evidence is logged and never drops members (the turn is refused instead).
-// 0.1.13 E5: an active scene refused for five minutes ends itself (members_gone); an accepted turn resets the clock.
+// 0.1.13 E5: five minutes of refusals ends the scene; the stored reason reflects the final eligibility check. An accepted turn resets the clock.
 
 define('PCV_LOG_TESTING', true);
 require_once dirname(__DIR__) . '/server/log.php';
 require_once dirname(__DIR__) . '/server/state.php';
 require_once dirname(__DIR__) . '/server/scope.php';
+require_once dirname(__DIR__) . '/server/log_reader.php';
 
 function resCheck(bool $condition, string $message): void
 {
@@ -87,9 +88,37 @@ try {
     pcv_begin_request($key, false, $stateDirectory, null, $known);
     resCheck(!isset(resStored($stateDirectory)['active']['refused_since']), 'An accepted turn clears the refusal clock.');
 
+    // E5: the timeout reason describes the final eligibility check, not the whole mixed refusal interval.
+    pcv_begin_request($key, false, $stateDirectory, null, ['404' => 'S'], 'wide_absent');
+    $stored = resStored($stateDirectory);
+    resCheck(($stored['active']['config']['actor_ids'] ?? null) === ['404', '505', '606'] && !isset($stored['active']['dropped']),
+        'An insufficient readable map refuses without dropping any group member.');
+    $stored['active']['activated_at'] = time() - 400;
+    $stored['active']['expires_at'] = $stored['active']['activated_at'] + PCV_ACTIVE_TTL;
+    $stored['active']['refused_since'] = time() - 301;
+    file_put_contents($stateDirectory . '/state.json', json_encode($stored, JSON_THROW_ON_ERROR));
+    resCheck(pcv_valid_stored_state(resStored($stateDirectory)), 'mixed refusal fixture remains valid.');
+    $r = pcv_begin_request($key, false, $stateDirectory, null, ['404' => 'S'], 'presence_error', null, false);
+    $stored = resStored($stateDirectory);
+    resCheck(($r['reason'] ?? null) === 'scene_not_eligible' && $stored['active'] === null,
+        'Five minutes of refusals still end the scene and refuse this input.');
+    resCheck(($stored['last_end']['reason'] ?? null) === 'evidence_unavailable',
+        'An unreadable final check ends with evidence_unavailable after a mixed refusal interval.');
+    resCheck(pcv_valid_stored_state($stored), 'evidence_unavailable is a valid stored end reason.');
+    resCheck((pcv_read($key, $stateDirectory)['last_end']['reason'] ?? null) === 'evidence_unavailable',
+        'pcv_read exposes the evidence_unavailable end reason.');
+
     $entries = array_values(array_filter(array_map(static fn($line) => json_decode($line, true), file($logDirectory . '/events.jsonl') ?: []), 'is_array'));
     $ended = array_values(array_filter($entries, static fn($e) => ($e['event'] ?? null) === 'state.scope_ended' && ($e['reason'] ?? null) === 'members_gone'));
     resCheck(count($ended) === 1, 'The automatic end is logged as state.scope_ended members_gone.');
+    $unavailableEnds = array_values(array_filter($entries, static fn($e) => ($e['event'] ?? null) === 'state.scope_ended'
+        && ($e['reason'] ?? null) === 'evidence_unavailable'));
+    resCheck(count($unavailableEnds) === 1, 'The unreadable final check is logged as state.scope_ended evidence_unavailable.');
+    $readback = pcv_diagnostics_read($logDirectory . '/events.jsonl', ['event' => 'state.scope_ended']);
+    $readbackReasons = array_column($readback['entries'] ?? [], 'reason');
+    resCheck(($readback['status'] ?? null) === 'ok' && count(array_filter($readbackReasons,
+        static fn($reason) => $reason === 'evidence_unavailable')) === 1,
+        'The diagnostics reader retains the evidence_unavailable end reason.');
     $readErrors = array_values(array_filter($entries, static fn($e) => ($e['event'] ?? null) === 'state.unavailable'
         && ($e['context']['operation'] ?? null) === 'presence_read'));
     resCheck(count($readErrors) >= 1, 'The unreadable report was logged.');

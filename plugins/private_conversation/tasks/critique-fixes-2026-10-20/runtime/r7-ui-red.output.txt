@@ -1,0 +1,6 @@
+
+Fatal error: Uncaught RuntimeException: The members-gone end must separate the refusal duration from the latest readable eligibility check. in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php:7
+Stack trace:
+#0 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php(363): pageCheck(false, 'The members-gon...')
+#1 {main}
+  thrown in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php on line 7

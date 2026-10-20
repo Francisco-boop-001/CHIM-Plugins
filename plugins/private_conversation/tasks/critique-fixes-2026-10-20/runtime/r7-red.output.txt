@@ -1,0 +1,3 @@
+in_scene={"known_npcs":[],"missing":{"404":"wide_unavailable","505":"wide_unavailable"},"error":true,"report_fresh":false}
+after_end={"active":null,"last_end":{"reason":"members_gone","at":1792490666}}
+FAIL: An unreadable final check ends with evidence_unavailable after a mixed refusal interval.

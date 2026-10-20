@@ -1,0 +1,45 @@
+{
+  "captured_at_utc": "2026-10-20T10:26:36.8568002Z",
+  "repository": "Francisco-boop-001/CHIM-PrivateConversation",
+  "source_base": "a7c7a418fc6a32aaec5d718dc6f3bb39216eb8b8",
+  "new_version": "0.1.22",
+  "protected_release": {
+    "id": 416033891,
+    "tag": "private_conversation-v0.1.21",
+    "name": "Private Conversation 0.1.21 — BETA",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "id": 651480345,
+        "name": "chim-plugin.tar.gz",
+        "size": 3053489,
+        "digest": "sha256:d2f8dfde43ab0cef03aeeb7a06b110c18378aa6f7e322d64975d6d4f5e9a5b55"
+      },
+      {
+        "id": 651480353,
+        "name": "private_conversation-0.1.21-mo2.zip",
+        "size": 3056680,
+        "digest": "sha256:8480d15479d0371a7e78979c809d698abf1fab35efb4ef98071ab9f9c811db5e"
+      },
+      {
+        "id": 651480343,
+        "name": "private_conversation-0.1.21.dwpkg",
+        "size": 3475089,
+        "digest": "sha256:0dd26c6387dcb880caadd410580d63945412f04ce3178505df136fce242eda94"
+      },
+      {
+        "id": 651480350,
+        "name": "private_conversation.tar.gz",
+        "size": 3053560,
+        "digest": "sha256:74629c0faa167143f4de7947862326a8465a9fc6058652dd07effdbd29943fe9"
+      },
+      {
+        "id": 651480347,
+        "name": "SHA256SUMS.txt",
+        "size": 381,
+        "digest": "sha256:d69825f0173ca5a87bb1ea8ba636b294455b9c915f329f678f5cb34e0f414697"
+      }
+    ]
+  }
+}

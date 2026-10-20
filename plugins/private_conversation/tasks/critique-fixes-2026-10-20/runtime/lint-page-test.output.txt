@@ -1,0 +1,1 @@
+No syntax errors detected in tests/page_check.php

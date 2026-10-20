@@ -1,0 +1,74 @@
+{
+  "recorded_at_utc": "2026-10-20T10:19:19.4698026Z",
+  "status": "REVIEW_REQUIRED",
+  "owner": "PCV confirmed critique fixes",
+  "released_distro": "DwemerAI4Skyrim3-test",
+  "remaining_native_runtime_work": "none planned",
+  "required_checks": [
+    "d1-green",
+    "d1-talk-green",
+    "actions-hook-green",
+    "scope-final-green",
+    "d2-green",
+    "r7-ui-green",
+    "card-validator-green",
+    "d3-green",
+    "r7-green",
+    "state-compat-green",
+    "lint-context-pre",
+    "lint-index",
+    "lint-log",
+    "lint-state",
+    "lint-clock-test",
+    "lint-page-test",
+    "lint-resilience-test",
+    "lint-d1-test",
+    "lint-scope-test"
+  ],
+  "tested_source": [
+    {
+      "path": "server/context_pre.php",
+      "sha256": "9a42bdeaa0bf7ea8121363f80c335fc600a965383c359b74043ae9e6fa8dcb53"
+    },
+    {
+      "path": "server/index.php",
+      "sha256": "9b3b1ca09c47ed0bf3fa3718f3d37384e9483cfd34b1714f73a2b1b0dd8545fc"
+    },
+    {
+      "path": "server/log.php",
+      "sha256": "0a3a0684211bcb7e3e2a380ddf0d0173dfe838471b557d0b6ab1a1ec8a3fef56"
+    },
+    {
+      "path": "server/state.php",
+      "sha256": "eddaf2610ddc3a86a954f8251c1074c0ed73744ffc67dc7cb3fbbf226d477f7a"
+    },
+    {
+      "path": "tests/d1_actions_prompt_check.php",
+      "sha256": "b853ecd2b1d7f8922247455a10149309e8c3a3ee18934950d747a560b393363a"
+    },
+    {
+      "path": "tests/page_check.php",
+      "sha256": "791a9ffb12e1e26be964d3cdfb324a98e7d7c58077bda5a586046bc84a441122"
+    },
+    {
+      "path": "tests/state_clock_regression_check.php",
+      "sha256": "a5eb14cfbef6c53b2bb85409a19cd133b8781f69e84e284d9c86abd5092d5123"
+    },
+    {
+      "path": "tests/scene_resilience_check.php",
+      "sha256": "857b2ac2d13e60a56b861fbe58cc6ea7a51a98b77c8966b5687f0144684309fb"
+    },
+    {
+      "path": "tests/scope_check.php",
+      "sha256": "9e8f749fac238d152ecb780744712ea102148f7f24b2054c3a7a395d3ac3f9fe"
+    }
+  ],
+  "gaming_vhd": {
+    "FullName": "D:\\DwemerAI4Skyrim3\\ext4.vhdx",
+    "Length": 157550641152,
+    "LastWriteTimeUtc": "2026-10-19T23:04:40.9907162Z"
+  },
+  "gaming_metadata_equal": false,
+  "wsl_status": "  NAME                     STATE           VERSION\r\n\r\n* kali-linux               Running         2\r\n\r\n  docker-desktop           Stopped         2\r\n\r\n  DwemerAI4Skyrim3         Stopped         2\r\n\r\n  DwemerAI4Skyrim3-test    Stopped         2\r\n\r\n\r\n",
+  "limits": "Isolated PHP fixture/syntax proof only; no installed-server/provider/DB/gameplay checks. Disk length/mtime comparison is not byte-level disk verification."
+}

@@ -1,0 +1,31 @@
+distro=DwemerAI4Skyrim3-test uid=0 time=2026-10-20T10:03:22Z
+Configuration File (php.ini) Path: /etc/php/8.2/cli
+Loaded Configuration File:         /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tasks/critique-fixes-2026-10-20/runtime/php.ini
+Scan for additional .ini files in: (none)
+Additional .ini files parsed:      (none)
+PHP 8.2.29 (cli) (built: Jul  3 2025 16:16:05) (NTS)
+Copyright (c) The PHP Group
+Zend Engine v4.2.29, Copyright (c) Zend Technologies
+[PHP Modules]
+Core
+date
+filter
+hash
+json
+libxml
+mbstring
+openssl
+pcntl
+pcre
+pgsql
+posix
+random
+Reflection
+session
+sodium
+SPL
+standard
+zlib
+
+[Zend Modules]
+

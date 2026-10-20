@@ -1,0 +1,1 @@
+No syntax errors detected in tests/scene_resilience_check.php

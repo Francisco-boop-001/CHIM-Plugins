@@ -33,12 +33,17 @@ function pcv_form_desired_state(array $post, string $csrfToken, array $knownNpcs
     if (($desired['enabled'] ?? false) !== true) {
         return $desired;
     }
-    // 0.1.14 roleplay settings; the state layer validates lengths and values.
+    // 0.1.14 roleplay settings; reject invalid cards before state staging.
     $card = $post['card'] ?? null;
     if ($card !== null && !is_string($card)) {
         throw new PcvUiFormRejection('invalid_configuration', 'The scene card is invalid.');
     }
     if (is_string($card) && trim($card) !== '') {
+        require_once __DIR__ . '/state.php';
+        $card = trim($card);
+        if (!pcv_valid_scene_card($card)) {
+            throw new PcvUiFormRejection('invalid_configuration', 'The scene card must be one line of at most 300 characters.');
+        }
         $desired['card'] = $card;
     }
     $pace = $post['pace'] ?? null;
@@ -353,8 +358,12 @@ function pcv_render_page(
                 : '<p class="small-note">Started without ' . $droppedName . ' (not nearby).</p>';
         }
     }
-    if ($status !== 'active' && ($state['last_end']['reason'] ?? null) === 'members_gone') {
-        $scopeSummary .= '<p class="small-note">The scene ended: its NPCs were gone for five minutes.</p>';
+    $lastEndReason = is_array($state['last_end'] ?? null) ? ($state['last_end']['reason'] ?? null) : null;
+    if ($status !== 'active' && in_array($lastEndReason, ['members_gone', 'evidence_unavailable'], true)) {
+        $endingCheck = $lastEndReason === 'members_gone'
+            ? 'found too few eligible NPCs' : 'could not verify eligibility';
+        $scopeSummary .= '<p class="small-note">The scene ended after five minutes of consecutive failed eligibility checks. '
+            . 'The check that ended the scene ' . $endingCheck . '.</p>';
     }
     $lastTurn =$status === 'active' && is_string($state['config_id'] ?? null) && function_exists('pcv_log_read_last_turn')
         ? pcv_log_read_last_turn($state['config_id']) : null;
@@ -1206,7 +1215,8 @@ function pcv_run_page(): void
                 $responseCode = 400;
                 $message = $error->reasonCode === 'actor_unavailable'
                     ? pcv_picker_rejection_notice($eligibilityStatus, count($knownNpcs))
-                    : 'The submitted form was invalid. Refresh the page and choose two available NPCs.';
+                    : ($error->reasonCode === 'invalid_configuration' ? $error->getMessage()
+                        : 'The submitted form was invalid. Refresh the page and choose two available NPCs.');
                 $notice = pcv_ui_failure_notice($message);
             }
         } catch (InvalidArgumentException $error) {

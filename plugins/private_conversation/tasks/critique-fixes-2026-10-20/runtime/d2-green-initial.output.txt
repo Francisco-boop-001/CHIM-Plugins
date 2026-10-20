@@ -1,0 +1,6 @@
+
+Fatal error: Uncaught RuntimeException: An invalid scene card must be rejected as configuration before staging, with a useful notice and no raw input in logs. in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php:7
+Stack trace:
+#0 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php(373): pageCheck(false, 'An invalid scen...')
+#1 {main}
+  thrown in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/page_check.php on line 7

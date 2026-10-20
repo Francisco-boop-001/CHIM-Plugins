@@ -1,0 +1,1 @@
+PASS D1 actions: captured available-actions section matches PCV-narrowed actions before core Markdown formatting.

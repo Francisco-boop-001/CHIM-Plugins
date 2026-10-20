@@ -257,7 +257,7 @@ function pcv_log_reason_codes(): array
 {
     return [
         'active_ttl', 'pending_ttl', 'invalid_state_key', 'identity_unavailable', 'state_unavailable', 'reply_in_progress',
-        'left_scene', 'not_eligible_at_start', 'speaker_outside_scene', 'rechat_speaker_outside_scene', 'members_gone', 'scope_unavailable', 'ended_in_game', 'wrapped_up', 'background_paused', 'action_not_allowed', 'target_outside_scene',
+        'left_scene', 'not_eligible_at_start', 'speaker_outside_scene', 'rechat_speaker_outside_scene', 'members_gone', 'evidence_unavailable', 'scope_unavailable', 'ended_in_game', 'wrapped_up', 'background_paused', 'action_not_allowed', 'target_outside_scene',
         'corrupt_state', 'symlinked_state', 'not_regular_file', 'state_stat_failed', 'state_too_large',
         'state_read_failed', 'invalid_json', 'invalid_state', 'state_stage_failed', 'state_transition_failed', 'profile_lookup_failed',
         'session_unavailable', 'catalog_unavailable', 'readback_mismatch',
@@ -374,7 +374,7 @@ function pcv_log_reason_allowed(string $event, ?string $reason, ?string $outcome
         return in_array($reason, ['invalid_state_key', 'identity_unavailable', 'state_unavailable', 'corrupt_state', 'symlinked_state', 'not_regular_file', 'state_stat_failed', 'state_too_large', 'state_read_failed', 'invalid_json', 'invalid_state', 'state_stage_failed', 'state_transition_failed', 'profile_lookup_failed', 'catalog_unavailable', 'presence_unavailable', 'presence_stale', 'presence_missing', 'presence_invalid', 'presence_key_mismatch', 'unsupported_special_mode'], true);
     }
     if ($event === 'state.scope_ended') {
-        return in_array($reason, ['members_gone', 'ended_in_game', 'wrapped_up'], true);
+        return in_array($reason, ['members_gone', 'evidence_unavailable', 'ended_in_game', 'wrapped_up'], true);
     }
     if ($event === 'routing.action_dropped') {
         return in_array($reason, ['action_not_allowed', 'target_outside_scene'], true);

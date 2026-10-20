@@ -1,0 +1,2 @@
+FAIL: D1: context_pre refreshed PROMPT_ACTIONS_LIST but left main.php’s captured actionsList stale.
+Private Conversation logger: directory_unavailable request_id=efb0bfdd-cee9-41aa-b8cc-f434fc4febf6 config_id=123e4567-e89b-42d3-a456-426614174000
