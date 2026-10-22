@@ -1,0 +1,1 @@
+PASS: native snapshot validation, background-only cache boundary, catalog identity mapping, and guarded activation

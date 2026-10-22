@@ -1,0 +1,23 @@
+{
+  "recordedUtc": "2026-10-22T17:13:29.6300169Z",
+  "distroRegistry": [
+    {
+      "name": "DwemerAI4Skyrim3",
+      "basePath": "D:\\DwemerAI4Skyrim3",
+      "version": 2
+    },
+    {
+      "name": "DwemerAI4Skyrim3-test",
+      "basePath": "E:\\WSL\\DwemerAI4Skyrim3-test",
+      "version": 2
+    }
+  ],
+  "gamingVhd": {
+    "path": "D:\\DwemerAI4Skyrim3\\ext4.vhdx",
+    "length": 157550641152,
+    "lastWriteTimeUtc": "2026-10-19T23:04:40.9907162Z"
+  },
+  "runtimeEntered": false,
+  "runtimeOwner": "MP queue after SF; PCV awaiting explicit handoff",
+  "baselineCommit": "3cd9f840ec5ce3d66da1a5e72252c1d28929c6a5"
+}

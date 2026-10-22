@@ -1,0 +1,67 @@
+[
+  {
+    "label": "state-recovery-green",
+    "fixture": "tests/state_recovery_check.php",
+    "exit": 1
+  },
+  {
+    "label": "scope-final-green",
+    "fixture": "tests/scope_check.php",
+    "exit": 1
+  },
+  {
+    "label": "turn-plan-green",
+    "fixture": "tests/turn_plan_check.php",
+    "exit": 0
+  },
+  {
+    "label": "turn-hooks-green",
+    "fixture": "tests/turn_hooks_check.php",
+    "exit": 0
+  },
+  {
+    "label": "strict-rechat-green",
+    "fixture": "tests/strict_rechat_check.php",
+    "exit": 0
+  },
+  {
+    "label": "commands-green",
+    "fixture": "tests/in_game_commands_check.php",
+    "exit": 0
+  },
+  {
+    "label": "end-hook-green",
+    "fixture": "tests/in_game_end_hook_failure_check.php",
+    "exit": 0
+  },
+  {
+    "label": "group-scope-green",
+    "fixture": "tests/group_scope_check.php",
+    "exit": 0
+  },
+  {
+    "label": "group-routing-green",
+    "fixture": "tests/group_routing_check.php",
+    "exit": 0
+  },
+  {
+    "label": "group-activation-green",
+    "fixture": "tests/group_activation_check.php",
+    "exit": 0
+  },
+  {
+    "label": "free-activation-green",
+    "fixture": "tests/free_activation_check.php",
+    "exit": 0
+  },
+  {
+    "label": "logs-access-final-green",
+    "fixture": "tests/ui_logs_host_access_check.php",
+    "exit": 0
+  },
+  {
+    "label": "logs-http-final-green",
+    "fixture": "tests/ui_diagnostics_http_check.php",
+    "exit": 0
+  }
+]

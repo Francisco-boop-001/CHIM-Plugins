@@ -1,0 +1,4 @@
+{"enabled":true,"scene_mode":"pair","free":true,"exclude_player":true,"bystander_mode":"exclude","actor_a":"15","actor_b":"11","actor_ids":["15","11","19","12","18","13"],"opener":"auto"}
+order=["14","12","11","13"]
+activated_context={"action":"enable","scene_mode":"pair","actor_a_id":"15","actor_b_id":"11","exclude_player":true,"bystander_mode":"exclude","member_count":6,"dropped_count":0,"free_scene":true}
+PASS free activation picks the nearest eligible six and waits below two

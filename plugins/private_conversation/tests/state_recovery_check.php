@@ -19,6 +19,7 @@ function recCheck(bool $condition, string $message): void
 
 $stateDirectory = sys_get_temp_dir() . '/pcv-recovery-' . bin2hex(random_bytes(8));
 $logDirectory = sys_get_temp_dir() . '/pcv-recovery-log-' . bin2hex(random_bytes(8));
+$identityDirectories = [];
 $exitCode = 0;
 try {
     recCheck(mkdir($stateDirectory, 0700) && mkdir($logDirectory, 0700), 'could not create fixture directories');
@@ -48,6 +49,7 @@ try {
     mkdir($odd, 0700);
     mkdir($odd . '/state.json', 0700);
     recCheck((pcv_stage($key, ['enabled' => false], $known, $odd)['status'] ?? null) === 'unavailable', 'A directory named state.json is left alone.');
+    recCheck(pcvScopeStoredStateExists($odd), 'A non-regular state file remains fail closed for unknown identity.');
     rmdir($odd . '/state.json');
     @unlink($odd . '/state.lock');
     rmdir($odd);
@@ -73,7 +75,116 @@ try {
     }
     @rmdir($empty);
 
-    echo "PASS END recovers unreadable state (bad copy kept, ARM still refuses); empty stores no longer block identity hiccups\n";
+    // E3: an expired-only but readable store is not blocking state when the playthrough identity is unknown.
+    $expiredDirectory = $stateDirectory . '-expired';
+    $expiredPendingDirectory = $stateDirectory . '-expired-pending';
+    $liveDirectory = $stateDirectory . '-live';
+    $mixedActiveDirectory = $stateDirectory . '-mixed-active';
+    $mixedPendingDirectory = $stateDirectory . '-mixed-pending';
+    $unsafeDirectory = $stateDirectory . '-unsafe';
+    $identityDirectories = [$expiredDirectory, $expiredPendingDirectory, $liveDirectory,
+        $mixedActiveDirectory, $mixedPendingDirectory, $unsafeDirectory];
+    foreach ($identityDirectories as $directory) {
+        recCheck(mkdir($directory, 0700), 'could not create identity-state fixture');
+    }
+    recCheck((pcv_stage($key, $pair, $known, $expiredDirectory)['status'] ?? null) === 'pending',
+        'Could not stage a valid fixture scene.');
+    recCheck((pcv_begin_request($key, true, $expiredDirectory, $known)['status'] ?? null) === 'active',
+        'Could not activate a valid fixture scene.');
+
+    $activePath = $expiredDirectory . '/state.json';
+    $activeContents = file_get_contents($activePath);
+    recCheck(is_string($activeContents), 'Could not read the active fixture state.');
+    recCheck(file_put_contents($liveDirectory . '/state.json', $activeContents) === strlen($activeContents)
+        && pcvScopeStoredStateExists($liveDirectory), 'A live active scene must still block unknown identity.');
+    recCheck(file_put_contents($unsafeDirectory . '/state.json', $activeContents) === strlen($activeContents)
+        && symlink($unsafeDirectory . '/state.json', $unsafeDirectory . '/state.lock')
+        && pcvScopeStoredStateExists($unsafeDirectory), 'A lock-symlink failure must remain fail closed.');
+
+    $expiredStore = json_decode($activeContents, true, 32, JSON_THROW_ON_ERROR);
+    $expiresAt = time() - 60;
+    $expiredStore['active']['activated_at'] = $expiresAt - PCV_ACTIVE_TTL - 60;
+    $expiredStore['active']['renewed_at'] = $expiresAt - PCV_ACTIVE_TTL;
+    $expiredStore['active']['expires_at'] = $expiresAt;
+    recCheck(pcv_valid_stored_state($expiredStore), 'The expired-only fixture is not schema-valid.');
+    $expiredPath = $expiredDirectory . '/state.json';
+    $expiredContents = json_encode($expiredStore, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
+    recCheck(file_put_contents($expiredPath, $expiredContents) === strlen($expiredContents), 'Could not write expired fixture state.');
+    touch($expiredPath, time() - 30);
+    clearstatcache(true, $expiredPath);
+    $beforeContents = file_get_contents($expiredPath);
+    $beforeMtime = filemtime($expiredPath);
+    recCheck(!pcvScopeStoredStateExists($expiredDirectory),
+        'A readable store containing only an expired active entry must not block an unknown playthrough.');
+    clearstatcache(true, $expiredPath);
+    recCheck(file_get_contents($expiredPath) === $beforeContents && filemtime($expiredPath) === $beforeMtime,
+        'Checking an expired-only store must not rewrite state for an unknown playthrough.');
+
+    recCheck((pcv_stage($key, $pair, $known, $expiredPendingDirectory)['status'] ?? null) === 'pending',
+        'Could not stage the pending-only fixture.');
+    $pendingOnly = json_decode((string)file_get_contents($expiredPendingDirectory . '/state.json'), true, 32, JSON_THROW_ON_ERROR);
+    $pendingExpiresAt = time() - 60;
+    $pendingOnly['pending']['staged_at'] = $pendingExpiresAt - PCV_PENDING_TTL;
+    $pendingOnly['pending']['expires_at'] = $pendingExpiresAt;
+    recCheck(pcv_valid_stored_state($pendingOnly), 'The expired-pending fixture is not schema-valid.');
+    $pendingPath = $expiredPendingDirectory . '/state.json';
+    $pendingContents = json_encode($pendingOnly, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
+    recCheck(file_put_contents($pendingPath, $pendingContents) === strlen($pendingContents), 'Could not write expired pending fixture.');
+    touch($pendingPath, time() - 30);
+    clearstatcache(true, $pendingPath);
+    $beforePendingMtime = filemtime($pendingPath);
+    recCheck(!pcvScopeStoredStateExists($expiredPendingDirectory),
+        'A readable store containing only an expired pending entry must not block an unknown playthrough.');
+    clearstatcache(true, $pendingPath);
+    recCheck(file_get_contents($pendingPath) === $pendingContents && filemtime($pendingPath) === $beforePendingMtime,
+        'Checking an expired pending entry must not rewrite state for an unknown playthrough.');
+
+    // Each live slot still blocks when the other slot has expired.
+    recCheck((pcv_stage($key, $pair, $known, $mixedActiveDirectory)['status'] ?? null) === 'pending',
+        'Could not stage the mixed-slot fixture.');
+    recCheck((pcv_begin_request($key, true, $mixedActiveDirectory, $known)['status'] ?? null) === 'active',
+        'Could not activate the mixed-slot fixture.');
+    $mixedPendingResult = pcv_stage($key, $pair, $known, $mixedActiveDirectory);
+    recCheck(($mixedPendingResult['status'] ?? null) === 'active'
+        && ($mixedPendingResult['pending'] ?? false) === true
+        && is_array($mixedPendingResult['pending_scope'] ?? null),
+        'Could not add a pending entry alongside the live active scene.');
+    $mixedLive = json_decode((string)file_get_contents($mixedActiveDirectory . '/state.json'), true, 32, JSON_THROW_ON_ERROR);
+    $mixedExpiry = time() - 60;
+
+    $mixedExpiredPending = $mixedLive;
+    $mixedExpiredPending['pending']['staged_at'] = $mixedExpiry - PCV_PENDING_TTL;
+    $mixedExpiredPending['pending']['expires_at'] = $mixedExpiry;
+    recCheck(pcv_valid_stored_state($mixedExpiredPending), 'The live-active/expired-pending fixture is not schema-valid.');
+    $mixedPendingContents = json_encode($mixedExpiredPending, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
+    recCheck(file_put_contents($mixedActiveDirectory . '/state.json', $mixedPendingContents) === strlen($mixedPendingContents)
+        && pcvScopeStoredStateExists($mixedActiveDirectory),
+        'A live active entry must block when the pending entry has expired.');
+
+    $mixedExpiredActive = $mixedLive;
+    $mixedExpiredActive['active']['activated_at'] = $mixedExpiry - PCV_ACTIVE_TTL - 60;
+    $mixedExpiredActive['active']['renewed_at'] = $mixedExpiry - PCV_ACTIVE_TTL;
+    $mixedExpiredActive['active']['expires_at'] = $mixedExpiry;
+    recCheck(pcv_valid_stored_state($mixedExpiredActive), 'The expired-active/live-pending fixture is not schema-valid.');
+    $mixedActiveContents = json_encode($mixedExpiredActive, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . "\n";
+    recCheck(file_put_contents($mixedPendingDirectory . '/state.json', $mixedActiveContents) === strlen($mixedActiveContents)
+        && pcvScopeStoredStateExists($mixedPendingDirectory),
+        'A live pending entry must block when the active entry has expired.');
+
+    $boundary = time();
+    $activeAtBoundary = $expiredStore;
+    $activeAtBoundary['active']['activated_at'] = $boundary - PCV_ACTIVE_TTL - 60;
+    $activeAtBoundary['active']['renewed_at'] = $boundary - PCV_ACTIVE_TTL;
+    $activeAtBoundary['active']['expires_at'] = $boundary;
+    $pendingAtBoundary = $pendingOnly;
+    $pendingAtBoundary['pending']['staged_at'] = $boundary - PCV_PENDING_TTL;
+    $pendingAtBoundary['pending']['expires_at'] = $boundary;
+    recCheck(pcv_valid_stored_state($activeAtBoundary) && pcv_valid_stored_state($pendingAtBoundary)
+        && (pcv_visible_state($activeAtBoundary, $boundary)['status'] ?? null) === 'off'
+        && (pcv_visible_state($pendingAtBoundary, $boundary)['status'] ?? null) === 'off',
+        'Entries expiring exactly at the read time must be invisible.');
+
+    echo "PASS END recovery and unknown-identity expiry/live-slot boundaries\n";
 } catch (Throwable $error) {
     fwrite(STDERR, 'FAIL: ' . $error->getMessage() . "\n");
     $exitCode = 1;
@@ -84,6 +195,14 @@ try {
         }
     }
     @rmdir($stateDirectory);
+    foreach ($identityDirectories as $directory) {
+        foreach (glob($directory . '/{,.}*', GLOB_BRACE) ?: [] as $path) {
+            if (is_file($path) || is_link($path)) {
+                @unlink($path);
+            }
+        }
+        @rmdir($directory);
+    }
     foreach (glob($logDirectory . '/*') ?: [] as $path) {
         @unlink($path);
     }

@@ -1,0 +1,12 @@
+[
+  {
+    "label": "state-recovery-final-green",
+    "fixture": "tests/state_recovery_check.php",
+    "exit": 0
+  },
+  {
+    "label": "scope-complete-green",
+    "fixture": "tests/scope_check.php",
+    "exit": 0
+  }
+]

@@ -94,7 +94,7 @@ if (!$solo) {
 $beforeAudience = $GLOBALS['CACHE_PEOPLE'] ?? ($GLOBALS['requestRoutingSnapshot']['audience'] ?? null);
 $beforePresence = $GLOBALS['requestRoutingSnapshot']['present_actors'] ?? null;
 try {
-    $nearbyContext = pcvBuildScopeContext($scope, $speaker, $listener);
+    $nearbyContext = pcvBuildScopeContext($scope, $speaker, $listener, $route === 'scene_direction');
 } catch (Throwable $error) {
     pcvRoutingLogException('context_pre', $error, $requestScope);
     throw $error;

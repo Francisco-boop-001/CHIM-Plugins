@@ -339,6 +339,8 @@ function pcv_render_page(
     };
     $isGroup = static fn(?array $config): bool => is_array($config) && is_array($config['actor_ids'] ?? null) && count($config['actor_ids']) > 2;
     $isFree = static fn(?array $config): bool => is_array($config) && ($config['free'] ?? false) === true;
+    $pendingFreeCap = is_int($pendingScope['free_cap'] ?? null)
+        && $pendingScope['free_cap'] >= 2 && $pendingScope['free_cap'] <= 6 ? $pendingScope['free_cap'] : 6;
     if ($status === 'active' && ($scene = $sceneText($scope)) !== '') {
         $scopeSummary .= '<p>' . ($scopeSceneMode === 'solo' ? 'Current reflection: '
             : ($isFree($scope) ? 'Current free scene: ' : ($isGroup($scope) ? 'Current group: ' : 'Current pair: ')))
@@ -378,7 +380,7 @@ function pcv_render_page(
         if ($pendingEnd) {
             $scopeSummary .= '<p class="pending-summary">End is queued for the next eligible ordinary input.</p>';
         } elseif ($isFree($pendingScope) && !is_array($pendingScope['actor_ids'] ?? null)) {
-            $scopeSummary .= '<p class="pending-summary">Next: free scene (nearest six).</p>';
+            $scopeSummary .= '<p class="pending-summary">Next: free scene (up to ' . $pendingFreeCap . ' nearest eligible NPCs; at least 2 required).</p>';
         } elseif ($pendingScope !== null && ($scene = $sceneText($pendingScope)) !== '') {
             $scopeSummary .= '<p class="pending-summary">Next ' . ($pendingSceneMode === 'solo' ? 'reflection: ' : ($isGroup($pendingScope) ? 'group: ' : 'pair: '))
                 . $scene . '.</p>';
@@ -515,7 +517,7 @@ function pcv_render_page(
 <input type="hidden" name="csrf" value="' . $csrf . '">
 <input type="hidden" name="action" value="arm">
 <p class="checkbox-field"><label><input type="checkbox" id="solo-mode" name="scene_mode" value="solo"' . $soloChecked . $soloDisabled . '> <span>Solo reflection</span></label></p>
-<p class="checkbox-field"><label><input type="checkbox" id="free-mode" name="scene_mode" value="free"' . $freeChecked . $freeDisabled . '> <span>Free scene (the nearest six NPCs, player excluded)</span></label></p>
+<p class="checkbox-field"><label><input type="checkbox" id="free-mode" name="scene_mode" value="free"' . $freeChecked . $freeDisabled . '> <span>Free scene (2–6 nearest eligible NPCs; player excluded)</span></label></p>
 <p id="mode-guidance" class="small-note"' . ($sceneMode === 'solo' ? '' : ' hidden') . '>Solo reflection asks the NPC to think aloud. Opinion changes require compatible Mind Poisoning support.</p>
 <p class="field"><label id="actor-a-label" for="actor-a">' . ($sceneMode === 'solo' ? 'Reflecting NPC' : 'NPC A') . '</label><select id="actor-a" name="actor_a" required' . $actorADisabledAttr . '>
 ' . $optionsA . '</select></p>
@@ -582,48 +584,16 @@ function pcv_send_text(int $statusCode, string $body, array $extraHeaders = []):
 }
 
 /**
- * The Windows host as seen from a WSL2 NAT guest: the single private IPv4 default gateway in
- * /proc/net/route. Missing, ambiguous or public data trusts nothing.
+ * Diagnostics are local-only: direct loopback without forwarding headers, or a server-authenticated REMOTE_USER.
  */
-function pcv_ui_wsl_host_address(string $routeTable): ?string
-{
-    $gateways = [];
-    foreach (preg_split('/\r?\n/', $routeTable) ?: [] as $line) {
-        $fields = preg_split('/\s+/', trim($line));
-        if (!is_array($fields) || count($fields) < 3 || $fields[1] !== '00000000'
-            || preg_match('/\A[0-9A-Fa-f]{8}\z/', $fields[2]) !== 1) {
-            continue;
-        }
-        $octets = array_reverse(array_map('hexdec', str_split($fields[2], 2)));
-        $gateways[implode('.', $octets)] = true;
-    }
-    if (count($gateways) !== 1) {
-        return null;
-    }
-    $address = (string)array_key_first($gateways);
-    $isIpv4 = filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false;
-    $isPrivate = $isIpv4
-        && filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE) === false
-        && filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE) !== false;
-    return $isPrivate ? $address : null;
-}
-
-/**
- * Diagnostics are local-only: direct loopback, the WSL host (the player's own Windows browser), or a
- * server-authenticated REMOTE_USER. Any forwarding header disqualifies the address checks.
- */
-function pcv_ui_logs_access_allowed(array $server, ?string $hostAddress = null, bool $resolveHost = false): bool
+function pcv_ui_logs_access_allowed(array $server): bool
 {
     $forwarded = array_key_exists('HTTP_FORWARDED', $server)
         || array_key_exists('HTTP_X_FORWARDED_FOR', $server)
         || array_key_exists('HTTP_X_REAL_IP', $server);
     $remoteAddress = $server['REMOTE_ADDR'] ?? null;
-    if ($resolveHost && $hostAddress === null && !$forwarded) {
-        $routes = @file_get_contents('/proc/net/route');
-        $hostAddress = is_string($routes) ? pcv_ui_wsl_host_address($routes) : null;
-    }
     $local = !$forwarded && is_string($remoteAddress)
-        && (in_array($remoteAddress, ['127.0.0.1', '::1'], true) || ($hostAddress !== null && $remoteAddress === $hostAddress));
+        && in_array($remoteAddress, ['127.0.0.1', '::1'], true);
     $remoteUser = $server['REMOTE_USER'] ?? null;
     $authenticatedUser = is_string($remoteUser) && trim($remoteUser) !== '';
     return $local || $authenticatedUser;
@@ -707,9 +677,9 @@ function pcv_render_logs_locked_page(array $server = []): string
         . '<title>CHIM Private Conversation — Operational Logs</title><link rel="stylesheet" href="assets/style.css"></head>'
         . '<body class="page"><main class="page-frame logs-page"><header class="topbar"><p class="wordmark">CHIM / SCENE NOTES</p>'
         . '<a href="?">Return to Private Conversation</a></header><section class="logs-panel"><h1>Operational logs</h1>'
-        . '<p role="status">Logs access is locked. Open this page directly on the CHIM host or use a web server that sets a trusted REMOTE_USER.</p>'
-        . '<p>Diagnostic access accepts direct loopback requests without forwarding headers, the Windows PC hosting this WSL server, or a nonempty server-authenticated REMOTE_USER.</p>'
-        . '<p>On the PC running this server, open: <a href="' . pcv_html($localUrl) . '">' . pcv_html($localUrl) . '</a></p>'
+        . '<p role="status">Logs access is locked. Open directly through loopback without forwarding headers, or use a web server that sets a trusted REMOTE_USER after authentication.</p>'
+        . '<p>Private gateway addresses are not trusted. On Windows and WSL, this loopback address may not reach the service in every network setup. If it does not and no authenticated route is configured, ask the server operator to provide one or inspect logs locally. PCV does not configure authentication or provide a login page. Scene controls are not affected.</p>'
+        . '<p>Try direct loopback on the CHIM host: <a href="' . pcv_html($localUrl) . '">' . pcv_html($localUrl) . '</a></p>'
         . '</section></main></body></html>';
 }
 
@@ -807,7 +777,7 @@ function pcv_render_logs_page(string $csrfToken, array $filters, ?array $result 
 
 function pcv_run_logs_route(string $method): void
 {
-    if (!pcv_ui_logs_access_allowed($_SERVER, null, true)) {
+    if (!pcv_ui_logs_access_allowed($_SERVER)) {
         pcv_ui_diagnostics_rejected('access_denied', pcv_ui_logs_operation($_POST['action'] ?? null));
         http_response_code(403);
         header('Content-Type: text/html; charset=UTF-8');

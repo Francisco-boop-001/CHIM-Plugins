@@ -1,0 +1,42 @@
+[
+  {
+    "label": "eligibility-red",
+    "fixture": "tests/eligibility_check.php",
+    "exit": 1
+  },
+  {
+    "label": "state-recovery-red",
+    "fixture": "tests/state_recovery_check.php",
+    "exit": 1
+  },
+  {
+    "label": "turn-plan-red",
+    "fixture": "tests/turn_plan_check.php",
+    "exit": 1
+  },
+  {
+    "label": "scope-red",
+    "fixture": "tests/scope_check.php",
+    "exit": 1
+  },
+  {
+    "label": "free-ui-red",
+    "fixture": "tests/free_ui_check.php",
+    "exit": 1
+  },
+  {
+    "label": "logs-access-red",
+    "fixture": "tests/ui_logs_host_access_check.php",
+    "exit": 1
+  },
+  {
+    "label": "old-page-notes-red",
+    "fixture": "dist/critique-20261022-baseline/tests/page_notes_check.php",
+    "exit": 1
+  },
+  {
+    "label": "page-notes-green",
+    "fixture": "tests/page_notes_check.php",
+    "exit": 0
+  }
+]

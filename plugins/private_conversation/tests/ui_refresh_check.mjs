@@ -264,6 +264,24 @@ test('group controls refresh with the roster, block duplicate members, and stay 
     assert.equal(actorC.disabled, false);
 });
 
+test('page guidance matches the group range and follows the selected free cap', async () => {
+    const harness = createHarness([
+        { snapshot: makeSnapshot({ a: ['101', '202', '303'], b: ['101', '202', '303'], group: ['101', '202', '303'] }) },
+    ], { group: true, free: true });
+    await flushPromises();
+    const intro = harness.nodes.get('#page-intro');
+    assert.match(intro.textContent, /Choose two to four voices/);
+
+    const freeMode = harness.nodes.get('#free-mode');
+    const freeCap = harness.nodes.get('#free-cap');
+    freeMode.checked = true;
+    freeMode.dispatchChange();
+    assert.match(intro.textContent, /up to 6 nearest eligible NPCs/);
+    freeCap.value = '3';
+    freeCap.dispatchChange();
+    assert.match(intro.textContent, /up to 3 nearest eligible NPCs/);
+});
+
 test('malformed refresh controls preserve both actor drafts and fail closed', async () => {
     const snapshot = makeSnapshot({ ref: 'new-playthrough' });
     const querySelector = snapshot.querySelector;

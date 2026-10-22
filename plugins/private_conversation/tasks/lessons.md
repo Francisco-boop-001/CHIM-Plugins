@@ -55,3 +55,6 @@
 - Mistake pattern: treating an operator-confirmed practical check as NOT RUN because its independent log trace is narrower or missing.
   - Corrected rule: distinguish operator confirmation from log-verified evidence; preserve confirmed outcomes while separately recording unmeasured timing, IDs, or route.
   - Prevention: record evidence source and the behavior it supports; use NOT RUN only when the outcome itself was not observed or confirmed, not merely when a correlated trace is unavailable.
+- Mistake pattern: updating a user-visible reason and its newest test while leaving an older related fixture broken.
+  - Corrected rule: trace changed messages and contracts through every directly dependent caller and fixture before choosing the bounded gate.
+  - Prevention: search all references to the old value, retain each fixture's unique behavior, and record original RED/GREEN output rather than assuming a nearby green test covers it.

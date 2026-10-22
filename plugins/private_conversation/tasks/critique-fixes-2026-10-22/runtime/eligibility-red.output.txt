@@ -1,0 +1,1 @@
+FAIL: ineligible replacement must refuse its input without exposing an active scope or queued replacement

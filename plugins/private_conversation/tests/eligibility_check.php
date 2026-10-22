@@ -161,16 +161,66 @@ try {
     eligibilityCheck(($activePairRestored['status'] ?? null) === 'active',
         'an active pair should continue when both IDs remain eligible');
 
+    $staleRenewalAt = time() - 61;
+    $activeBeforeReplacement = json_decode((string)file_get_contents($stateDirectory . '/state.json'), true, 16, JSON_THROW_ON_ERROR);
+    eligibilityCheck(is_array($activeBeforeReplacement['active'] ?? null)
+        && is_string($activeBeforeReplacement['active']['config_id'] ?? null),
+        'could not load the active scene renewal fixture');
+    $activeBeforeReplacement['active']['activated_at'] = $staleRenewalAt;
+    $activeBeforeReplacement['active']['renewed_at'] = $staleRenewalAt;
+    $activeBeforeReplacement['active']['expires_at'] = $staleRenewalAt + PCV_ACTIVE_TTL;
+    eligibilityCheck(file_put_contents($stateDirectory . '/state.json', json_encode($activeBeforeReplacement, JSON_THROW_ON_ERROR)) !== false,
+        'could not age the active scene renewal fixture');
+    $activeConfigId = $activeBeforeReplacement['active']['config_id'];
+    $activeExpiryBeforeRefusal = $activeBeforeReplacement['active']['expires_at'];
+
     $replacement = ['enabled' => true, 'actor_a' => '101', 'actor_b' => '303', 'exclude_player' => false, 'bystander_mode' => 'silent'];
     pcv_stage($key, $replacement, ['101' => 'Aela', '303' => 'Troll'], $stateDirectory);
-    $blockedReplacement = pcv_begin_request($key, true, $stateDirectory, ['101' => 'Aela']);
-    eligibilityCheck(($blockedReplacement['status'] ?? null) === 'unavailable',
-        'ineligible replacement must fail closed for its attempted request');
-    $stateAfterBlockedReplacement = pcv_read($key, $stateDirectory);
-    eligibilityCheck(($stateAfterBlockedReplacement['status'] ?? null) === 'active'
-        && ($stateAfterBlockedReplacement['scope'] ?? null) === $config
-        && ($stateAfterBlockedReplacement['pending'] ?? false),
-        'blocked replacement must preserve old active and pending config on disk');
+    $blockedReplacement = pcv_begin_request($key, true, $stateDirectory, ['101' => 'Aela', '202' => 'Faendal']);
+    eligibilityCheck(($blockedReplacement['status'] ?? null) === 'unavailable'
+        && ($blockedReplacement['scope'] ?? null) === null
+        && ($blockedReplacement['reason'] ?? null) === 'scene_not_eligible'
+        && !($blockedReplacement['pending'] ?? true)
+        && ($blockedReplacement['pending_scope'] ?? null) === null
+        && ($blockedReplacement['pending_config_id'] ?? null) === null,
+        'ineligible replacement must refuse its input without exposing an active scope or queued replacement');
+    $storedAfterBlockedReplacement = json_decode((string)file_get_contents($stateDirectory . '/state.json'), true, 16, JSON_THROW_ON_ERROR);
+    eligibilityCheck(($storedAfterBlockedReplacement['active']['config'] ?? null) === $config
+        && ($storedAfterBlockedReplacement['active']['config_id'] ?? null) === $activeConfigId
+        && ($storedAfterBlockedReplacement['pending'] ?? null) === null,
+        'rejected replacement must be consumed while preserving the current active scene and config');
+    eligibilityCheck(($storedAfterBlockedReplacement['active']['renewed_at'] ?? null) === $staleRenewalAt
+        && ($storedAfterBlockedReplacement['active']['expires_at'] ?? null) === $activeExpiryBeforeRefusal,
+        'a refused replacement input must not renew the active scene TTL');
+    $visibleAfterBlockedReplacement = pcv_read($key, $stateDirectory);
+    eligibilityCheck(($visibleAfterBlockedReplacement['status'] ?? null) === 'active'
+        && ($visibleAfterBlockedReplacement['scope'] ?? null) === $config
+        && ($visibleAfterBlockedReplacement['config_id'] ?? null) === $activeConfigId
+        && !($visibleAfterBlockedReplacement['pending'] ?? true)
+        && ($visibleAfterBlockedReplacement['pending_scope'] ?? null) === null
+        && ($visibleAfterBlockedReplacement['pending_config_id'] ?? null) === null,
+        'state readback used by the page must show the prior active scene without a queued replacement');
+    $nextStandard = pcv_begin_request($key, true, $stateDirectory, ['101' => 'Aela', '202' => 'Faendal']);
+    eligibilityCheck(($nextStandard['status'] ?? null) === 'active'
+        && ($nextStandard['scope'] ?? null) === $config
+        && ($nextStandard['config_id'] ?? null) === $activeConfigId
+        && !($nextStandard['pending'] ?? true),
+        'the next Standard input must recheck and continue the current scene after the rejected replacement is consumed');
+
+    pcv_stage($key, $replacement, ['101' => 'Aela', '303' => 'Troll'], $stateDirectory);
+    $blockedReplacementWithoutStrictMap = pcv_begin_request($key, true, $stateDirectory, null, ['101' => 'Aela', '202' => 'Faendal']);
+    eligibilityCheck(($blockedReplacementWithoutStrictMap['status'] ?? null) === 'unavailable'
+        && ($blockedReplacementWithoutStrictMap['scope'] ?? null) === null
+        && ($blockedReplacementWithoutStrictMap['reason'] ?? null) === 'scene_not_eligible'
+        && !($blockedReplacementWithoutStrictMap['pending'] ?? true)
+        && ($blockedReplacementWithoutStrictMap['pending_scope'] ?? null) === null
+        && ($blockedReplacementWithoutStrictMap['pending_config_id'] ?? null) === null,
+        'a replacement refused without a strict map must not remain advertised as queued');
+    $storedAfterReplacementWithoutStrictMap = json_decode((string)file_get_contents($stateDirectory . '/state.json'), true, 16, JSON_THROW_ON_ERROR);
+    eligibilityCheck(($storedAfterReplacementWithoutStrictMap['active']['config'] ?? null) === $config
+        && ($storedAfterReplacementWithoutStrictMap['active']['config_id'] ?? null) === $activeConfigId
+        && ($storedAfterReplacementWithoutStrictMap['pending'] ?? null) === null,
+        'valid active-scene evidence must preserve A+B while consuming its rejected replacement without strict evidence');
 
     pcv_stage($key, ['enabled' => false], [], $stateDirectory);
     $ended = pcv_begin_request($key, true, $stateDirectory);

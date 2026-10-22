@@ -1,0 +1,1 @@
+PASS the page omits an automatic-end note without a stored end reason

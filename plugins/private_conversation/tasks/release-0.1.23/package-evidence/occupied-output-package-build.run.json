@@ -1,0 +1,6 @@
+{
+  "command": "py -3 scripts/build-package.py --format release --release-dir dist/release-v0.1.23-candidate",
+  "started_utc": "2026-10-22T18:15:52.5503644Z",
+  "exit_code": 1,
+  "output": "package failed: Release output directory must be new or empty"
+}

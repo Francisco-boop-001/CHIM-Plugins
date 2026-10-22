@@ -1,0 +1,25 @@
+{
+  "baseline": "3cd9f840ec5ce3d66da1a5e72252c1d28929c6a5",
+  "version": "0.1.23",
+  "lead_product_code_authored": false,
+  "selected_php_files_passed": 19,
+  "node_dom_cases_passed": 14,
+  "changed_php_syntax_passed": 5,
+  "package_test_cases_passed": 4,
+  "inventory_checks_passed": 14,
+  "test_distro_released": true,
+  "fresh_gameplay_claimed": false,
+  "changed_components": [
+    "Private Conversation"
+  ],
+  "preserved_components": [
+    "CHIM core",
+    "SHARMAT",
+    "Mind Poisoning"
+  ],
+  "whitespace_exceptions": [
+    "Original fixture-modules.output.txt trailing blank line",
+    "Original ui-refresh-red.output.txt runner indentation"
+  ],
+  "source_gate": "PASS; clean committed-source rebuild and publication remain pending"
+}

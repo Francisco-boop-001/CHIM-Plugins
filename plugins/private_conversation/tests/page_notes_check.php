@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// 0.1.13 E5: when a scene ends itself because its NPCs were gone, the page says so.
+// The current end reason is covered by page_check.php; this keeps the separate no-end-note case.
 
 define('PCV_UI_TEST', true);
 define('PCV_LOG_TESTING', true);
@@ -10,14 +10,11 @@ require_once dirname(__DIR__) . '/server/index.php';
 
 try {
     $known = ['404' => 'Stalleo', '505' => 'Guard One'];
-    $html = pcv_render_page('tok', ['status' => 'off', 'pending' => false, 'last_end' => ['reason' => 'members_gone', 'at' => time() - 60]], $known);
-    if (!str_contains($html, 'The scene ended: its NPCs were gone for five minutes.')) {
-        throw new RuntimeException('The page explains an automatic end.');
-    }
-    if (str_contains(pcv_render_page('tok', ['status' => 'off', 'pending' => false], $known), 'were gone for five minutes')) {
+    if (str_contains(pcv_render_page('tok', ['status' => 'off', 'pending' => false], $known),
+        'The scene ended after five minutes of consecutive failed eligibility checks.')) {
         throw new RuntimeException('No note without an automatic end.');
     }
-    echo "PASS the page explains a scene that ended because its NPCs were gone\n";
+    echo "PASS the page omits an automatic-end note without a stored end reason\n";
     exit(0);
 } catch (Throwable $error) {
     fwrite(STDERR, 'FAIL: ' . $error->getMessage() . "\n");

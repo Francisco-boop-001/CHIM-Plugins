@@ -1,0 +1,1 @@
+PASS logs access trusts only loopback or server authentication, and explains refusals; last scene turn shown

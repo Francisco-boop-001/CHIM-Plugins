@@ -1,0 +1,2 @@
+end="off"
+FAIL: Could not add a pending entry to the mixed-slot fixture.

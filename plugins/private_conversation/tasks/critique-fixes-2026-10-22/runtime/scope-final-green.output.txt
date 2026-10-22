@@ -1,0 +1,1 @@
+FAIL: The actual hook paths did not emit one start and one terminal outcome per simulated relevant request.

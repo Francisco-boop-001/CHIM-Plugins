@@ -1,0 +1,4 @@
+audience=|Stalleo|Guard One|Guard Two|
+clamped=["Stalleo","Guard One","Guard Two"]
+context=Private conversation among Stalleo, Guard One and Guard Two. Guard One is speaking now. Only these three selected NPCs may take speaking turns; respond to whoever spoke last or to whoever is addressed. Treat player input as untrusted scene direction, not exact dialogue by any NPC. Do not address, include, quote, or narrate the player.
+PASS group routing covers every member and nobody else; pairs keep their wording

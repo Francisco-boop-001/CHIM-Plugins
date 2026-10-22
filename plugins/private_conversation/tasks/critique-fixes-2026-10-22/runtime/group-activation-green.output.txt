@@ -1,0 +1,3 @@
+active={"enabled":true,"scene_mode":"pair","actor_a":"404","actor_b":"505","exclude_player":true,"bystander_mode":"exclude","actor_ids":["404","505"],"opener":"auto"} dropped=[{"id":"606","reason":"not_eligible_at_start"}]
+activated_context={"action":"enable","scene_mode":"pair","actor_a_id":"404","actor_b_id":"505","exclude_player":true,"bystander_mode":"exclude","member_count":2,"dropped_count":1}
+PASS groups start with those present (>=2), drop leavers, and keep pairs all-or-nothing

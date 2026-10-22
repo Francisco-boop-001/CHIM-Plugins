@@ -1,0 +1,6 @@
+
+Fatal error: Uncaught RuntimeException: Forwarded and caller-supplied identity headers must receive locked Logs instructions: 403 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CHIM Private Conversation — Operational Logs</title><link rel="s in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/ui_diagnostics_http_check.php:7
+Stack trace:
+#0 /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/ui_diagnostics_http_check.php(166): check(false, 'Forwarded and c...')
+#1 {main}
+  thrown in /mnt/k/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/ui_diagnostics_http_check.php on line 7

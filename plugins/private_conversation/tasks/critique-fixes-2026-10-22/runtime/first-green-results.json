@@ -1,0 +1,47 @@
+[
+  {
+    "label": "scope-prefix-red",
+    "fixture": "tests/scope_check.php",
+    "exit": 1
+  },
+  {
+    "label": "eligibility-green",
+    "fixture": "tests/eligibility_check.php",
+    "exit": 0
+  },
+  {
+    "label": "state-green",
+    "fixture": "tests/state_check.php",
+    "exit": 0
+  },
+  {
+    "label": "free-ui-green",
+    "fixture": "tests/free_ui_check.php",
+    "exit": 0
+  },
+  {
+    "label": "logs-access-green",
+    "fixture": "tests/ui_logs_host_access_check.php",
+    "exit": 0
+  },
+  {
+    "label": "ui-green",
+    "fixture": "tests/ui_check.php",
+    "exit": 0
+  },
+  {
+    "label": "page-green",
+    "fixture": "tests/page_check.php",
+    "exit": 0
+  },
+  {
+    "label": "page-notes-final-green",
+    "fixture": "tests/page_notes_check.php",
+    "exit": 0
+  },
+  {
+    "label": "logs-http-green",
+    "fixture": "tests/ui_diagnostics_http_check.php",
+    "exit": 255
+  }
+]

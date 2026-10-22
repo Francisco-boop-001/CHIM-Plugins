@@ -1,0 +1,1 @@
+FAIL: a replacement refused without a strict map must not remain advertised as queued

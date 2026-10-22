@@ -1,0 +1,2 @@
+plan1={"listeners":["Aela","Bruce"],"spread":true,"wrap_up":false,"sharmat":false}
+PASS turn plans: SHARMAT pins honored safely, groups spread their turns, wrap-up closes without rechat

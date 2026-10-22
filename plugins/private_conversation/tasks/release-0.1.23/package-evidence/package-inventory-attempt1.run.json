@@ -1,0 +1,6 @@
+{
+  "command": "py -3 tasks/release-0.1.23/package-evidence/inventory.py",
+  "exit_code": 1,
+  "output": "{\"assets\": [{\"bytes\": 381, \"name\": \"SHA256SUMS.txt\", \"sha256\": \"9ac9680d552fc99cf7cea7d46f3b48511780d0da1932f288842ec2d8cb352031\"}, {\"bytes\": 3053766, \"name\": \"chim-plugin.tar.gz\", \"sha256\": \"4aa0d8d5dd32ce57c59f56324c31a8b0b89e48db6075d0988156e5fc03587d9a\"}, {\"bytes\": 3057014, \"name\": \"private_conversation-0.1.23-mo2.zip\", \"sha256\": \"cb009a464a4d75977e9eb15e32df62ac8acdf99d087648c0c75f2fbc517ffd76\"}, {\"bytes\": 3477054, \"name\": \"private_conversation-0.1.23.dwpkg\", \"sha256\": \"e743d43ef3c34f7d9dc11e3b2bc3c5162957973e9978d3c784270a2c1314c001\"}, {\"bytes\": 3053844, \"name\": \"private_conversation.tar.gz\", \"sha256\": \"e8ba7b6a10d6d8591a291d3da286e5f017b331b816f7454039de465a715d9cdb\"}], \"check_count\": 14, \"errors\": [\"wrapped_tar_layout_safety\", \"flat_tar_layout_safety\"], \"status\": \"FAIL\"}",
+  "note": "Original inventory attempt preserved after execution; start timestamp was not retained by the command wrapper."
+}

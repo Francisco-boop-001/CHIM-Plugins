@@ -1,0 +1,1 @@
+PASS strict rechat targeting is lifted only for spread rechats in 3+ member scenes

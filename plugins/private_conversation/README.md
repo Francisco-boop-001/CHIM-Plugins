@@ -6,7 +6,7 @@
 
 Want two NPCs to trade gossip while the Dragonborn stays out of it, or one to think aloud to no one? PCV stages that conversation. I’m one author who has spent a suspicious amount of time making sure the llama’s clipboard stays out of the scene.
 
-**Current release: 0.1.22 BETA.** Private Conversation (PCV) stages a cast and scene boundaries for CHIM’s next eligible ordinary Standard input. CHIM and the model write the response; the llama has a clipboard, not mind control. Start with the quickstart below, or use the [player guide](docs/player-guide.md) for the longer tour.
+**Current release: 0.1.23 BETA.** Private Conversation (PCV) stages a cast and scene boundaries for CHIM’s next eligible ordinary Standard input. CHIM and the model write the response; the llama has a clipboard, not mind control. Start with the quickstart below, or use the [player guide](docs/player-guide.md) for the longer tour.
 
 ## Quick start
 
@@ -15,7 +15,7 @@ Want two NPCs to trade gossip while the Dragonborn stays out of it, or one to th
 3. For Pair, choose NPC A and B; for Group, choose A and B and optionally C/D. Toggle **Free scene** or **Solo reflection** for those modes. Choose player participation for Pair/Group and how other NPCs are treated. Add a scene card, turn length, or optional actions if useful.
 4. Click **Arm or update on next input**. This queues settings; it does not start dialogue.
 5. Send one ordinary **Standard** text or speech-to-text input in Skyrim with a clear direction. That next eligible input starts or updates the scene. With the player included in Pair/Group, speak as your character; with the player excluded, your input is scene direction.
-6. Click **End now** when finished. If you forget, your next Standard input follows the player setting: included means player speech; excluded means scene direction. Wait for the page to confirm the state readback; if it cannot confirm, do not assume the scene is off. End now does not stop generation already underway or speech already queued.
+6. Click **End now** when finished. If you forget, your next Standard input follows the player setting: included means player speech; excluded means scene direction. End now clears pending and active settings on a successful write; wait for the page’s state readback before assuming the scene is off. It does not stop generation already underway or speech already queued.
 
 The button is very literal about “next input.” The robots are excellent at improvising and less excellent at guessing what you meant.
 
@@ -24,7 +24,7 @@ The button is very literal about “next input.” The robots are excellent at i
 | Mode | Set up | What PCV requests |
 | --- | --- | --- |
 | **Pair** | Choose two distinct eligible NPCs, A and B. | A two-person conversation. For a new pair, **Exclude the player** starts on; uncheck it to participate as Player. |
-| **Group** | Choose A and B, plus optional C and D. | A scene with two to four selected members. If an extra member is unavailable when the scene starts, they may be dropped; at least two must remain. |
+| **Group** | Choose A and B, plus optional C and D. | A scene with two to four selected members. Any unavailable member, including original A or B, may be dropped; at least two eligible members must remain. |
 | **Free scene** | Choose **How many (free scene)** from 2 to 6. | At activation, PCV takes up to that many nearest eligible NPCs in CHIM’s candidate order and fixes the roster. The player is always excluded. |
 | **Solo reflection** | Choose one **Reflecting NPC**. | One think-aloud reflection, addressed to no one, per eligible Standard input. Solo always excludes the player and has no rechat or continuation. |
 
@@ -61,16 +61,18 @@ Phrase rumors as rumors and allegations as allegations. CHIM may retain a narrat
 
 ## Ending, wrap-up, and expiry
 
-- **End now** clears pending and active PCV settings after the page confirms the state readback. If it cannot confirm, do not assume the scene is off. It does not cancel generation already underway or speech already queued. CHIM’s **Stop All Dialogue** can request a playback stop; PCV does not prove that external control in-game.
+- **End now** clears pending and active PCV settings on a successful write. Wait for the page’s state readback before assuming the scene is off. It does not cancel generation already underway or speech already queued. CHIM’s **Stop All Dialogue** can request a playback stop; PCV does not prove that external control in-game.
 - In ordinary Standard input, **`end scene`** ends an active or queued scene without sending that phrase to an NPC. With no scene running, it is ordinary speech. Voice input works only if speech-to-text transcribes the command.
-- In Pair, Group, or Free, **`wrap up: <how they close>`** requests one closing turn and releases the stored scene before generation. If PCV cannot confirm the clear, it blocks the request. CHIM still controls generation and playback.
+- If a replacement cannot be verified while a scene is active—including when its strict eligibility map is unavailable—PCV refuses that input, clears the queued replacement, and keeps the existing scene. The refused input is not redirected to either cast; a fresh ordinary Standard input can recheck the remaining scene. Initial ARM with no active scene remains pending and retryable.
+- In Pair, Group, or Free, **`wrap up: <how they close>`** is a stage direction even when the player is included. PCV validates that direction before clearing the stored scene; an invalid player-prefixed direction, such as one made ambiguous by a colon-bearing identity, is refused without ending the scene. A valid closing turn releases the PCV scene before generation. Its closing sentinel takes precedence over a valid SHARMAT listener pin for this response, but it does not end OStim or cancel independent SHARMAT requests. CHIM still controls generation and playback.
 - Solo has no closing turn. **`wrap up`** immediately ends a pending or active reflection.
 - Pending settings expire after 15 minutes. An active scene expires after one hour without a scene turn; a turn renews the timer. After five minutes of consecutive failed eligibility checks, a later request can end the scene; the request that reaches the threshold is still refused. The page explains whether the latest check found too few eligible NPCs or could not verify eligibility; that is not a report of physical absence for five minutes.
+- When the current playthrough identity is unavailable, a safely readable store containing only expired scenes no longer blocks an input. PCV still fails closed if stored state cannot be read safely, and it does not rewrite or delete scene-state data under an unknown identity.
 - Close and Whisper inputs are stopped while a scene is active. Director mode is outside this feature.
 
 ## Install and update
 
-PCV 0.1.22 is a BETA release. For CHIM Plugin Manager discovery, GitHub release metadata uses `draft=false` and `prerelease=false`; those technical flags enable discovery and do not set or certify the maturity label.
+PCV 0.1.23 is a BETA release. Choose one installation route below and keep one active copy. For CHIM Plugin Manager discovery, GitHub release metadata’s `draft` and `prerelease` flags control discovery; neither flag sets or certifies the maturity label.
 
 Still updating from an old 0.1.4 or 0.1.5 CHIM-Plugins manifest? Those update buttons use literal old-hub asset URLs and cannot move themselves to this repository. See the historical [0.1.4 release](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.4) or [0.1.5 release](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.5), then use one of the current routes below.
 
@@ -80,25 +82,25 @@ Still updating from an old 0.1.4 or 0.1.5 CHIM-Plugins manifest? Those update bu
 2. For an update, use **Update <channel label>** on the installed row, confirm **Install Plugin** or **Update Plugin**, then choose **Back to Plugin Manager**.
 3. Open **Plugin Page** on the PCV row. Use this generated link: it follows the resolved install folder.
 
-The installer uses the flat [chim-plugin.tar.gz](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.22/chim-plugin.tar.gz) asset. Fresh discovery installs normally use `ext/CHIM-PrivateConversation`; an update can retain an existing `ext/private_conversation` folder. MO2 is not needed for this server-plugin route.
+The installer uses the flat [chim-plugin.tar.gz](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.23/chim-plugin.tar.gz) asset. Fresh discovery installs normally use `ext/CHIM-PrivateConversation`; an update can retain an existing `ext/private_conversation` folder. MO2 is not needed for this server-plugin route.
 
 ### MO2 and manual downloads
 
-For MO2, install and enable the [0.1.22 MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.22/private_conversation-0.1.22-mo2.zip) as the one active PCV source, with `CHIM` directly under the game’s Data root. The ZIP already contains `CHIM/server-plugins/private_conversation/0.1.22.dwpkg`; a separate DWPkg download is unnecessary. Its root `meta.ini` includes `validated=true`, an MO2 metadata override—not proof CHIM sees or syncs the package. MO2 may overwrite the displayed version during import; the server version is checked separately below.
+For MO2, install and enable the [0.1.23 MO2 ZIP](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.23/private_conversation-0.1.23-mo2.zip) as the one active PCV source, with `CHIM` directly under the game’s Data root. The ZIP already contains `CHIM/server-plugins/private_conversation/0.1.23.dwpkg`; a separate DWPkg download is unnecessary. Its root `meta.ini` includes `validated=true`, an MO2 metadata override—not proof CHIM sees or syncs the package. MO2 may overwrite the displayed version during import; the server version is checked separately below.
 
 | Download | Use |
 | --- | --- |
-| [DWPkg](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.22/private_conversation-0.1.22.dwpkg) | Advanced manual sync: rename to `0.1.22.dwpkg` and place at `Data/CHIM/server-plugins/private_conversation/0.1.22.dwpkg`. Do not unpack into Data. |
-| [Legacy repository TAR](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.22/private_conversation.tar.gz) | Candidate-manifest route only; CHIM removes its `private_conversation/` wrapper using `archive_strip_components: 1`. This is not the flat Plugin Manager asset. |
-| [SHA256SUMS.txt](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.22/SHA256SUMS.txt) | Optional release-asset checksum verification. |
+| [DWPkg](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.23/private_conversation-0.1.23.dwpkg) | Advanced manual sync: rename to `0.1.23.dwpkg` and place at `Data/CHIM/server-plugins/private_conversation/0.1.23.dwpkg`. Do not unpack into Data. |
+| [Legacy repository TAR](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.23/private_conversation.tar.gz) | Candidate-manifest route only; CHIM removes its `private_conversation/` wrapper using `archive_strip_components: 1`. This is not the flat Plugin Manager asset. |
+| [SHA256SUMS.txt](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.23/SHA256SUMS.txt) | Optional release-asset checksum verification. |
 
-For MO2/DWPkg sync, start CHIM connected to the game and load a save to trigger sync. Then open **Server Plugins → Automatic Game Plugin Sync → Refresh Status** and confirm the server version is **0.1.22**. The client `SERVER_PLUGIN_SYNC` log is another check; MO2’s displayed version is separate.
+For MO2/DWPkg sync, start CHIM connected to the game and load a save to trigger sync. Then open **Server Plugins → Automatic Game Plugin Sync → Refresh Status** and confirm the server version is **0.1.23**. The client `SERVER_PLUGIN_SYNC` log is another check; MO2’s displayed version is separate.
 
 ### Duplicate-copy recovery
 
 Keep exactly one active PCV source. If the Plugin Page returns **HTTP 409**, read the message to identify the physical owner and open that copy’s Plugin Page. If a scene is active, click **End now on that owner page before switching or removing the duplicate**. PCV state is tied to its installation path; it is not automatically migrated between copies.
 
-An unguarded 0.1.19 copy can remain preferred and make a newer guarded copy defer safely with HTTP 409. Two unguarded 0.1.19 copies can still collide even when a guarded 0.1.20, 0.1.21, or 0.1.22 copy is present. Upgrade/replace or remove the extra old copy until one source remains. The 0.1.21 runtime matched 0.1.20; 0.1.22 changes runtime code, so that old byte-match claim does not extend to this release. Installing another copy does not solve two old copies.
+An unguarded 0.1.19 copy can remain preferred and make a newer guarded copy defer safely with HTTP 409. Two unguarded 0.1.19 copies can still collide even when a guarded 0.1.20, 0.1.21, 0.1.22, or 0.1.23 copy is present. Upgrade/replace or remove the extra old copy until one source remains. The 0.1.21 runtime matched 0.1.20; 0.1.22 and 0.1.23 change runtime code, so that old byte-match claim does not extend to either release. Installing another copy does not solve two old copies.
 
 Before switching installation routes, back up the server and quiesce old requests. Disabling a game-carried package stops discovery but does not uninstall its server copy; remove it through the server route too. Removing PCV or Mind Poisoning does not undo opinion values already stored by Mind Poisoning.
 
@@ -108,7 +110,7 @@ PCV’s scene direction and routing work without Mind Poisoning. Install Mind Po
 
 ## Logs and troubleshooting
 
-Open **Operational logs** from the Plugin Page for sanitized lifecycle records. PCV logs ordinarily omit raw prompts and dialogue; bounded NPC IDs and exception metadata may appear.
+Open **Operational logs** from the Plugin Page for sanitized lifecycle records. This access rule protects only the diagnostics view and log export; scene controls are unaffected. Direct loopback requests are allowed only without forwarding headers. An existing trusted web server may instead supply `REMOTE_USER` after authentication. A reverse proxy must authenticate the upstream client and set `REMOTE_USER` server-side, or mark proxied traffic so PCV rejects it as direct loopback; never pass a client-supplied `REMOTE_USER` header through as the authenticated server identity. Preserve trustworthy source-address information too: forwarded identity/address headers alone are not authentication. A private default gateway is not caller identity, so PCV no longer grants automatic gateway access. Depending on the WSL and host network setup, a Windows browser may not reach the service through localhost. If localhost cannot reach it and no authenticated route already exists, the server operator must provide authenticated access or inspect the logs locally. PCV does not configure authentication or ship a login page. PCV logs ordinarily omit raw prompts and dialogue; bounded NPC IDs and exception metadata may appear.
 
 | What you see | What to try |
 | --- | --- |
@@ -133,7 +135,7 @@ php diagnostics.php --config CONFIG_UUID --jsonl > /restricted/path/private-conv
 
 The CLI reader rejects HTTP; the protected Logs page and CLI share the sanitized reader. It accepts 1–1000 matching records and scans at most five rotated 10 MiB files. Missing or capped logs do not prove nothing happened. The default temporary log root can be cleaned by the OS. For retention, set `PCV_LOG_DIR` in the trusted worker environment to an absolute private path outside the webroot, owned by the worker with mode `0700`; the reader needs the same identity and environment. `PCV_LOG_DEBUG_UNTIL` is an administrator-set Unix timestamp no more than one hour ahead, not a web toggle. Under lock contention the writer can fall back to PHP’s `error_log`; that fallback is best-effort, keeps health degraded, and is not shown by the Logs reader.
 
-The page uses CSRF protection, **not a login system**. Keep CHIM behind an independently trusted access boundary.
+The page uses CSRF protection for form submissions, **not a login system**. Keep the server behind an independently trusted access boundary.
 
 ## How it works and what each plugin owns
 
@@ -153,13 +155,13 @@ The default runtime state lives in a private per-install temporary root, separat
 
 The extension-root `.htaccess` protects only legacy extension-local state when Apache honors overrides. If overrides are ignored, the package is not an HTTP access boundary; another server needs an equivalent server-level rule. The denial was checked in isolated Apache fixtures, not against your installed server. See [operator acceptance](docs/operator-acceptance.md) before changing routes or handling live state.
 
-PCV 0.1.22 changes runtime code. Its [focused verification record](tasks/critique-fixes-2026-10-20/verification.md) reports test-distro PHP fixture RED/GREEN results and syntax checks for action scoping, card validation, refusal-clock handling, and the latest eligibility-check explanation. These fixtures use synthetic inputs; they are not a fresh full CHIM request, provider run, installation check, or Skyrim session.
+PCV 0.1.22 and 0.1.23 both change runtime code. The current [focused verification record](tasks/critique-fixes-2026-10-22/verification.md) reports 19 selected PHP fixture files passing in the test distro, 14/14 host-only Node DOM checks, and syntax checks for the five changed PHP files. It preserves the original failing outputs and corrected-fixture receipts. These checks use synthetic inputs; they do not establish a complete CHIM request, provider run, package contents, fresh installation, or Skyrim gameplay.
 
-Earlier gameplay evidence remains historical. The exercised 0.1.20 Elsa–Lidia Pair flow has retained native client logs showing playback completion for all five utterances (two by Elsa and three by Lidia); all three Solo reflection utterances also reached playback completion. Dated PCV/Mind Poisoning server review records separately show an Elsa-to-Bruce opinion change stored and END with an empty active scope. Direct post-END recovery, repeated Solo use, and removal without harm were operator-confirmed. The publisher verified 0.1.21’s 20 non-manifest payload members match 0.1.20; 0.1.21 was not separately played. That metadata-only comparison does not apply to 0.1.22. See the [historical acceptance evidence](tasks/beta-2026-10-17/acceptance-evidence.md) and the [0.1.22 player guide](docs/player-guide.md). PCV remains a scoped current-request feature, not a privacy force field: history and memories can still mention excluded people, models can ignore guidance, and vanilla earshot is outside its checks.
+Earlier gameplay evidence remains historical. The exercised 0.1.20 Elsa–Lidia Pair flow has retained native client logs showing playback completion for all five utterances (two by Elsa and three by Lidia); all three Solo reflection utterances also reached playback completion. Dated PCV/Mind Poisoning server review records separately show an Elsa-to-Bruce opinion change stored and END with an empty active scope. Direct post-END recovery, repeated Solo use, and removal without harm were operator-confirmed. The publisher verified 0.1.21’s 20 non-manifest payload members match 0.1.20; 0.1.21 was not separately played. That metadata-only comparison does not apply to runtime-changing 0.1.22 or 0.1.23. No fresh 0.1.23 gameplay, installation, or provider run is claimed. See the [historical acceptance evidence](tasks/beta-2026-10-17/acceptance-evidence.md) and the [0.1.23 player guide](docs/player-guide.md). PCV remains a scoped current-request feature, not a privacy force field: history and memories can still mention excluded people, models can ignore guidance, and vanilla earshot is outside its checks.
 
 ## Release notes and support
 
-The [0.1.22 release note](distribution/private_conversation-v0.1.22.md) holds current beta guidance; [0.1.21](distribution/private_conversation-v0.1.21.md) and the [0.1.20 ALPHA note](distribution/private_conversation-v0.1.20.md) preserve earlier release records. Recent history: [0.1.19](distribution/private_conversation-v0.1.19.md) and [0.1.18](distribution/private_conversation-v0.1.18.md). The [GitHub releases page](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases) and [distribution folder](distribution/) keep the older release archaeology, so this page can be about using the plugin.
+The [0.1.23 release note](distribution/private_conversation-v0.1.23.md) contains current BETA guidance. [0.1.22](distribution/private_conversation-v0.1.22.md), [0.1.21](distribution/private_conversation-v0.1.21.md) and the [0.1.20 ALPHA note](distribution/private_conversation-v0.1.20.md) preserve earlier release records. Recent history: [0.1.19](distribution/private_conversation-v0.1.19.md) and [0.1.18](distribution/private_conversation-v0.1.18.md). The [GitHub releases page](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases) and [distribution folder](distribution/) keep the older release archaeology, so this page can be about using the plugin.
 
 [Report issues](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/issues) with PCV/CHIM versions, mode and settings, a short reproduction, expected versus observed behavior, and only relevant bounded logs. Omit credentials and full private dumps. “The llama looked suspicious” is delightful atmosphere and a poor bug report.
 

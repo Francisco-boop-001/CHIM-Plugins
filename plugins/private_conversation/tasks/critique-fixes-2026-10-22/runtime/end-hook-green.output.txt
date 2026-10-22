@@ -1,0 +1,1 @@
+PASS END failures block; solo/group wraps and active/pending END success plus unarmed input remain intact

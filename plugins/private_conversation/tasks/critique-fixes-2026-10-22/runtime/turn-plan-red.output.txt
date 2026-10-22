@@ -1,0 +1,2 @@
+plan1={"listeners":["Aela","Bruce"],"spread":true,"wrap_up":false,"sharmat":false}
+FAIL: Wrap-up must suppress a valid SHARMAT listener pin.

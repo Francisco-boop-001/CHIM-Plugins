@@ -1,0 +1,97 @@
+[
+  {
+    "label": "eligibility-green",
+    "exit": 0,
+    "output": "eligibility-green.output.txt"
+  },
+  {
+    "label": "state-green",
+    "exit": 0,
+    "output": "state-green.output.txt"
+  },
+  {
+    "label": "free-ui-green",
+    "exit": 0,
+    "output": "free-ui-green.output.txt"
+  },
+  {
+    "label": "logs-access-final-green",
+    "exit": 0,
+    "output": "logs-access-final-green.output.txt"
+  },
+  {
+    "label": "ui-green",
+    "exit": 0,
+    "output": "ui-green.output.txt"
+  },
+  {
+    "label": "page-green",
+    "exit": 0,
+    "output": "page-green.output.txt"
+  },
+  {
+    "label": "page-notes-final-green",
+    "exit": 0,
+    "output": "page-notes-final-green.output.txt"
+  },
+  {
+    "label": "logs-http-final-green",
+    "exit": 0,
+    "output": "logs-http-final-green.output.txt"
+  },
+  {
+    "label": "state-recovery-final-green",
+    "exit": 0,
+    "output": "state-recovery-final-green.output.txt"
+  },
+  {
+    "label": "scope-complete-green",
+    "exit": 0,
+    "output": "scope-complete-green.output.txt"
+  },
+  {
+    "label": "turn-plan-green",
+    "exit": 0,
+    "output": "turn-plan-green.output.txt"
+  },
+  {
+    "label": "turn-hooks-green",
+    "exit": 0,
+    "output": "turn-hooks-green.output.txt"
+  },
+  {
+    "label": "strict-rechat-green",
+    "exit": 0,
+    "output": "strict-rechat-green.output.txt"
+  },
+  {
+    "label": "commands-green",
+    "exit": 0,
+    "output": "commands-green.output.txt"
+  },
+  {
+    "label": "end-hook-green",
+    "exit": 0,
+    "output": "end-hook-green.output.txt"
+  },
+  {
+    "label": "group-scope-green",
+    "exit": 0,
+    "output": "group-scope-green.output.txt"
+  },
+  {
+    "label": "group-routing-green",
+    "exit": 0,
+    "output": "group-routing-green.output.txt"
+  },
+  {
+    "label": "group-activation-green",
+    "exit": 0,
+    "output": "group-activation-green.output.txt"
+  },
+  {
+    "label": "free-activation-green",
+    "exit": 0,
+    "output": "free-activation-green.output.txt"
+  }
+]

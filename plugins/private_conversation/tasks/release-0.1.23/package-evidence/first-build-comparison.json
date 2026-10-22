@@ -1,0 +1,22 @@
+[
+  {
+    "name": "chim-plugin.tar.gz",
+    "equal": true
+  },
+  {
+    "name": "private_conversation-0.1.23-mo2.zip",
+    "equal": true
+  },
+  {
+    "name": "private_conversation-0.1.23.dwpkg",
+    "equal": true
+  },
+  {
+    "name": "private_conversation.tar.gz",
+    "equal": true
+  },
+  {
+    "name": "SHA256SUMS.txt",
+    "equal": true
+  }
+]

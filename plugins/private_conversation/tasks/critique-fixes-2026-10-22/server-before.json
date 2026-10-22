@@ -1,0 +1,86 @@
+[
+  {
+    "path": "server/.htaccess",
+    "sha256": "ccd754e3ccb7ac8b8a8eafd60f087d6e5a4b936c17459720d5c512b5b927c05a"
+  },
+  {
+    "path": "server/context_pre.php",
+    "sha256": "9a42bdeaa0bf7ea8121363f80c335fc600a965383c359b74043ae9e6fa8dcb53"
+  },
+  {
+    "path": "server/context.php",
+    "sha256": "2b7a4128c4718b296cecd63c903f17d5b5ba2a6c2a87a77c531437ab00a3d5bf"
+  },
+  {
+    "path": "server/diagnostics.php",
+    "sha256": "89166188fd86b7b656a90b4e014f49213c1a1829da90d74e30b5f6dad1fb6e87"
+  },
+  {
+    "path": "server/index.php",
+    "sha256": "9b3b1ca09c47ed0bf3fa3718f3d37384e9483cfd34b1714f73a2b1b0dd8545fc"
+  },
+  {
+    "path": "server/installation_guard.php",
+    "sha256": "082cb9534bb3c8570faa384c5050d5193f2fbe19a58534381bb7f1b47e2a607d"
+  },
+  {
+    "path": "server/json_response_custom.php",
+    "sha256": "f1304985ee29663365cebb87bf11846edbc2dc68c77b1e981ab2b7e7a95eebd1"
+  },
+  {
+    "path": "server/log_reader.php",
+    "sha256": "9fbe50d46ecbc9064df80d258439d77cafcbadf38b0d9b4b6ea83577f2498c97"
+  },
+  {
+    "path": "server/log.php",
+    "sha256": "0a3a0684211bcb7e3e2a380ddf0d0173dfe838471b557d0b6ab1a1ec8a3fef56"
+  },
+  {
+    "path": "server/manifest.json",
+    "sha256": "ffaef9c859e3e379b49e6754752199b2d9a8aa0cda4710cc1c92ab71b745ce0f"
+  },
+  {
+    "path": "server/postrequest.php",
+    "sha256": "ef872ff00160d0403d856dfde6606e4c639c716bb624601641ef9a3118adef21"
+  },
+  {
+    "path": "server/prepostrequest.php",
+    "sha256": "3b92bd8825ae0770b49fe01646a90758e8a22b4870cffed3872c19882af7e380"
+  },
+  {
+    "path": "server/preprocessing.php",
+    "sha256": "e1881d60901f3cc47dc0fafe0430ac8fd8fd909e482bede08c181a3c5f19fb5e"
+  },
+  {
+    "path": "server/prerequest.php",
+    "sha256": "b229411c6f6d6f78403890041f6f2a3fa43ded3feb199f3a590aa397fd019434"
+  },
+  {
+    "path": "server/reflection_receipt.php",
+    "sha256": "f2fba808ec7f1153f059b4a919f855fa95f23761fb4eb5ac3ebc7173340a7f15"
+  },
+  {
+    "path": "server/reflection.php",
+    "sha256": "d33a41331638be653d7c94119043672d7142e73ac752f8adb7b7cfc090670540"
+  },
+  {
+    "path": "server/scope.php",
+    "sha256": "078912784620a27c3f4e4173cc252fb492ce004d7d7be8e93033d10fa53305f6"
+  },
+  {
+    "path": "server/state.php",
+    "sha256": "af117608cbbd74c38013630b334ad4dffae4f81a4d7e3a746b12cd8962c7f2e0"
+  },
+  {
+    "path": "server/assets/private-conversation-scene.png",
+    "sha256": "e104c8c2d8fec85185855eeb5026d582e9caa3795534e3720eb661173f6d76af"
+  },
+  {
+    "path": "server/assets/style.css",
+    "sha256": "25c99aa25a2e637a91b42f2b09dd61b58cb7d1843a7a48a79a95e898fc511158"
+  },
+  {
+    "path": "server/assets/ui-refresh.js",
+    "sha256": "836896f1e03a43d869acc60d0d4547577939d21f73bda40fc0bed907d85b43c3"
+  }
+]

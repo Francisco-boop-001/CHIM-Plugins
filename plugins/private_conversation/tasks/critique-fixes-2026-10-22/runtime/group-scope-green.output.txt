@@ -1,0 +1,3 @@
+{"enabled":true,"scene_mode":"pair","actor_a":"Stalleo","actor_b":"Guard One","members":["Stalleo","Guard One","Guard Two"],"opener":"Guard Two","exclude_player":true,"bystander_mode":"exclude"}
+live={"status":"active","profiles":{"Stalleo":7,"Guard One":8,"Guard Two":9}}
+PASS resolved group scopes carry member names, opener and profiles

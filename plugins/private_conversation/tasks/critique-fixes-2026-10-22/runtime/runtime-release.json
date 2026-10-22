@@ -1,0 +1,16 @@
+{
+  "recordedUtc": "2026-10-22T18:03:53.4686792Z",
+  "ownHttpHelperProbeExit": 0,
+  "ownPersistentHelpers": 0,
+  "distroStatus": "  NAME                     STATE           VERSION\r\n\r\n* kali-linux               Running         2\r\n\r\n  docker-desktop           Stopped         2\r\n\r\n  DwemerAI4Skyrim3         Stopped         2\r\n\r\n  DwemerAI4Skyrim3-test    Running         2\r\n\r\n\r\n",
+  "gamingVhd": {
+    "path": "D:\\DwemerAI4Skyrim3\\ext4.vhdx",
+    "length": 157550641152,
+    "lastWriteTimeUtc": "2026-10-19T23:04:40.9907162Z",
+    "beforeUtcTicks": 639280478809907162,
+    "afterUtcTicks": 639280478809907162,
+    "sizeAndUtcTimestampUnchanged": true
+  },
+  "scope": "No distro stopped; pre-existing TEST services preserved; no PostgreSQL/providers/installed-data access; metadata equality does not prove disk content equality",
+  "pcvNativeQueue": "released; no queued work"
+}

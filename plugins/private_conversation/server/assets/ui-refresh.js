@@ -167,7 +167,9 @@
         if (pageIntro) {
             pageIntro.textContent = solo
                 ? 'Choose one NPC to think aloud. CHIM carries that scene direction into the next eligible ordinary Standard-mode input.'
-                : 'Choose two voices for a conversation, or one NPC to think aloud. CHIM carries that scene direction into the next eligible ordinary Standard-mode input.';
+                : free
+                    ? `Choose up to ${freeCap?.value || '6'} nearest eligible NPCs for a conversation. The player is excluded. CHIM carries that scene direction into the next eligible ordinary Standard-mode input.`
+                    : 'Choose two to four voices for a conversation. CHIM carries that scene direction into the next eligible ordinary Standard-mode input.';
         }
         if (modeGuidance) {
             modeGuidance.hidden = !solo;
@@ -417,5 +419,6 @@
     }
     documentRef.querySelector('#solo-mode')?.addEventListener('change', handleModeChange);
     documentRef.querySelector('#free-mode')?.addEventListener('change', handleFreeChange);
+    documentRef.querySelector('#free-cap')?.addEventListener('change', updateModePresentation);
     void refresh();
 })();

@@ -1,0 +1,2 @@
+{"enabled":true,"scene_mode":"pair","free":true,"exclude_player":true,"bystander_mode":"silent","free_cap":"3"}
+PASS free page: checkbox, form ignores pickers, pending and active free status

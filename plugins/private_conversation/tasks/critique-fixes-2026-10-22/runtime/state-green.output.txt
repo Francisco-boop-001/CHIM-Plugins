@@ -1,0 +1,3 @@
+PASS: default state path and atomic legacy migration preserved active/pending, registry, receipts, and presence
+PASS: cross-device migration refusal preserved source bytes
+PASS: identity, config correlation, legacy compatibility, invalidation/expiry logs, corrupt-state preservation and isolated state logs

@@ -5,7 +5,7 @@ declare(strict_types=1);
 // G0 SHARMAT compatibility: honor SHARMAT's intimate-scene listener pin when it was computed for this speaker and
 //    names another member; a pin computed before PCV switched the speaker, or naming an outsider, is not honored.
 // G3 turn spreading: in groups of 3+, address members who have not spoken this round (new round when all have).
-// G6 wrap-up: the closing turn uses the native no-rechat sentinel (unless SHARMAT's pin applies).
+// G6 wrap-up: the closing turn always uses the native no-rechat sentinel.
 
 define('PCV_LOG_TESTING', true);
 require_once dirname(__DIR__) . '/server/log.php';
@@ -55,7 +55,8 @@ try {
     $plan = pcvSceneTurnPlan($trio, 'Lidia', [], 'Bruce', [pcv_scope_name_key('Lidia'), pcv_scope_name_key('Bruce')]);
     tpCheck($plan['listeners'] === ['Bruce'] && $plan['sharmat'] === true && $plan['spread'] === false, 'SHARMAT pin to a member is honored.');
     $plan = pcvSceneTurnPlan($trio, 'Lidia', ['wrap_up' => true], 'Bruce', []);
-    tpCheck($plan['listeners'] === ['Bruce'] && $plan['wrap_up'] === true, 'SHARMAT pin wins over the wrap-up sentinel (the scene still ends).');
+    tpCheck($plan['listeners'] === ['explicit_disable_rechat'] && $plan['wrap_up'] === true
+        && $plan['sharmat'] === false, 'Wrap-up must suppress a valid SHARMAT listener pin.');
     // Not honored: pin computed before PCV switched the speaker, or naming an outsider, or naming the speaker.
     tpCheck(pcvSceneTurnPlan($trio, 'Lidia', ['speaker_switched' => true], 'Bruce', [])['sharmat'] === false, 'A pin from before the speaker switch is ignored.');
     tpCheck(pcvSceneTurnPlan($trio, 'Lidia', [], 'Nazeem', [])['listeners'] === ['Aela', 'Bruce'], 'A pin to an outsider never widens the scene.');

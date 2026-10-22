@@ -12,6 +12,13 @@ function scopeCheck(bool $condition, string $message): void
     }
 }
 
+function scopeCheckCollect(array &$failures, bool $condition, string $message): void
+{
+    if (!$condition) {
+        $failures[] = $message;
+    }
+}
+
 final class PcvHookFixtureAbort extends RuntimeException {}
 
 function pcv_current_playthrough_key(): ?string
@@ -21,7 +28,8 @@ function pcv_current_playthrough_key(): ?string
 
 function pcv_current_player_name(): ?string
 {
-    return 'Player';
+    return is_string($GLOBALS['pcv_fixture_player_name'] ?? null)
+        ? $GLOBALS['pcv_fixture_player_name'] : 'Player';
 }
 
 function pcv_read(string $key): array
@@ -90,6 +98,16 @@ function pcv_begin_request(string $key, bool $eligible, ?string $stateDirectory 
             'config_id' => $state['config_id'] ?? null, 'reason' => 'scene_not_eligible'];
     }
     return $state;
+}
+
+function pcv_stage(string $key, array $desired, array $knownNpcs, ?string $stateDirectory = null, ?string $endReason = null): array
+{
+    $GLOBALS['pcv_fixture_stage_calls'][] = ['enabled' => $desired['enabled'] ?? null, 'reason' => $endReason];
+    if (($desired['enabled'] ?? null) === false) {
+        $GLOBALS['pcv_fixture_state'] = ['status' => 'off', 'scope' => null, 'pending' => false];
+        return ['status' => 'off', 'scope' => null, 'pending' => false];
+    }
+    return ['status' => 'unavailable', 'scope' => null, 'pending' => false];
 }
 
 final class NpcMaster
@@ -561,6 +579,153 @@ try {
         && !str_contains($logText, 'Aela') && !str_contains($logText, 'Bryn')
         && !str_contains($logText, 'Nazeem') && !str_contains($logText, 'Player'),
         'Routing logs included dialogue, prompt content, or display names.');
+
+    // Regression: an included player remains in the audience, but a wrap suffix is still a scene direction.
+    // The fixture's pcv_stage stub only changes test state; this does not prove persistent END or native playback.
+    $routingFailures = [];
+    $includedStoredScope = array_replace($storedScope, ['exclude_player' => false]);
+    $GLOBALS['pcv_fixture_state'] = [
+        'status' => 'active', 'scope' => $includedStoredScope, 'pending' => false, 'config_id' => $fixtureConfigId,
+    ];
+    $GLOBALS['pcv_fixture_current_presence'] = [
+        'status' => 'ready',
+        'actors' => [['form_id' => 1, 'name' => 'Aela', 'distance' => 10], ['form_id' => 2, 'name' => 'Bryn', 'distance' => 20]],
+        'reason' => null,
+    ];
+    $GLOBALS['pcv_fixture_cached_presence'] = [
+        'status' => 'ready', 'known_npcs' => ['101' => 'Aela', '202' => 'Bryn'], 'reason' => null,
+    ];
+    $GLOBALS['requestRoutingSnapshot'] = $snapshot;
+    $GLOBALS['gameRequest'] = ['inputtext', '1700000000', 'g', 'Player: wrap up: They part ways at dusk.', 'client-json'];
+    $GLOBALS['CHIM_EXECUTION_MODE'] = 'STANDARD';
+    $GLOBALS['HERIKA_NAME'] = 'Aela';
+    $GLOBALS['HOOKS']['JSON_TEMPLATE'] = [];
+    $GLOBALS['AIAGENTNSFW_FORCE_SCENE_LISTENER'] = 'Bryn';
+    unset($GLOBALS['PCV_REQUEST_SCOPE']);
+    scopeCheckBeginSimulatedRequest();
+    include $hookDir . '/preprocessing.php';
+    scopeCheckCollect($routingFailures,
+        ($GLOBALS['gameRequest'][0] ?? null) === 'instruction'
+            && ($GLOBALS['gameRequest'][3] ?? null) === 'Player: They part ways at dusk.'
+            && ($GLOBALS['PCV_REQUEST_SCOPE']['route'] ?? null) === 'scene_direction'
+            && ($GLOBALS['PCV_REQUEST_SCOPE']['wrap_up'] ?? null) === true,
+        'The real preprocessing hook did not route an included-player wrap suffix as scene direction.');
+    scopeCheckCollect($routingFailures,
+        ($GLOBALS['requestRoutingSnapshot']['audience'] ?? null) === '|Player|Aela|Bryn|',
+        'Routing an included-player wrap direction removed the player from the audience.');
+    include $hookDir . '/prerequest.php';
+    $GLOBALS['FUNCTIONS_ARE_ENABLED'] = true;
+    $GLOBALS['FUNC_LIST'] = ['Travel_To'];
+    $partnerName = 'Bryn';
+    $speakerName = 'Aela';
+    $GLOBALS['HOOKS']['JSON_TEMPLATE'][] = static function () use ($partnerName, $speakerName): void {
+        if (isset($GLOBALS['responseTemplate']) && is_array($GLOBALS['responseTemplate'])) {
+            $GLOBALS['responseTemplate']['listener'] = $partnerName;
+        }
+        if (isset($GLOBALS['structuredOutputTemplate']['json_schema']['schema']['properties']['listener'])) {
+            $GLOBALS['structuredOutputTemplate']['json_schema']['schema']['properties']['listener']['enum'] = [$partnerName];
+            $GLOBALS['structuredOutputTemplate']['json_schema']['schema']['properties']['listener']['description'] =
+                "Must be exactly '{$partnerName}', {$speakerName}'s partner in this NPC-to-NPC scene. Never the player.";
+        }
+    };
+    // The first fixture request already loaded this file with require_once. Re-register after the simulated
+    // SHARMAT closure so the real callback order is SHARMAT pin, then PCV's final wrap constraint.
+    pcvRegisterJsonResponseCustomizer();
+    include $hookDir . '/context_pre.php';
+    $wrapPrompt = is_string($GLOBALS['PROMPT_NEARBY_SECTIONS'] ?? null) ? $GLOBALS['PROMPT_NEARBY_SECTIONS'] : '';
+    scopeCheckCollect($routingFailures,
+        str_contains(strtolower($wrapPrompt), 'scene direction')
+            && !str_contains($wrapPrompt, 'retain their input as player speech')
+            && str_contains($wrapPrompt, 'player is included as a participant'),
+        'The wrap prompt did not distinguish direction from player speech while retaining the player as participant.');
+    scopeCheckCollect($routingFailures,
+        ($GLOBALS['CACHE_PEOPLE'] ?? null) === '|Player|Aela|Bryn|'
+            && ($GLOBALS['CACHE_PEOPLE_LIMITED'] ?? null) === '|Player|Aela|Bryn|',
+        'Context preparation removed the included player from the actual audience lists.');
+    scopeCheckCollect($routingFailures,
+        ($GLOBALS['structuredOutputTemplate']['json_schema']['schema']['properties']['listener']['enum'] ?? null)
+            === ['explicit_disable_rechat']
+            && ($GLOBALS['PCV_TURN_PLAN']['sharmat'] ?? null) === false,
+        'The final listener schema allowed a SHARMAT-pinned reply after a PCV wrap-up.');
+    $GLOBALS['head'] = [
+        ['role' => 'system', 'content' => $wrapPrompt],
+        ['role' => 'user', 'content' => 'Previous conversation history remains intact.'],
+    ];
+    include $hookDir . '/context.php';
+    scopeCheckCollect($routingFailures,
+        str_contains(strtolower((string)($GLOBALS['head'][0]['content'] ?? '')), 'scene direction')
+            && ($GLOBALS['head'][1]['content'] ?? null) === 'Previous conversation history remains intact.',
+        'The final context hook lost wrap direction guidance or prior conversation history.');
+
+    // A normal included-player turn must remain ordinary player speech.
+    unset($GLOBALS['AIAGENTNSFW_FORCE_SCENE_LISTENER']);
+    $GLOBALS['pcv_fixture_state'] = [
+        'status' => 'active', 'scope' => $includedStoredScope, 'pending' => false, 'config_id' => $fixtureConfigId,
+    ];
+    $normalIncluded = ['inputtext', '1700000001', 'g', 'Player: ordinary included speech.', 'client-json'];
+    $GLOBALS['gameRequest'] = $normalIncluded;
+    $GLOBALS['requestRoutingSnapshot'] = $snapshot;
+    $GLOBALS['HERIKA_NAME'] = 'Aela';
+    $GLOBALS['HOOKS']['JSON_TEMPLATE'] = [];
+    unset($GLOBALS['PCV_REQUEST_SCOPE']);
+    scopeCheckBeginSimulatedRequest();
+    include $hookDir . '/preprocessing.php';
+    scopeCheckCollect($routingFailures,
+        ($GLOBALS['gameRequest'] ?? null) === $normalIncluded
+            && ($GLOBALS['PCV_REQUEST_SCOPE']['route'] ?? null) === 'player_speech'
+            && ($GLOBALS['requestRoutingSnapshot']['audience'] ?? null) === '|Player|Aela|Bryn|',
+        'A normal included-player turn stopped being player speech or lost its audience membership.');
+    include $hookDir . '/prerequest.php';
+    $GLOBALS['FUNCTIONS_ARE_ENABLED'] = true;
+    $GLOBALS['HOOKS']['JSON_TEMPLATE'] = [];
+    pcvRegisterJsonResponseCustomizer();
+    include $hookDir . '/context_pre.php';
+    $normalIncludedPrompt = is_string($GLOBALS['PROMPT_NEARBY_SECTIONS'] ?? null)
+        ? $GLOBALS['PROMPT_NEARBY_SECTIONS'] : '';
+    scopeCheckCollect($routingFailures,
+        str_contains($normalIncludedPrompt, 'retain their input as player speech')
+            && !str_contains(strtolower($normalIncludedPrompt), 'scene direction'),
+        'Normal included-player context was changed to scene-direction guidance.');
+    $GLOBALS['head'] = [
+        ['role' => 'system', 'content' => $normalIncludedPrompt],
+        ['role' => 'user', 'content' => 'Ordinary included history remains intact.'],
+    ];
+    include $hookDir . '/context.php';
+    scopeCheckCollect($routingFailures,
+        str_contains((string)($GLOBALS['head'][0]['content'] ?? ''), 'retain their input as player speech')
+            && ($GLOBALS['head'][1]['content'] ?? null) === 'Ordinary included history remains intact.',
+        'The final context hook lost normal included-player speech guidance or prior history.');
+
+    // A direction must use the same prefix validation even when the player remains in the audience.
+    $colonPlayer = 'Runa: Skyrim';
+    $colonWrapRequest = ['inputtext', '1700000002', 'g', $colonPlayer . ': wrap up: They part ways at dusk.', 'client-json'];
+    $GLOBALS['pcv_fixture_player_name'] = $colonPlayer;
+    $GLOBALS['pcv_fixture_state'] = [
+        'status' => 'active', 'scope' => $includedStoredScope, 'pending' => false, 'config_id' => $fixtureConfigId,
+    ];
+    $GLOBALS['pcv_fixture_current_presence'] = [
+        'status' => 'ready',
+        'actors' => [['form_id' => 1, 'name' => 'Aela', 'distance' => 10], ['form_id' => 2, 'name' => 'Bryn', 'distance' => 20]],
+        'reason' => null,
+    ];
+    $GLOBALS['pcv_fixture_cached_presence'] = [
+        'status' => 'ready', 'known_npcs' => ['101' => 'Aela', '202' => 'Bryn'], 'reason' => null,
+    ];
+    $GLOBALS['gameRequest'] = $colonWrapRequest;
+    $GLOBALS['requestRoutingSnapshot'] = $snapshot;
+    $GLOBALS['HERIKA_NAME'] = 'Aela';
+    $GLOBALS['CHIM_EXECUTION_MODE'] = 'STANDARD';
+    unset($GLOBALS['PCV_REQUEST_SCOPE']);
+    scopeCheckBeginSimulatedRequest();
+    $colonWrapStopped = scopeCheckHookStops($hookDir . '/preprocessing.php');
+    scopeCheckCollect($routingFailures,
+        $colonWrapStopped
+            && ($GLOBALS['pcv_fixture_state']['status'] ?? null) === 'active'
+            && ($GLOBALS['gameRequest'] ?? null) === $colonWrapRequest,
+        'A colon-bearing player identity was routed as an instruction or consumed the active scene.'
+    );
+    unset($GLOBALS['pcv_fixture_player_name']);
+    scopeCheck($routingFailures === [], 'Wrap/included routing regressions: ' . implode('; ', $routingFailures));
 
     scopeCheckBeginSimulatedRequest();
     $GLOBALS['CHIM_EXECUTION_MODE'] = 'STANDARD';
@@ -1050,6 +1215,7 @@ try {
     echo "PASS: silent bystanders are described generically without actor membership or names.\n";
     echo "PASS: real hooks preserve the eligible-input boundary, responder selection, rechat clamp, audience, and action schema.\n";
     echo "PASS: malformed rechat/Close and outsider generation stop; Director and fresh install remain outside scope.\n";
+    echo "PASS: included-player wrap remains a direction, keeps the player in audience, and closes over SHARMAT pins.\n";
 } catch (Throwable $error) {
     fwrite(STDERR, 'FAIL: ' . $error->getMessage() . PHP_EOL);
     exit(1);
