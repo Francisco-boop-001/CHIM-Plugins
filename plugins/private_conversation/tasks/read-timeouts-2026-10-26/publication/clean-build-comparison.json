@@ -1,0 +1,32 @@
+[
+  {
+    "asset": "chim-plugin.tar.gz",
+    "sha256": "277a9d9d210fa605be122d8c5a9f4d00b3691f2ef4b431524602b27907e02349",
+    "matches": true,
+    "size": 3054731
+  },
+  {
+    "asset": "private_conversation-0.1.24-mo2.zip",
+    "sha256": "9574f8981a1ebe8929d4c2eb7c7a5d79f875524d693d73421f07f2a1c6638453",
+    "matches": true,
+    "size": 3057920
+  },
+  {
+    "asset": "private_conversation-0.1.24.dwpkg",
+    "sha256": "5fee5948ed66b5475cfe5f03e0c365ebb1201d963686971aee4bdc97f81839a3",
+    "matches": true,
+    "size": 3481531
+  },
+  {
+    "asset": "private_conversation.tar.gz",
+    "sha256": "4adf60dcbab992ac584887acbf2303626e6295177d19e37eed177dae4ae880bd",
+    "matches": true,
+    "size": 3054805
+  },
+  {
+    "asset": "SHA256SUMS.txt",
+    "sha256": "fc2389d9ac37bc0cf720b1b86e8075b8fbfe3ee65a666f9f68c99afc3713d656",
+    "matches": true,
+    "size": 381
+  }
+]

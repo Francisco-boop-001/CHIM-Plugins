@@ -42,15 +42,15 @@ Own artifacts/pcv-read-timeouts-20261026. Reuse actual retained official core he
 ## Task4 — docs/metadata (docs_publication_verify, independent)
 
 Own server/manifest.json version0.1.24, README.md, docs/player-guide.md, docs/logging-revision-2.md, distribution/private_conversation-v0.1.24.md.
-- [ ] Useful player guidance in established witty/self-deprecating tone; clarify failed reads, per-statement limits and paired version requirements. No invented gameplay proof.
-- [ ] Finalize exact paired links only after candidate/evidence supplied; validate links/metadata/LF.
+- [x] Useful player guidance in established witty/self-deprecating tone; clarify failed reads, per-statement limits and paired version requirements. No invented gameplay proof.
+- [x] Finalize exact paired links only after candidate/evidence supplied; validate links/metadata/LF.
 
 ## Task5 — lead acceptance and paired release
 
-- [ ] Review every diff and real call path, inspect original runtime outputs, independent cross-review; required fixes returned to owner.
-- [ ] Send exact settled source bytes/hashes early to Department; obtain overlay/backup migration success, failed-upgrade rollback, repeat and drift evidence. Keep other plugin mappings preserved.
-- [ ] Commit verified source; clean committed-source build, package inventory and authenticated draft byte checks; preserve prior releases.
-- [ ] Joint final publication gate with Department before either unmatched PCV release goes public. Verify anonymous assets, canonical and PCV-only hub scope, final documentation/evidence commit.
+- [x] Review every diff and real call path, inspect original runtime outputs, independent cross-review; required fixes returned to owner.
+- [x] Send exact settled source bytes/hashes early to Department; obtain overlay/backup migration success, failed-upgrade rollback, repeat and drift evidence. Keep other plugin mappings preserved.
+- [x] Commit verified source; clean committed-source build, package inventory and authenticated draft byte checks; preserve prior releases.
+- [x] Joint final publication gate with Department before either unmatched PCV release goes public. Verify anonymous assets, canonical and PCV-only hub scope, final documentation/evidence commit.
 
 ## Conflict scan / review focus
 
@@ -68,4 +68,4 @@ Own server/manifest.json version0.1.24, README.md, docs/player-guide.md, docs/lo
 
 ## Review
 
-Pending. Static checks will not be presented as runtime or gameplay proof.
+Lead accepted the minimal shared-reader fix and both native callers after examining diffs, official restore/token guards, rollback and caller-connection ownership, full-row/error semantics, original runtime outputs and cleanup. All source, paired migration, clean-build and public-byte gates passed. Final documentation-only commit/readback closes the remaining checklist item; no new installation/provider/Skyrim result is claimed. See publication/record.md.

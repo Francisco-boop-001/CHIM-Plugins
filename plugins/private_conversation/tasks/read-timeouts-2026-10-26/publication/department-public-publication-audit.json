@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "phase": "public",
+  "id": 424756304,
+  "url": "https://github.com/Francisco-boop-001/CHIM-DepartmentOfQuestionableDecisions/releases/tag/v0.1.0-prealpha.20",
+  "tag": "v0.1.0-prealpha.20",
+  "publishedAt": "2026-10-26T20:53:15Z",
+  "assets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 338,
+      "digest": "sha256:43f802599ba3e29e6bd916484f8f6022f65dc6b45394b5d6c0b88d0f78ea6818"
+    },
+    {
+      "name": "WorldOfDramaLlama-0.1.0-prealpha.20-paired-proof.zip",
+      "size": 3734,
+      "digest": "sha256:0d8471231953acb3f1bc94790d6c00c36d26aca050e664801f21cfca157446d9"
+    },
+    {
+      "name": "WorldOfDramaLlama-0.1.0-prealpha.20-source.zip",
+      "size": 1061574,
+      "digest": "sha256:b5329152c40b52860427c9f9496c6b33d22b0abadf37bb2d07e7857b749725fb"
+    },
+    {
+      "name": "WorldOfDramaLlama-0.1.0-prealpha.20.zip",
+      "size": 618763,
+      "digest": "sha256:2a60c5ac9d012c7ee30d6286b876ec3d117566ea1374ff2e9801bed34416b720"
+    }
+  ],
+  "priorReleasesUnchanged": 18,
+  "priorAssetsUnchanged": 111,
+  "priorTagRefsUnchanged": 36,
+  "publicDownloadsAnonymous": true
+}

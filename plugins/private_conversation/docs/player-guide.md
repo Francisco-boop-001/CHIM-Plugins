@@ -6,7 +6,7 @@ Private Conversation (PCV) sets the scene boundaries and passes direction into C
 
 **Who controls what:** PCV manages the pending/active cast and request routing, then narrows optional scene actions. CHIM owns its request pipeline, provider and client playback. The model writes dialogue and receives scene-card/turn-length guidance, which it can ignore. SHARMAT keeps its own action gates. Mind Poisoning is optional and alone owns opinion evaluation and persistence.
 
-The Department prealpha.18 and prealpha.19 releases target PCV 0.1.23. If you use the Department interface, pair PCV 0.1.24 only with a Department build whose own manifest explicitly names 0.1.24; standalone PCV remains available through its own browser page. Similar UI or behavior is not a compatibility check.
+The Department prealpha.18 and prealpha.19 releases target PCV 0.1.23. The matching prealpha.20 release names PCV 0.1.24 in its manifest; see the [paired release](https://github.com/Francisco-boop-001/CHIM-DepartmentOfQuestionableDecisions/releases/tag/v0.1.0-prealpha.20). If you use the Department interface, use that matched pair and keep the manifest pin intact. Standalone PCV remains available through its own browser page.
 
 ## First scene
 
@@ -106,7 +106,7 @@ Open **Operational logs** from the Plugin Page for sanitized lifecycle records; 
 
 ## Evidence and limits for 0.1.24
 
-Focused 0.1.24 source acceptance is recorded in the [verification report](../tasks/read-timeouts-2026-10-26/verification.md): five PHP fixtures, eight syntax checks, the 18/18 PCV PostgreSQL suite, and the 6/6 paired Department overlay suite passed. Four package checks passed and the builder produced five candidate assets. A clean committed-source build and public-asset verification remain pending. No fresh provider request, installation, or Skyrim gameplay is claimed.
+Source and publication evidence is in the [0.1.24 verification report](../tasks/read-timeouts-2026-10-26/verification.md): five focused PHP fixtures, eight syntax checks, 18/18 PCV PostgreSQL checks, and 6/6 exact Department prealpha.20 overlay checks passed. Four package checks passed; all five clean-committed-source assets match the tested candidate, and all five anonymous public PCV assets match those assets. The [PCV 0.1.24 BETA release](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/tag/private_conversation-v0.1.24) and [matching Department prealpha.20 release](https://github.com/Francisco-boop-001/CHIM-DepartmentOfQuestionableDecisions/releases/tag/v0.1.0-prealpha.20) are public. This verifies release bytes and bounded source checks, not a fresh provider request, installation, or Skyrim gameplay.
 
 The earlier 0.1.20 gameplay evidence remains historical. The publisher verified that 0.1.21 had the same runtime code as exercised 0.1.20: all 20 non-manifest payload members matched byte for byte, and the package check passed 4/4. Only the manifest version and description changed; 0.1.21 itself was not separately played. That comparison does not extend to runtime-changing 0.1.22, 0.1.23, or 0.1.24; no 0.1.24 gameplay, installation, or provider run is claimed.
 

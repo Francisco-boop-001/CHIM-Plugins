@@ -1,0 +1,946 @@
+[
+  {
+    "path": "distribution/private_conversation-v0.1.24.md",
+    "matches": true
+  },
+  {
+    "path": "docs/logging-revision-2.md",
+    "matches": true
+  },
+  {
+    "path": "docs/player-guide.md",
+    "matches": true
+  },
+  {
+    "path": "README.md",
+    "matches": true
+  },
+  {
+    "path": "server/.htaccess",
+    "matches": true
+  },
+  {
+    "path": "server/assets/private-conversation-scene.png",
+    "matches": true
+  },
+  {
+    "path": "server/assets/style.css",
+    "matches": true
+  },
+  {
+    "path": "server/assets/ui-refresh.js",
+    "matches": true
+  },
+  {
+    "path": "server/context_pre.php",
+    "matches": true
+  },
+  {
+    "path": "server/context.php",
+    "matches": true
+  },
+  {
+    "path": "server/diagnostics.php",
+    "matches": true
+  },
+  {
+    "path": "server/index.php",
+    "matches": true
+  },
+  {
+    "path": "server/installation_guard.php",
+    "matches": true
+  },
+  {
+    "path": "server/json_response_custom.php",
+    "matches": true
+  },
+  {
+    "path": "server/log_reader.php",
+    "matches": true
+  },
+  {
+    "path": "server/log.php",
+    "matches": true
+  },
+  {
+    "path": "server/manifest.json",
+    "matches": true
+  },
+  {
+    "path": "server/postrequest.php",
+    "matches": true
+  },
+  {
+    "path": "server/prepostrequest.php",
+    "matches": true
+  },
+  {
+    "path": "server/preprocessing.php",
+    "matches": true
+  },
+  {
+    "path": "server/prerequest.php",
+    "matches": true
+  },
+  {
+    "path": "server/reflection_receipt.php",
+    "matches": true
+  },
+  {
+    "path": "server/reflection.php",
+    "matches": true
+  },
+  {
+    "path": "server/scope.php",
+    "matches": true
+  },
+  {
+    "path": "server/state.php",
+    "matches": true
+  },
+  {
+    "path": "tasks/lessons.md",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/baseline-export.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/gaming-vhd-before.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/host-before.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/plan.md",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/progress.md",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/proof-source-binding.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1-command.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/baseline-receipt.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_index_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_index_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_scope_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_scope_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_scope.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog_scope.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog-schema.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/catalog-schema.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/cleanup.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/create-db.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/identity_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/identity_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/initdb.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/initialize.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/initialize.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/postgres.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/start.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/baseline-red-1/stop.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/caller-fixtures-green1.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/candidate-build.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1-command.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/catalog_index_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/catalog_index_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/catalog_scope.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/catalog_scope.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/catalog-schema.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/catalog-schema.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/cleanup.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/create-db.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/harness-source/pg_driver.py",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/harness-source/probe.php",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/harness-source/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/identity_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/identity_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/initdb.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/initialize.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/initialize.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/paired-receipt.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/postgres.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/runtime_barrier_catalog_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/runtime_barrier_catalog_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/runtime_barrier_identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/runtime_barrier_identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/start.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/dept-pcv24-green-1/stop.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/legacy-bash-host-check.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1-command.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/catalog_reader.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/catalog_reader.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/catalog-schema.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/catalog-schema.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/cleanup.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/create-db.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/harness-source/pg_driver.py",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/harness-source/probe.php",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/harness-source/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/identity_no_active.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/identity_no_active.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/identity_no_profile_table.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/identity_no_profile_table.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/initdb.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/initialize.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/initialize.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/postgres.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/read_bounds_default.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/read_bounds_default.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/runtime_barrier_catalog_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/runtime_barrier_catalog_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/runtime_barrier_identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/runtime_barrier_identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/start.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-1/stop.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2-command.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/candidate-receipt.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_index_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_index_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_preservation_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_preservation_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_preservation_statement_default.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_preservation_statement_default.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_preservation_statement_short.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_preservation_statement_short.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_reader.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_reader.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_scope_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_scope_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_scope.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog_scope.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog-schema.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/catalog-schema.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/cleanup.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/create-db.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/harness-source/pg_driver.py",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/harness-source/probe.php",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/harness-source/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity_no_active.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity_no_active.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity_no_profile_table.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity_no_profile_table.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/initdb.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/initialize.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/initialize.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/postgres.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/read_bounds_default.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/read_bounds_default.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/read_bounds_shorter.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/read_bounds_shorter.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/runtime_barrier_catalog_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/runtime_barrier_catalog_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/runtime_barrier_identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/runtime_barrier_identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/start.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-2/stop.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3-command.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/candidate-receipt.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_index_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_index_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_preservation_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_preservation_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_preservation_statement_default.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_preservation_statement_default.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_preservation_statement_short.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_preservation_statement_short.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_reader.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_reader.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_scope_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_scope_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_scope.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog_scope.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog-schema.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/catalog-schema.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/cleanup.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/create-db.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/harness-source/pg_driver.py",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/harness-source/probe.php",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/harness-source/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity_locked.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity_locked.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity_no_active.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity_no_active.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity_no_profile_table.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity_no_profile_table.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/initdb.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/initialize.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/initialize.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/postgres.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/read_bounds_default.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/read_bounds_default.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/read_bounds_shorter.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/read_bounds_shorter.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/runtime_barrier_catalog_index.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/runtime_barrier_catalog_index.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/runtime_barrier_identity.stderr.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/runtime_barrier_identity.stdout.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/start.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/owner-green-3/stop.log",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/package-check.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/page_check.php.green1.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/pg_driver.py",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/probe.php",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/README.md",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/restore-guard-green.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/restore-guard-red.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/run_pg.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/run_unit.sh",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/runtime-release.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/scope_check.php.green1.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/syntax-mock-corrected.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/syntax.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/ui-green1.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/unit-green1.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/unit-green2-aborted-callback.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/unit-red-corrected.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/runtime/unit-red.txt",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/source-acceptance.json",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/spec.md",
+    "matches": true
+  },
+  {
+    "path": "tasks/read-timeouts-2026-10-26/verification.md",
+    "matches": true
+  },
+  {
+    "path": "tests/database_read_bounds_check.php",
+    "matches": true
+  },
+  {
+    "path": "tests/identity_source_check.php",
+    "matches": true
+  },
+  {
+    "path": "tests/page_check.php",
+    "matches": true
+  },
+  {
+    "path": "tests/scope_check.php",
+    "matches": true
+  },
+  {
+    "path": "tests/ui_check.php",
+    "matches": true
+  }
+]

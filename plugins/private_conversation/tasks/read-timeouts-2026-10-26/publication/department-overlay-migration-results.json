@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "ownerCommit": "ce0a998773237a9fc91f6914725a327d9e621718",
+  "legacyOwnerCommit": "77265202d7f4a47b88e1eb88131b21f4b0752020",
+  "cases": [
+    {
+      "case": "clean-repeat",
+      "passed": true
+    },
+    {
+      "case": "already-postimage",
+      "passed": true
+    },
+    {
+      "case": "postimage-without-backup",
+      "passed": true
+    },
+    {
+      "case": "postimage-legacy-backup",
+      "passed": true
+    },
+    {
+      "case": "postimage-tampered-current-backup",
+      "passed": true
+    },
+    {
+      "case": "current-backup-partial-recovery",
+      "passed": true
+    },
+    {
+      "case": "owner-drift",
+      "passed": true
+    },
+    {
+      "case": "missing-stage",
+      "passed": true
+    },
+    {
+      "case": "legacy-upgrade",
+      "passed": true
+    },
+    {
+      "case": "legacy-tampered",
+      "passed": true
+    },
+    {
+      "case": "legacy-root-mismatch",
+      "passed": true
+    },
+    {
+      "case": "foreign-active",
+      "passed": true
+    },
+    {
+      "case": "tampered-archive",
+      "passed": true
+    },
+    {
+      "case": "legacy-upgrade-rollback",
+      "passed": true
+    },
+    {
+      "case": "legacy-upgrade-rollback-active-restore-failure",
+      "passed": true
+    }
+  ],
+  "count": 15,
+  "sourceHashes": {
+    "server/lib/overlay_setup.php": "34b3c5ef54d9e55cc04b224569a39be74d920ef86b681e164c7ef0b27db78aee",
+    "server/tests/onboarding/overlay.php": "6fa9e4852444d819925925af84e7b0c1e5006022dbcafe9c7b5a902db383e93e",
+    "packaging/companion-only/pcv-0.1.24-source-manifest.json": "daeb8331cc738a7470f7ed08307fc329d2c8c70cec4bf4a2d9c7475c9be332bc",
+    "pcv-companion/private-conversation-v0.1.24/server/installation_guard.php": "082cb9534bb3c8570faa384c5050d5193f2fbe19a58534381bb7f1b47e2a607d",
+    "pcv-companion/private-conversation-v0.1.24/server/log.php": "0a3a0684211bcb7e3e2a380ddf0d0173dfe838471b557d0b6ab1a1ec8a3fef56",
+    "pcv-companion/private-conversation-v0.1.24/server/manifest.json": "929a0b67050c3bab4ab1362f34997651896e07f9c8cd491a6e45fb7d9dca1ff0",
+    "pcv-companion/private-conversation-v0.1.24/server/preprocessing.php": "01134dea7cd1adc6a2467f26297f14d26e70398f50b1c1963ea02c9af1936950",
+    "pcv-companion/private-conversation-v0.1.24/server/reflection.php": "d33a41331638be653d7c94119043672d7142e73ac752f8adb7b7cfc090670540",
+    "pcv-companion/private-conversation-v0.1.24/server/scope.php": "1aac2c5124f8886cf87f22e26c621906fdd6c569d66c08b908406fd64d67865f",
+    "pcv-companion/private-conversation-v0.1.24/server/state.php": "b64277236a520b5464a26becc9c7d15dce233fdf2e3f4c99201c568da22e16d6"
+  },
+  "raw": {
+    "command": [
+      "K:\\ActorwrightExchange\\artifacts\\php-8.3.35-windows-cli\\runtime\\php.exe",
+      "-n",
+      "server/tests/onboarding/overlay.php",
+      "--stage",
+      "K:\\ActorwrightExchange\\worktrees\\department-startup-20261025\\pcv-companion\\private-conversation-v0.1.24\\server",
+      "--owner-base",
+      "K:\\ActorwrightExchange\\artifacts\\pcv-read-timeouts-20261026\\sources\\pcv24-candidate3\\server",
+      "--manifest",
+      "K:\\ActorwrightExchange\\worktrees\\department-startup-20261025\\packaging\\companion-only\\pcv-0.1.24-source-manifest.json",
+      "--legacy-owner-root",
+      "K:\\ActorwrightExchange\\artifacts\\department-pcv24-20261026\\owner23-baseline\\server"
+    ],
+    "exitCode": 0,
+    "stdout": "{\"case\":\"clean-repeat\",\"passed\":true}\r\n{\"case\":\"already-postimage\",\"passed\":true}\r\n{\"case\":\"postimage-without-backup\",\"passed\":true}\r\n{\"case\":\"postimage-legacy-backup\",\"passed\":true}\r\n{\"case\":\"postimage-tampered-current-backup\",\"passed\":true}\r\n{\"case\":\"current-backup-partial-recovery\",\"passed\":true}\r\n{\"case\":\"owner-drift\",\"passed\":true}\r\n{\"case\":\"missing-stage\",\"passed\":true}\r\n{\"case\":\"legacy-upgrade\",\"passed\":true}\r\n{\"case\":\"legacy-tampered\",\"passed\":true}\r\n{\"case\":\"legacy-root-mismatch\",\"passed\":true}\r\n{\"case\":\"foreign-active\",\"passed\":true}\r\n{\"case\":\"tampered-archive\",\"passed\":true}\r\n{\"case\":\"legacy-upgrade-rollback\",\"passed\":true}\r\n{\"case\":\"legacy-upgrade-rollback-active-restore-failure\",\"passed\":true}\r\n",
+    "stderr": ""
+  },
+  "limits": {
+    "temporaryFilesOnly": true,
+    "database": false,
+    "http": false,
+    "skyrim": false
+  }
+}

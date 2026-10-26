@@ -1,0 +1,42 @@
+[
+  {
+    "asset": "chim-plugin.tar.gz",
+    "url": "https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/chim-plugin.tar.gz",
+    "anonymous": true,
+    "sha256": "277a9d9d210fa605be122d8c5a9f4d00b3691f2ef4b431524602b27907e02349",
+    "size": 3054731,
+    "matches": true
+  },
+  {
+    "asset": "private_conversation-0.1.24-mo2.zip",
+    "url": "https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/private_conversation-0.1.24-mo2.zip",
+    "anonymous": true,
+    "sha256": "9574f8981a1ebe8929d4c2eb7c7a5d79f875524d693d73421f07f2a1c6638453",
+    "size": 3057920,
+    "matches": true
+  },
+  {
+    "asset": "private_conversation-0.1.24.dwpkg",
+    "url": "https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/private_conversation-0.1.24.dwpkg",
+    "anonymous": true,
+    "sha256": "5fee5948ed66b5475cfe5f03e0c365ebb1201d963686971aee4bdc97f81839a3",
+    "size": 3481531,
+    "matches": true
+  },
+  {
+    "asset": "private_conversation.tar.gz",
+    "url": "https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/private_conversation.tar.gz",
+    "anonymous": true,
+    "sha256": "4adf60dcbab992ac584887acbf2303626e6295177d19e37eed177dae4ae880bd",
+    "size": 3054805,
+    "matches": true
+  },
+  {
+    "asset": "SHA256SUMS.txt",
+    "url": "https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/SHA256SUMS.txt",
+    "anonymous": true,
+    "sha256": "fc2389d9ac37bc0cf720b1b86e8075b8fbfe3ee65a666f9f68c99afc3713d656",
+    "size": 381,
+    "matches": true
+  }
+]

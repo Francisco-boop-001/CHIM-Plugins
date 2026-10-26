@@ -1,0 +1,14 @@
+{
+  "command": [
+    "K:\\ActorwrightExchange\\artifacts\\php-8.3.35-windows-cli\\runtime\\php.exe",
+    "-n",
+    "-d",
+    "extension_dir=K:/ActorwrightExchange/artifacts/php-8.3.35-windows-cli/runtime/ext",
+    "-d",
+    "extension=php_zip.dll",
+    "K:\\ActorwrightExchange\\artifacts\\department-pcv24-20261026\\validate_paired_archives.php"
+  ],
+  "exitCode": 0,
+  "stdout": "{\n    \"consumer\": \"Unmodified official DwemerPluginPackageManager::validateAndExtractArchive; no install\\/migration\",\n    \"hostCommit\": \"0ec590b42c8087860138bb4e9aab470049ff9a2b\",\n    \"consumerSha256\": \"a35936ac82fe4bad92bedb514cc9b75353f663d21de07b88c9e4f1ec36e89e42\",\n    \"databaseTouched\": false,\n    \"cases\": [\n        {\n            \"name\": \"questionable_decisions\",\n            \"version\": \"0.1.0-prealpha.20\",\n            \"archiveSha256\": \"b77db4ebe01b0fcf87b50eed0d28475f6032f69d7e4186b9e3075491947e1716\",\n            \"accepted\": true,\n            \"activated\": false,\n            \"schemaVersion\": 4\n        },\n        {\n            \"name\": \"pcv_companion\",\n            \"version\": \"0.1.0-prealpha.11\",\n            \"archiveSha256\": \"80a3accb93b5db49e247dbacaaa0008a752acc49b7459f8d0894d43b2316be46\",\n            \"accepted\": true,\n            \"activated\": false,\n            \"schemaVersion\": 4\n        },\n        {\n            \"name\": \"private_conversation\",\n            \"version\": \"0.1.24\",\n            \"archiveSha256\": \"5fee5948ed66b5475cfe5f03e0c365ebb1201d963686971aee4bdc97f81839a3\",\n            \"accepted\": true,\n            \"activated\": false,\n            \"schemaVersion\": 4\n        }\n    ]\n}\r\n",
+  "stderr": ""
+}
