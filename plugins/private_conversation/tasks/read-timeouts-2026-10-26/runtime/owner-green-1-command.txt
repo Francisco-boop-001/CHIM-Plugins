@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/pg_driver.py", line 500, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/pg_driver.py", line 403, in main
+    results.extend(test_candidate_boundaries(engine, package))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/pg_driver.py", line 196, in test_candidate_boundaries
+    insert_catalog_rows()
+  File "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/pg_driver.py", line 110, in insert_catalog_rows
+    psql(
+  File "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/pg_driver.py", line 42, in psql
+    result = run(
+             ^^^^
+  File "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/pg_driver.py", line 38, in run
+    return subprocess.run(command, input=input_text, text=True, capture_output=True, timeout=timeout, check=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['psql', 'host=127.0.0.1 port=5432 dbname=dwemer user=dwemer', '-XqAt', '-v', 'ON_ERROR_STOP=1', '-c', 'INSERT INTO public.core_profiles(id) VALUES (19); INSERT INTO public.core_npc_master (id,npc_name,prompt_head,npc_static_bio,personality,occupation,metadata,gender,race,refid,profile_id,extended_data,plugin_extended_data,core,base,tags) VALUES (4001,\'Aela\',\'head-a\',\'bio-a\',\'personality-a\',\'hunter\',\'{"fixture":"a"}\'::jsonb,\'female\',\'Nord\',\'0000000000012345\',19,\'{"extra":1}\'::jsonb,\'{"pcv":{"a":true}}\'::jsonb,\'core-a\',\'base-a\',\'tag-a\'), (4002,\'Faendal\',\'head-b\',\'bio-b\',\'personality-b\',\'archer\',\'{"fixture":"b"}\'::jsonb,\'male\',\'Bosmer\',\'0000000000012346\',19,\'{"extra":2}\'::jsonb,\'{"pcv":{"b":true}}\'::jsonb,\'core-b\',\'base-b\',\'tag-b\'), (4003,\'Lydia\',\'head-c\',\'bio-c\',\'personality-c\',\'housecarl\',\'{"fixture":"c"}\'::jsonb,\'female\',\'Nord\',\'0000000000012347\',19,\'{"extra":3}\'::jsonb,\'{"pcv":{"c":true}}\'::jsonb,\'core-c\',\'base-c\',\'tag-c\')']' returned non-zero exit status 1.

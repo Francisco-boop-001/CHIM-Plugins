@@ -1,0 +1,12 @@
+2026-10-26 15:48:12.210 -04 [46] LOG:  starting PostgreSQL 15.14 (Debian 15.14-0+deb12u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-26 15:48:12.210 -04 [46] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-26 15:48:12.361 -04 [46] LOG:  listening on Unix socket "/tmp/pcv-read-timeouts-20261026-xqnkxMGB/.s.PGSQL.5432"
+2026-10-26 15:48:12.512 -04 [49] LOG:  database system was shut down at 2026-10-26 15:48:11 -04
+2026-10-26 15:48:12.596 -04 [46] LOG:  database system is ready to accept connections
+2026-10-26 15:48:29.226 -04 [46] LOG:  received fast shutdown request
+2026-10-26 15:48:29.326 -04 [46] LOG:  aborting any active transactions
+2026-10-26 15:48:29.327 -04 [46] LOG:  background worker "logical replication launcher" (PID 52) exited with exit code 1
+2026-10-26 15:48:29.327 -04 [47] LOG:  shutting down
+2026-10-26 15:48:29.426 -04 [47] LOG:  checkpoint starting: shutdown immediate
+2026-10-26 15:48:30.342 -04 [47] LOG:  checkpoint complete: wrote 955 buffers (5.8%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.154 s, sync=0.416 s, total=1.015 s; sync files=327, longest=0.280 s, average=0.002 s; distance=4398 kB, estimate=4398 kB
+2026-10-26 15:48:30.346 -04 [46] LOG:  database system is shut down

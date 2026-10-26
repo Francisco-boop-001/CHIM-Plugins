@@ -1,0 +1,4 @@
+
+
+
+{"mode":"catalog_index_locked","status":"error","failure":"probe_exception","elapsed_ms":2016.1,"error_class":"RuntimeException"}

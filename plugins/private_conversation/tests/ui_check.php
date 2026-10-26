@@ -283,7 +283,7 @@ check(str_contains($armedPicker, 'only if both selected NPCs are still nearby an
     'Armed status must qualify activation on current presence and AI state.');
 
 $fixture = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pcv-ui-' . bin2hex(random_bytes(6));
-mkdir($fixture . '/lib/core', 0777, true);
+mkdir($fixture . '/lib', 0777, true);
 mkdir($fixture . '/conf', 0777, true);
 file_put_contents($fixture . '/lib/runtime_bootstrap.php', <<<'PHP'
 <?php
@@ -302,49 +302,66 @@ function chimRuntimeBootstrap(string $path, array $options = []): void
 PHP);
 file_put_contents($fixture . '/conf/conf.sample.php', "<?php \$DBDRIVER = 'fixture_db';\n");
 file_put_contents($fixture . '/conf/conf.php', "<?php \$FIXTURE_CONFIG_LOADED = true;\n");
-file_put_contents($fixture . '/lib/fixture_db.class.php', <<<'PHP'
-<?php
-class sql
-{
-    public function __construct()
-    {
-        $GLOBALS['pcv_fixture_db_opened'] = true;
-    }
+if (function_exists('pcv_read_npc_catalog')) {
+    throw new RuntimeException('The UI caller fixture loaded the production catalog reader too early.');
 }
-PHP);
-file_put_contents($fixture . '/lib/core/npc_master.class.php', <<<'PHP'
-<?php
-class NpcMaster
-{
-    public function __construct()
+$fixtureCatalogRows = [
+    ['id' => '301', 'npc_name' => 'Fixture NPC', 'metadata' => '{"kept":"as returned"}'],
+    ['id' => '302', 'npc_name' => 'Second Fixture NPC'],
+];
+$GLOBALS['pcv_fixture_catalog_rows'] = $fixtureCatalogRows;
+$GLOBALS['pcv_fixture_catalog_reads'] = 0;
+if (!function_exists('pcv_read_npc_catalog')) {
+    function pcv_read_npc_catalog(): array
     {
-        if (!($GLOBALS['db'] ?? null) instanceof sql) {
-            throw new RuntimeException('NPC master was not given the existing CHIM database object.');
+        $GLOBALS['pcv_fixture_catalog_reads']++;
+        if (($GLOBALS['pcv_fixture_catalog_failure'] ?? false) === true) {
+            throw new RuntimeException('fixture catalog read failed');
         }
-    }
-    public function getAll(): array
-    {
-        $GLOBALS['pcv_fixture_get_all_called'] = true;
-        return [['id' => 301, 'npc_name' => 'Fixture NPC']];
+        return $GLOBALS['pcv_fixture_catalog_rows'];
     }
 }
-PHP);
+$priorDb = $GLOBALS['db'] ?? null;
+$hadDb = array_key_exists('db', $GLOBALS);
+$sharedDb = new stdClass();
+$GLOBALS['db'] = $sharedDb;
 try {
     $rows = pcv_npc_rows($fixture);
-    check(($GLOBALS['pcv_fixture_db_opened'] ?? false) === true, 'UI bootstrap did not construct the CHIM SQL driver.');
-    check(($GLOBALS['pcv_fixture_get_all_called'] ?? false) === true, 'UI bootstrap did not call the instance NpcMaster::getAll().');
-    check($rows === [['id' => 301, 'npc_name' => 'Fixture NPC']], 'UI bootstrap did not return the current NPC rows.');
+    check($rows === $fixtureCatalogRows, 'UI catalog caller did not return the owned reader rows unchanged.');
+    check(($GLOBALS['pcv_fixture_catalog_reads'] ?? 0) === 1, 'UI catalog caller did not use the shared reader exactly once.');
+    check(($GLOBALS['FIXTURE_CONFIG_LOADED'] ?? false) === true,
+        'UI catalog caller stopped importing the CHIM runtime configuration.');
+    check(($GLOBALS['DBDRIVER'] ?? null) === 'fixture_db', 'UI catalog caller did not import the CHIM driver configuration.');
+    check(($GLOBALS['ENGINE_PATH'] ?? null) === rtrim($fixture, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR,
+        'UI catalog caller did not preserve the configured engine path.');
+    check($GLOBALS['db'] === $sharedDb, 'UI catalog caller replaced the shared CHIM database object.');
+    check(!isset($GLOBALS['pcv_fixture_db_opened']) && !isset($GLOBALS['pcv_fixture_get_all_called']),
+        'UI catalog caller opened the shared SQL driver or instantiated NpcMaster.');
+
+    check(pcvScopeLoadNpcCatalog() === $fixtureCatalogRows,
+        'Scope catalog caller did not return the shared reader rows unchanged.');
+    check(($GLOBALS['pcv_fixture_catalog_reads'] ?? 0) === 2,
+        'Scope catalog caller did not use the shared reader.');
+    check($GLOBALS['db'] === $sharedDb, 'Scope catalog caller replaced the shared CHIM database object.');
+
+    $GLOBALS['pcv_fixture_catalog_failure'] = true;
+    rejects(static fn() => pcv_npc_rows($fixture), 'UI catalog failure was returned as an empty list.');
+    rejects(static fn() => pcvScopeLoadNpcCatalog(), 'Scope catalog failure was returned as an empty list.');
 } finally {
-    foreach ([
-        '/lib/core/npc_master.class.php', '/lib/fixture_db.class.php', '/lib/runtime_bootstrap.php',
-        '/conf/conf.sample.php', '/conf/conf.php',
-    ] as $relative) {
+    foreach (['/lib/runtime_bootstrap.php', '/conf/conf.sample.php', '/conf/conf.php'] as $relative) {
         @unlink($fixture . $relative);
     }
-    @rmdir($fixture . '/lib/core');
     @rmdir($fixture . '/lib');
     @rmdir($fixture . '/conf');
     @rmdir($fixture);
+    if ($hadDb) {
+        $GLOBALS['db'] = $priorDb;
+    } else {
+        unset($GLOBALS['db']);
+    }
+    unset($GLOBALS['pcv_fixture_catalog_rows'], $GLOBALS['pcv_fixture_catalog_reads'],
+        $GLOBALS['pcv_fixture_catalog_failure'], $GLOBALS['FIXTURE_CONFIG_LOADED'],
+        $GLOBALS['DBDRIVER'], $GLOBALS['ENGINE_PATH']);
 }
 
 $logFixture = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'pcv-ui-log-' . bin2hex(random_bytes(6));

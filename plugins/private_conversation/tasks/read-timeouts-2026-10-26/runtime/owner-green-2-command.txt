@@ -1,0 +1,6 @@
+{
+  "phase": "candidate",
+  "passed": 16,
+  "total": 18,
+  "receipt": "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/runs/owner-green-2/candidate-receipt.json"
+}

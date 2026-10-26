@@ -1,0 +1,42 @@
+[
+  {
+    "file": "server/state.php",
+    "exit": 0,
+    "output": "No syntax errors detected in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/server/state.php"
+  },
+  {
+    "file": "server/index.php",
+    "exit": 0,
+    "output": "No syntax errors detected in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/server/index.php"
+  },
+  {
+    "file": "server/scope.php",
+    "exit": 0,
+    "output": "No syntax errors detected in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/server/scope.php"
+  },
+  {
+    "file": "tests/identity_source_check.php",
+    "exit": 0,
+    "output": "No syntax errors detected in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/tests/identity_source_check.php"
+  },
+  {
+    "file": "tests/database_read_bounds_check.php",
+    "exit": 255,
+    "output": "Errors parsing /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/tests/database_read_bounds_check.php\nPHP Fatal error:  Cannot redeclare pg_transaction_status() in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/tests/database_read_bounds_check.php on line 168"
+  },
+  {
+    "file": "tests/ui_check.php",
+    "exit": 0,
+    "output": "No syntax errors detected in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/tests/ui_check.php"
+  },
+  {
+    "file": "tests/page_check.php",
+    "exit": 0,
+    "output": "No syntax errors detected in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/tests/page_check.php"
+  },
+  {
+    "file": "tests/scope_check.php",
+    "exit": 0,
+    "output": "No syntax errors detected in /mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/sources/pcv24-candidate3/tests/scope_check.php"
+  }
+]

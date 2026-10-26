@@ -1,0 +1,47 @@
+[
+  {
+    "file": "server/state.php",
+    "sha256": "49c2b53466572015e77117653739966377267b5b50ec4514155e53256bca7361",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "server/index.php",
+    "sha256": "58310584871af7e1fc081da1908bc86bcb60afa6cf3c7fc9ad02b9d246c5dc4f",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "server/scope.php",
+    "sha256": "e21fd73985424c099332dcbb035e3587c72ab78a21e21781669978dc25e39686",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "server/manifest.json",
+    "sha256": "929a0b67050c3bab4ab1362f34997651896e07f9c8cd491a6e45fb7d9dca1ff0",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "tests/identity_source_check.php",
+    "sha256": "3e5f8df64744c029e0f1422423f38ca6ea95a3005657f9b75efecbd5f1f56ce8",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "tests/database_read_bounds_check.php",
+    "sha256": "2411f9a3a0e76beb46e19890a90ff525371db507d577fa7d6cb7b1b161686380",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "tests/ui_check.php",
+    "sha256": "100195d4fccef70a5e4b4dc5e19c2e8f806800807132653f5964ee9114cedc7d",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "tests/page_check.php",
+    "sha256": "0aa7dbe8abdcbacdf3c0d249143e718604a1bf141fc06e95277de7621b632bb6",
+    "matchesProofSnapshot": true
+  },
+  {
+    "file": "tests/scope_check.php",
+    "sha256": "baa17ab224f90626bc56045f883b099dd260db5a8aac25ea08f5a5e224cee3ed",
+    "matchesProofSnapshot": true
+  }
+]

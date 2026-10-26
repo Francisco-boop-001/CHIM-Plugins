@@ -110,20 +110,17 @@ function pcv_stage(string $key, array $desired, array $knownNpcs, ?string $state
     return ['status' => 'unavailable', 'scope' => null, 'pending' => false];
 }
 
-final class NpcMaster
+function pcv_read_npc_catalog(): array
 {
-    public function getAll(): array
-    {
-        $GLOBALS['pcv_fixture_catalog_calls'] = ($GLOBALS['pcv_fixture_catalog_calls'] ?? 0) + 1;
-        if (!empty($GLOBALS['pcv_fixture_catalog_throw'])) {
-            throw new RuntimeException('fixture catalog failure');
-        }
-        return $GLOBALS['pcv_fixture_catalog_rows'] ?? [
-            ['id' => '101', 'npc_name' => 'Aela', 'profile_id' => 9],
-            ['id' => '202', 'npc_name' => 'Bryn', 'profile_id' => 10],
-            ['id' => '303', 'npc_name' => 'Nazeem', 'profile_id' => 11],
-        ];
+    $GLOBALS['pcv_fixture_catalog_calls'] = ($GLOBALS['pcv_fixture_catalog_calls'] ?? 0) + 1;
+    if (!empty($GLOBALS['pcv_fixture_catalog_throw'])) {
+        throw new RuntimeException('fixture catalog failure');
     }
+    return $GLOBALS['pcv_fixture_catalog_rows'] ?? [
+        ['id' => '101', 'npc_name' => 'Aela', 'profile_id' => 9],
+        ['id' => '202', 'npc_name' => 'Bryn', 'profile_id' => 10],
+        ['id' => '303', 'npc_name' => 'Nazeem', 'profile_id' => 11],
+    ];
 }
 
 function chimSwitchActiveNpcProfile(string $name): bool

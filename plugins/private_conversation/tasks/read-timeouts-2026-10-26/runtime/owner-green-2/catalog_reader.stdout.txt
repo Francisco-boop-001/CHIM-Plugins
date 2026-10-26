@@ -1,0 +1,3 @@
+
+
+{"mode":"catalog_reader","status":"error","failure":"probe_exception","elapsed_ms":null,"error_class":"RuntimeException"}

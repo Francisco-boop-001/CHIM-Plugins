@@ -657,15 +657,10 @@ function pcvResolveLiveScopeState(
 /** Load one current catalog snapshot for the entire request. */
 function pcvScopeLoadNpcCatalog(): array
 {
-    if (!class_exists('NpcMaster')) {
-        throw new RuntimeException('NPC catalog is unavailable.');
+    if (!function_exists('pcv_read_npc_catalog')) {
+        require_once __DIR__ . '/state.php';
     }
-    $catalog = new \NpcMaster();
-    $rows = $catalog->getAll();
-    if (!is_array($rows)) {
-        throw new RuntimeException('NPC catalog is unavailable.');
-    }
-    return $rows;
+    return \pcv_read_npc_catalog();
 }
 
 function pcvScopePresenceFailureReason(array $presence): string

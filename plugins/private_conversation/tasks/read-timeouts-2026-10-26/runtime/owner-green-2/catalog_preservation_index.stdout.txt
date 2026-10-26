@@ -1,0 +1,4 @@
+
+
+
+{"mode":"catalog_preservation_index","status":"error","row_count":null,"elapsed_ms":515.8,"error_class":"RuntimeException","caller_preserved":true}

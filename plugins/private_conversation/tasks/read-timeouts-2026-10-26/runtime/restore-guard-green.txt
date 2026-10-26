@@ -1,0 +1,5 @@
+identity source query checks passed
+database read bound checks passed
+
+IDENTITY_EXIT=0
+BOUNDS_EXIT=0

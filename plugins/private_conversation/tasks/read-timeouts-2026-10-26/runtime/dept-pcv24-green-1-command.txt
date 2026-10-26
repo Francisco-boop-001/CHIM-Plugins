@@ -1,0 +1,6 @@
+{
+  "phase": "paired",
+  "passed": 6,
+  "total": 6,
+  "receipt": "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/runs/dept-pcv24-green-1/paired-receipt.json"
+}

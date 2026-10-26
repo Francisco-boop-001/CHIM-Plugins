@@ -1,0 +1,1 @@
+{"mode":"catalog_scope_locked","status":"ok","elapsed_ms":2816.9,"row_count":3,"field_count":29,"matches_native":true,"rows_sha256":"deb8f9b644d7c1203dc190dba0bfa4885076331450f484fb1a979d51dea89dbb"}

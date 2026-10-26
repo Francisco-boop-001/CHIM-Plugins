@@ -1,0 +1,13 @@
+{
+  "capturedUtc": "2026-10-26T20:15:32.1189891Z",
+  "inventory": "  NAME                      STATE           VERSION\n\n* kali-linux                Running         2\n\n  DwemerAI4Skyrim3-test2    Stopped         2\n\n  docker-desktop            Stopped         2\n\n  DwemerAI4Skyrim3          Stopped         2\n\n",
+  "defaultGuid": "{b07fc0b3-f1bd-4827-adbb-2bc535b90f04}",
+  "defaultDistro": "kali-linux",
+  "defaultBasePath": "L:\\WSL\\kali-linux",
+  "gamingVhd": {
+    "path": "D:\\DwemerAI4Skyrim3\\ext4.vhdx",
+    "length": 213060157440,
+    "lastWriteUtc": "2026-10-26T10:47:29.0663045Z",
+    "lastWriteTicks": 639286084490663045
+  }
+}

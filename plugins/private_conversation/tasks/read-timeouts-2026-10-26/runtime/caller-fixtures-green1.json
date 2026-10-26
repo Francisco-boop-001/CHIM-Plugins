@@ -1,0 +1,12 @@
+[
+  {
+    "fixture": "scope_check.php",
+    "exit": 0,
+    "output": "PASS: stable actor identity, ordinary event transform, authoritative audience, and presence exclusion.\nPASS: ambiguous speaker prefixes and unsupported modes fail closed; disabled scope is inert.\nPASS: rechat speaker set and pre-generation speaker guard stay within the selected pair.\nPASS: silent bystanders are described generically without actor membership or names.\nPASS: real hooks preserve the eligible-input boundary, responder selection, rechat clamp, audience, and action schema.\nPASS: malformed rechat/Close and outsider generation stop; Director and fresh install remain outside scope.\nPASS: included-player wrap remains a direction, keeps the player in audience, and closes over SHARMAT pins."
+  },
+  {
+    "fixture": "page_check.php",
+    "exit": 0,
+    "output": "PASS: actual page GET read failure returns a matching reference and suppresses page-open.\nPASS: valid concurrent readback stays accepted with its staged config ID and renders the current state.\nPASS: unavailable readback reports operation=readback, retains staged ID, and says it could not be confirmed.\nPASS: refresh GET rereads eligibility without staging, logging page-open, or holding the session lock.\nPASS: picker uses the helper map, disables ARM below two, and distinguishes empty/missing/stale.\nPASS: stale/single-actor POSTs reject without staging; END succeeds when catalog loading fails.\nPASS: solo POST stages with one eligible actor, ignores submitted actor B, and forces player exclusion."
+  }
+]

@@ -1,0 +1,15 @@
+2026-10-26 16:16:44.280 -04 [50] LOG:  starting PostgreSQL 15.14 (Debian 15.14-0+deb12u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-26 16:16:44.280 -04 [50] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-26 16:16:44.446 -04 [50] LOG:  listening on Unix socket "/tmp/pcv-read-timeouts-20261026-KaRXvyll/.s.PGSQL.5432"
+2026-10-26 16:16:44.614 -04 [53] LOG:  database system was shut down at 2026-10-26 16:16:42 -04
+2026-10-26 16:16:44.708 -04 [50] LOG:  database system is ready to accept connections
+2026-10-26 16:16:53.299 -04 [89] ERROR:  duplicate key value violates unique constraint "core_profiles_pkey"
+2026-10-26 16:16:53.299 -04 [89] DETAIL:  Key (id)=(19) already exists.
+2026-10-26 16:16:53.299 -04 [89] STATEMENT:  INSERT INTO public.core_profiles(id) VALUES (19); INSERT INTO public.core_npc_master (id,npc_name,prompt_head,npc_static_bio,personality,occupation,metadata,gender,race,refid,profile_id,extended_data,plugin_extended_data,core,base,tags) VALUES (4001,'Aela','head-a','bio-a','personality-a','hunter','{"fixture":"a"}'::jsonb,'female','Nord','0000000000012345',19,'{"extra":1}'::jsonb,'{"pcv":{"a":true}}'::jsonb,'core-a','base-a','tag-a'), (4002,'Faendal','head-b','bio-b','personality-b','archer','{"fixture":"b"}'::jsonb,'male','Bosmer','0000000000012346',19,'{"extra":2}'::jsonb,'{"pcv":{"b":true}}'::jsonb,'core-b','base-b','tag-b'), (4003,'Lydia','head-c','bio-c','personality-c','housecarl','{"fixture":"c"}'::jsonb,'female','Nord','0000000000012347',19,'{"extra":3}'::jsonb,'{"pcv":{"c":true}}'::jsonb,'core-c','base-c','tag-c')
+2026-10-26 16:16:53.355 -04 [50] LOG:  received fast shutdown request
+2026-10-26 16:16:53.437 -04 [50] LOG:  aborting any active transactions
+2026-10-26 16:16:53.439 -04 [50] LOG:  background worker "logical replication launcher" (PID 56) exited with exit code 1
+2026-10-26 16:16:53.439 -04 [51] LOG:  shutting down
+2026-10-26 16:16:53.519 -04 [51] LOG:  checkpoint starting: shutdown immediate
+2026-10-26 16:16:54.487 -04 [51] LOG:  checkpoint complete: wrote 950 buffers (5.8%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.383 s, sync=0.269 s, total=1.049 s; sync files=332, longest=0.093 s, average=0.001 s; distance=4403 kB, estimate=4403 kB
+2026-10-26 16:16:54.491 -04 [50] LOG:  database system is shut down

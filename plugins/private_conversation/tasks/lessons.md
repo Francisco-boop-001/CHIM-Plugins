@@ -58,3 +58,7 @@
 - Mistake pattern: updating a user-visible reason and its newest test while leaving an older related fixture broken.
   - Corrected rule: trace changed messages and contracts through every directly dependent caller and fixture before choosing the bounded gate.
   - Prevention: search all references to the old value, retain each fixture's unique behavior, and record original RED/GREEN output rather than assuming a nearby green test covers it.
+
+- Mistake pattern: treating bare Windows bash.exe as a local syntax checker. It is a legacy WSL launcher and can enter the default distro even with -n.
+  - Corrected rule: workers without a runtime grant must not invoke bash.exe, wsl.exe, or launcher aliases. The lead uses only an explicit authorized distro and an in-script identity guard.
+  - Prevention: inspect binary resolution without running it; run shell syntax checks inside the lead's existing TEST2 window, never through a default-distro launcher.

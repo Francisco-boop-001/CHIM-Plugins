@@ -1,0 +1,3 @@
+
+
+{"mode":"read_bounds_shorter","status":"ok","lock_ms":500,"statement_ms":700}

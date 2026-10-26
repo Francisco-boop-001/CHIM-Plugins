@@ -1,0 +1,104 @@
+{
+  "phase": "paired",
+  "source_root": "/mnt/k/ActorwrightExchange/artifacts/department-pcv24-20261026/overlaid-candidate3",
+  "source_sha256": {
+    "server/state.php": "b64277236a520b5464a26becc9c7d15dce233fdf2e3f4c99201c568da22e16d6",
+    "server/index.php": "58310584871af7e1fc081da1908bc86bcb60afa6cf3c7fc9ad02b9d246c5dc4f",
+    "server/scope.php": "1aac2c5124f8886cf87f22e26c621906fdd6c569d66c08b908406fd64d67865f"
+  },
+  "executed_package_sha256": {
+    "server/state.php": "b64277236a520b5464a26becc9c7d15dce233fdf2e3f4c99201c568da22e16d6",
+    "server/index.php": "58310584871af7e1fc081da1908bc86bcb60afa6cf3c7fc9ad02b9d246c5dc4f",
+    "server/scope.php": "1aac2c5124f8886cf87f22e26c621906fdd6c569d66c08b908406fd64d67865f"
+  },
+  "retained_core_root": "/mnt/k/ActorwrightExchange/artifacts/department-maintainer-audit-20261026/host/server-dev",
+  "retained_core_sha256": {
+    "lib/playthrough_home.php": "e28ced10ee4410f0926f9366fca7bb80199b2f423c80afb1c960d074564b88b6",
+    "lib/playthrough_preferences.php": "fc9562fad12b867a5593d06bc0b0b8167120b0270088c343ae3db074e4b3f475",
+    "lib/playthrough_runtime.php": "d480af9d658c8e754b78d1e4ca6056544d21942facbafd94b23ab1da4cb1cd9c",
+    "lib/playthrough_switching.php": "f8564567b9fe189e0bf83df217f83c805563f79b09dc06bc096bca85e244b445",
+    "lib/postgresql.class.php": "0ceb8187394861aca0cda6d90903ff943525948033bc2d309382569a768f076b",
+    "lib/core/npc_master.class.php": "506cf5bcc13d513abf604a4d4c14453312a34cafcbdf83d37c6ad1ab4a9b12dc",
+    "lib/core/database_schema/core_npc_master.sql": "9eae322a0183522da4ed9714eb1d538736b566beb04c264c82affdb71bc07fc6"
+  },
+  "executed_core_sha256": {
+    "lib/playthrough_home.php": "e28ced10ee4410f0926f9366fca7bb80199b2f423c80afb1c960d074564b88b6",
+    "lib/playthrough_preferences.php": "fc9562fad12b867a5593d06bc0b0b8167120b0270088c343ae3db074e4b3f475",
+    "lib/playthrough_runtime.php": "d480af9d658c8e754b78d1e4ca6056544d21942facbafd94b23ab1da4cb1cd9c",
+    "lib/playthrough_switching.php": "f8564567b9fe189e0bf83df217f83c805563f79b09dc06bc096bca85e244b445",
+    "lib/postgresql.class.php": "0ceb8187394861aca0cda6d90903ff943525948033bc2d309382569a768f076b",
+    "lib/core/npc_master.class.php": "506cf5bcc13d513abf604a4d4c14453312a34cafcbdf83d37c6ad1ab4a9b12dc",
+    "lib/core/database_schema/core_npc_master.sql": "9eae322a0183522da4ed9714eb1d538736b566beb04c264c82affdb71bc07fc6"
+  },
+  "harness_sha256": {
+    "run_pg.sh": "571adb20b1747d9009427172f1cb73f4f5957413f329af7007b99c1d52869741",
+    "pg_driver.py": "f0c4489f0ad2673e97b644473f6e3f3266680913f134af48d2df76e0969583c7",
+    "probe.php": "82127673147a98463d4c1e6503f7bc38eafed5e1499d982cf931c64263bdde53"
+  },
+  "executed_probe_sha256": "82127673147a98463d4c1e6503f7bc38eafed5e1499d982cf931c64263bdde53",
+  "postgres_version": "15.14 (Debian 15.14-0+deb12u1)",
+  "php_version": "8.2.35",
+  "network_namespace": "net:[4026532220]",
+  "initial_network_namespace": "net:[4026531833]",
+  "database": "fresh private-namespace localhost:5432/dwemer only",
+  "cases": [
+    {
+      "mode": "identity",
+      "status": "ok",
+      "elapsed_ms": 9.6,
+      "has_identity": true,
+      "player_matches": true,
+      "case": "identity_unlocked",
+      "passed": true
+    },
+    {
+      "mode": "catalog_scope",
+      "status": "ok",
+      "elapsed_ms": 8.9,
+      "row_count": 3,
+      "field_count": 29,
+      "matches_native": true,
+      "rows_sha256": "deb8f9b644d7c1203dc190dba0bfa4885076331450f484fb1a979d51dea89dbb",
+      "case": "catalog_scope_populated",
+      "passed": true
+    },
+    {
+      "mode": "identity_locked",
+      "status": "unavailable",
+      "elapsed_ms": 2020.7,
+      "has_identity": false,
+      "player_matches": false,
+      "lockElapsedWallMs": 2082.2,
+      "case": "identity_lock_is_bounded",
+      "passed": true
+    },
+    {
+      "mode": "catalog_index_locked",
+      "status": "error",
+      "failure": "probe_exception",
+      "elapsed_ms": 2016.1,
+      "error_class": "RuntimeException",
+      "lockElapsedWallMs": 2062.0,
+      "case": "catalog_lock_is_bounded_and_fails_closed",
+      "passed": true
+    },
+    {
+      "case": "runtime_barrier_identity",
+      "mode": "identity",
+      "elapsed_ms": 48.0,
+      "exit_code": 75,
+      "passed": true,
+      "status": "refused_by_runtime_barrier"
+    },
+    {
+      "case": "runtime_barrier_catalog_index",
+      "mode": "catalog_index",
+      "elapsed_ms": 55.1,
+      "exit_code": 75,
+      "passed": true,
+      "status": "refused_by_runtime_barrier"
+    }
+  ],
+  "passed": 6,
+  "total": 6
+}

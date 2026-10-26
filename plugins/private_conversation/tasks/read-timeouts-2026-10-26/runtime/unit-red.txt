@@ -1,0 +1,6 @@
+FAIL: identity query used an unexpected connection
+FAIL: bounded read helper is missing
+
+IDENTITY_EXIT=
+BOUNDS_EXIT=
+bash: line 1: test: : integer expression expected

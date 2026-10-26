@@ -1,0 +1,5 @@
+identity source query checks passed
+FAIL: tagged reads must enter the restore barrier before connect and guard the owned bounded transaction
+
+IDENTITY_EXIT=0
+BOUNDS_EXIT=1

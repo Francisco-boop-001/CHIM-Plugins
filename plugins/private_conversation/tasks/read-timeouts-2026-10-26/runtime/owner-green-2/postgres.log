@@ -1,0 +1,32 @@
+2026-10-26 16:19:42.524 -04 [50] LOG:  starting PostgreSQL 15.14 (Debian 15.14-0+deb12u1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-10-26 16:19:42.525 -04 [50] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-10-26 16:19:42.676 -04 [50] LOG:  listening on Unix socket "/tmp/pcv-read-timeouts-20261026-jqQs4MuR/.s.PGSQL.5432"
+2026-10-26 16:19:42.827 -04 [53] LOG:  database system was shut down at 2026-10-26 16:19:41 -04
+2026-10-26 16:19:42.912 -04 [50] LOG:  database system is ready to accept connections
+2026-10-26 16:19:50.788 -04 [95] ERROR:  relation "public.core_npc_master" does not exist at character 15
+2026-10-26 16:19:50.788 -04 [95] STATEMENT:  SELECT * FROM public.core_npc_master
+2026-10-26 16:19:53.981 -04 [103] ERROR:  canceling statement due to statement timeout
+2026-10-26 16:19:53.981 -04 [103] STATEMENT:  SELECT pg_sleep(3.5)
+2026-10-26 16:19:54.730 -04 [112] ERROR:  canceling statement due to lock timeout at character 15
+2026-10-26 16:19:54.730 -04 [112] STATEMENT:  SELECT * FROM public.core_npc_master
+2026-10-26 16:19:57.759 -04 [115] ERROR:  canceling statement due to statement timeout
+2026-10-26 16:19:57.759 -04 [115] STATEMENT:  SELECT pg_sleep(1.5)
+2026-10-26 16:20:00.091 -04 [129] ERROR:  canceling statement due to lock timeout at character 444
+2026-10-26 16:20:00.091 -04 [129] STATEMENT:  SELECT p.id,p.name,p.schema_name,p.is_active,p.storage_type,
+	        COALESCE(to_jsonb(p)->>'retention_kind','unclassified') AS retention_kind,p.xmin::text AS row_version,n.oid AS schema_oid,
+	        to_jsonb(p)->>'retention_pinned' AS pinned,p.player_name,p.last_gamets,p.created_at,p.size_bytes,
+	        to_jsonb(p)->>'player_faction_members' AS player_faction_members,
+	        obj_description(n.oid,'pg_namespace') AS manifest
+	        FROM chim_meta.playthrough_profiles p LEFT JOIN pg_namespace n ON n.nspname=p.schema_name AND p.storage_type='schema'
+	        ORDER BY p.is_active DESC,p.created_at DESC,p.id DESC
+2026-10-26 16:20:02.999 -04 [133] ERROR:  canceling statement due to lock timeout at character 15
+2026-10-26 16:20:02.999 -04 [133] STATEMENT:  SELECT * FROM public.core_npc_master
+2026-10-26 16:20:05.902 -04 [138] ERROR:  canceling statement due to lock timeout at character 15
+2026-10-26 16:20:05.902 -04 [138] STATEMENT:  SELECT * FROM public.core_npc_master
+2026-10-26 16:20:06.858 -04 [50] LOG:  received fast shutdown request
+2026-10-26 16:20:06.957 -04 [50] LOG:  aborting any active transactions
+2026-10-26 16:20:06.959 -04 [50] LOG:  background worker "logical replication launcher" (PID 56) exited with exit code 1
+2026-10-26 16:20:06.959 -04 [51] LOG:  shutting down
+2026-10-26 16:20:07.041 -04 [51] LOG:  checkpoint starting: shutdown immediate
+2026-10-26 16:20:07.932 -04 [51] LOG:  checkpoint complete: wrote 959 buffers (5.9%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.113 s, sync=0.465 s, total=0.973 s; sync files=334, longest=0.288 s, average=0.002 s; distance=4425 kB, estimate=4425 kB
+2026-10-26 16:20:07.937 -04 [50] LOG:  database system is shut down

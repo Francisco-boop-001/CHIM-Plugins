@@ -1,0 +1,6 @@
+{
+  "phase": "baseline",
+  "passed": 6,
+  "total": 6,
+  "receipt": "/mnt/k/ActorwrightExchange/artifacts/pcv-read-timeouts-20261026/runs/baseline-red-1/baseline-receipt.json"
+}

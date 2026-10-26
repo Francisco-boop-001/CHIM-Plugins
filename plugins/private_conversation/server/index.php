@@ -973,33 +973,10 @@ function pcv_npc_rows(string $enginePath): array
     }
     \chimRuntimeImportConfigVariables(get_defined_vars());
     $GLOBALS['ENGINE_PATH'] = $enginePath;
-
-    $driver = $GLOBALS['DBDRIVER'] ?? null;
-    if (!is_string($driver) || preg_match('/\A[A-Za-z0-9_]+\z/', $driver) !== 1) {
-        throw new RuntimeException('The CHIM database driver is unavailable.');
+    if (!function_exists('pcv_read_npc_catalog')) {
+        require_once __DIR__ . '/state.php';
     }
-    $driverPath = $enginePath . 'lib' . DIRECTORY_SEPARATOR . $driver . '.class.php';
-    $npcMasterPath = $enginePath . 'lib' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'npc_master.class.php';
-    if (!is_file($driverPath) || !is_file($npcMasterPath)) {
-        throw new RuntimeException('The CHIM NPC catalog is unavailable.');
-    }
-    require_once $driverPath;
-    if (!class_exists('sql')) {
-        throw new RuntimeException('The CHIM database driver did not load.');
-    }
-    if (!isset($GLOBALS['db']) || !($GLOBALS['db'] instanceof \sql)) {
-        $GLOBALS['db'] = new \sql();
-    }
-    require_once $npcMasterPath;
-    if (!class_exists('NpcMaster')) {
-        throw new RuntimeException('The CHIM NPC catalog is unavailable.');
-    }
-    $npcMaster = new \NpcMaster();
-    $rows = $npcMaster->getAll();
-    if (!is_array($rows)) {
-        throw new RuntimeException('The CHIM NPC catalog is invalid.');
-    }
-    return array_values($rows);
+    return array_values(\pcv_read_npc_catalog());
 }
 
 function pcv_run_page(): void

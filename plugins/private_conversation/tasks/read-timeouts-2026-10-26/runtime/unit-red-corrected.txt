@@ -1,0 +1,5 @@
+FAIL: profile and playthrough identity reads did not share the bounded read transaction
+FAIL: bounded read helper is missing
+
+IDENTITY_EXIT=1
+BOUNDS_EXIT=1

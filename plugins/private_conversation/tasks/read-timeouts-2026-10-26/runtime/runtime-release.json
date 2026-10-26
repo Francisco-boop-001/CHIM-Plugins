@@ -1,0 +1,11 @@
+{
+  "capturedUtc": "2026-10-26T20:24:28.1941344Z",
+  "inventory": "  NAME                      STATE           VERSION\n\n* kali-linux                Stopped         2\n\n  DwemerAI4Skyrim3-test2    Stopped         2\n\n  docker-desktop            Stopped         2\n\n  DwemerAI4Skyrim3          Stopped         2\n\n",
+  "test2RestoredStopped": true,
+  "gamingPath": "D:\\DwemerAI4Skyrim3\\ext4.vhdx",
+  "gamingLength": 213060157440,
+  "gamingLastWriteUtc": "2026-10-26T10:47:29.0663045Z",
+  "gamingTicks": 639286084490663045,
+  "gamingMetadataUnchanged": true,
+  "scope": "metadata only; no live content or distro entry"
+}

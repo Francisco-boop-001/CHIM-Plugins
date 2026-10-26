@@ -467,7 +467,7 @@ Source/docs and the PCV-only hub snapshot are accepted. The focused four package
 
 ### Review
 
-Solo action behavior and duplicate owner election/inactive HTTP refusal passed their bounded fixtures. Package checks passed; the exact source commit was clean-built, tagged, published as a normal-flag ALPHA release, and all five anonymous public downloads matched the clean build. Canonical main and the PCV-only hub mirror advanced non-force; independent review proved 356 exact PCV path/mode/blob entries, three authorized shared-doc edits, and 239 protected paths unchanged. The ACK shutdown behavior remains NOTRUN because no disposable PostgreSQL target was configured; no connection was made. One postterminal logger directory_unavailable warning remains unattributed. Full CHIM bootstrap/schema refresh, live install/provider/database operation, public ACK scheduling, native recovery, client sync, and Skyrim gameplay remain unverified. The release is ALPHA, not beta or stable certification. CHIM core, Mind Poisoning, live installation, and game data remain outside this change. See the [final 0.1.20 publication receipt in the canonical PCV repository](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.21/tasks/release-0.1.20/publication-evidence/final-publication-receipt.md).
+Solo action behavior and duplicate owner election/inactive HTTP refusal passed their bounded fixtures. Package checks passed; the exact source commit was clean-built, tagged, published as a normal-flag ALPHA release, and all five anonymous public downloads matched the clean build. Canonical main and the PCV-only hub mirror advanced non-force; independent review proved 356 exact PCV path/mode/blob entries, three authorized shared-doc edits, and 239 protected paths unchanged. The ACK shutdown behavior remains NOTRUN because no disposable PostgreSQL target was configured; no connection was made. One postterminal logger directory_unavailable warning remains unattributed. Full CHIM bootstrap/schema refresh, live install/provider/database operation, public ACK scheduling, native recovery, client sync, and Skyrim gameplay remain unverified. The release is ALPHA, not beta or stable certification. CHIM core, Mind Poisoning, live installation, and game data remain outside this change. See tasks/release-0.1.20/publication-evidence/final-publication-receipt.md.
 
 ## Reader-first README refresh (2026-10-16)
 
@@ -480,7 +480,7 @@ Solo action behavior and duplicate owner election/inactive HTTP refusal passed t
 
 ### Review
 
-The documentation refresh is published. Canonical commit b6f0e82877038746497719d12952f51253fb59e5 is public, and the current 0.1.20 release body matches the reviewed body SHA-256 f43a584592cd504eff14af95c07ea4a7e7f2aeb489007fc571440f9fd6be4b5f. The original body-equals-tag-note evidence refers to initial publication; it is not a claim about the updated body. The PCV-only hub documentation mirror is public at 84dbe4f5c022764372ff23fe65a6b38be229ddf0. The 0.1.20 source tag, five assets, release flags, product code, CHIM core, and Mind Poisoning were not changed by this follow-up. No new runtime or gameplay proof was produced. See [the documentation publication receipt](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.21/tasks/player-docs-2026-10-16/docs-publication-receipt.md).
+The documentation refresh is published. Canonical commit b6f0e82877038746497719d12952f51253fb59e5 is public, and the current 0.1.20 release body matches the reviewed body SHA-256 f43a584592cd504eff14af95c07ea4a7e7f2aeb489007fc571440f9fd6be4b5f. The original body-equals-tag-note evidence refers to initial publication; it is not a claim about the updated body. The PCV-only hub documentation mirror is public at 84dbe4f5c022764372ff23fe65a6b38be229ddf0. The 0.1.20 source tag, five assets, release flags, product code, CHIM core, and Mind Poisoning were not changed by this follow-up. No new runtime or gameplay proof was produced. See [the documentation publication receipt](player-docs-2026-10-16/docs-publication-receipt.md).
 
 ## Private Conversation 0.1.21 BETA evidence and operator acceptance update - 2026-10-17
 
@@ -494,3 +494,11 @@ The documentation refresh is published. Canonical commit b6f0e82877038746497719d
 ### Review
 
 Read back the four owned files. The evidence is a dated summary of previously inspected 0.1.20 runtime records and operator confirmations, with no raw dialogue or private prompts. The publisher receipt verifies 20/20 non-manifest runtime-payload identity for the 0.1.21 candidate; this is not a 0.1.21 gameplay claim. Practical repeat, post-END ordinary Standard, and removal remain accepted as operator-confirmed with their stated detail limits. The lead accepted this bounded evidence; release mechanics are recorded separately under `tasks/release-0.1.21/`, and this review does not claim publication.
+
+## Paired PCV SQL wait bounds — 2026-10-26
+
+- [ ] Record scoped baseline RED, implement bounded owned identity/catalog reader and native callers under exclusive Luna Max/Ponytail FULL ownership.
+- [ ] Verify actual isolated TEST2 behavior, paired Department overlay/known23 backup migration and independent review.
+- [ ] Coordinate verified0.1.24/Department20 source, packages and publication; preserve other components and prior releases.
+
+Plan: [SQL read timeouts](read-timeouts-2026-10-26/plan.md).

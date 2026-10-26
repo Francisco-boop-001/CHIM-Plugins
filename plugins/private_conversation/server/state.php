@@ -105,6 +105,133 @@ function pcv_identity_from_home_state(
     ];
 }
 
+function pcv_read_command($connection, string $query, string $failureMessage): void
+{
+    $result = @pg_query($connection, $query);
+    if ($result === false) {
+        throw new RuntimeException($failureMessage);
+    }
+    try {
+        if (pg_result_status($result) !== PGSQL_COMMAND_OK) {
+            throw new RuntimeException($failureMessage);
+        }
+    } finally {
+        @pg_free_result($result);
+    }
+}
+
+function pcv_apply_read_bounds($connection): void
+{
+    $result = @pg_query_params($connection,
+        "SELECT (SELECT setting::integer FROM pg_settings WHERE name = 'lock_timeout' AND unit = 'ms') AS lock_timeout,
+                (SELECT setting::integer FROM pg_settings WHERE name = 'statement_timeout' AND unit = 'ms') AS statement_timeout",
+        []);
+    if ($result === false) {
+        throw new RuntimeException('Core read timeout settings could not be read.');
+    }
+    try {
+        if (pg_num_rows($result) !== 1) {
+            throw new RuntimeException('Core read timeout settings returned an invalid result.');
+        }
+        $settings = pg_fetch_assoc($result);
+        if (!is_array($settings)) {
+            throw new RuntimeException('Core read timeout settings returned an invalid result.');
+        }
+    } finally {
+        @pg_free_result($result);
+    }
+
+    $bounds = [
+        'statement_timeout' => 3000,
+        'lock_timeout' => 2000,
+    ];
+    foreach ($bounds as $name => $maximumMilliseconds) {
+        $current = $settings[$name] ?? null;
+        $current = is_int($current) || is_string($current) ? (string)$current : '';
+        if (preg_match('/^[0-9]+$/D', $current) !== 1) {
+            throw new RuntimeException('Core read timeout setting is invalid.');
+        }
+        $targetMilliseconds = (int)$current > 0
+            ? min((int)$current, $maximumMilliseconds) : $maximumMilliseconds;
+        pcv_read_command($connection, "SET LOCAL $name = '{$targetMilliseconds}ms'",
+            'Core read timeout limits could not be applied.');
+    }
+}
+
+function pcv_with_read_connection(callable $read): mixed
+{
+    $engineRoot = dirname(__DIR__, 2);
+    $homeHelper = $engineRoot . '/lib/playthrough_home.php';
+    if (!is_file($homeHelper)) {
+        throw new RuntimeException('Core read connection is unavailable.');
+    }
+    require_once $homeHelper;
+    if (!function_exists('ptp_connect') || !function_exists('ptr_runtime_enter')) {
+        throw new RuntimeException('Core read connection is unavailable.');
+    }
+
+    $connection = null;
+    $transactionAttempted = false;
+    try {
+        ptr_runtime_enter();
+        $connection = ptp_connect();
+        if (!$connection || pg_connection_status($connection) !== PGSQL_CONNECTION_OK) {
+            throw new RuntimeException('Core read connection is unavailable.');
+        }
+        if (pg_transaction_status($connection) !== PGSQL_TRANSACTION_IDLE) {
+            throw new RuntimeException('Core read connection is not idle.');
+        }
+
+        $transactionAttempted = true;
+        pcv_read_command($connection, 'BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY',
+            'Core read transaction could not be started.');
+        if (pg_transaction_status($connection) !== PGSQL_TRANSACTION_INTRANS) {
+            throw new RuntimeException('Core read transaction did not start.');
+        }
+        pcv_apply_read_bounds($connection);
+        $scriptName = basename((string)($_SERVER['SCRIPT_FILENAME'] ?? ''));
+        if (isset($_SERVER['HTTP_X_CHIM_PLAYTHROUGH']) || in_array($scriptName, ['main.php', 'gamedata.php'], true)) {
+            $switchingHelper = $engineRoot . '/lib/playthrough_switching.php';
+            if (!is_file($switchingHelper)) {
+                throw new RuntimeException('Core playthrough guard is unavailable.');
+            }
+            require_once $switchingHelper;
+            if (!function_exists('pas_guard')) {
+                throw new RuntimeException('Core playthrough guard is unavailable.');
+            }
+            pas_guard($connection, true);
+        }
+        $value = $read($connection);
+        if (pg_transaction_status($connection) !== PGSQL_TRANSACTION_INTRANS) {
+            throw new RuntimeException('Core read transaction is no longer active.');
+        }
+        pcv_read_command($connection, 'COMMIT', 'Core read transaction could not be committed.');
+        if (pg_transaction_status($connection) !== PGSQL_TRANSACTION_IDLE) {
+            throw new RuntimeException('Core read transaction did not finish.');
+        }
+        $transactionAttempted = false;
+        return $value;
+    } catch (Throwable $error) {
+        if ($connection !== null && $connection !== false && $transactionAttempted) {
+            try {
+                $rollback = @pg_query($connection, 'ROLLBACK');
+                if ($rollback !== false) {
+                    @pg_free_result($rollback);
+                }
+            } catch (Throwable $rollbackError) {
+            }
+        }
+        throw $error;
+    } finally {
+        if ($connection !== null && $connection !== false) {
+            try {
+                @pg_close($connection);
+            } catch (Throwable $closeError) {
+            }
+        }
+    }
+}
+
 function pcv_profile_table_exists($connection): bool
 {
     if (!function_exists('pg_query_params') || !function_exists('pg_num_rows') || !function_exists('pg_fetch_assoc')) {
@@ -177,39 +304,50 @@ function pcv_current_identity(bool $refresh = false): array
         return $identity;
     }
 
-    $connection = null;
     try {
         require_once $homeHelper;
         if (!function_exists('ptp_connect')) {
             return $identity;
         }
 
-        $connection = ptp_connect();
-        if (!$connection) {
-            return $identity;
-        }
-        $profileTableExists = pcv_profile_table_exists($connection);
-        if (!$profileTableExists) {
-            $identity = pcv_identity_from_home_state([], false, pcv_core_player_name($connection));
-            return $identity;
-        }
-        if (!function_exists('pth_state')) {
-            return $identity;
-        }
-        $homeState = pth_state($connection);
-        $corePlayerName = pcv_home_state_has_no_active_profile($homeState)
-            ? pcv_core_player_name($connection) : null;
-        $identity = pcv_identity_from_home_state($homeState, $profileTableExists, $corePlayerName);
+        $identity = pcv_with_read_connection(static function ($connection): array {
+            $profileTableExists = pcv_profile_table_exists($connection);
+            if (!$profileTableExists) {
+                return pcv_identity_from_home_state([], false, pcv_core_player_name($connection));
+            }
+            if (!function_exists('pth_state')) {
+                return ['key' => null, 'player_name' => null];
+            }
+            $homeState = pth_state($connection);
+            $corePlayerName = pcv_home_state_has_no_active_profile($homeState)
+                ? pcv_core_player_name($connection) : null;
+            return pcv_identity_from_home_state($homeState, $profileTableExists, $corePlayerName);
+        });
     } catch (Throwable $error) {
         pcv_log_exception('state.unavailable', 'error', 'unavailable', 'profile_lookup_failed', $error, ['operation' => 'identity']);
         $identity = ['key' => null, 'player_name' => null];
-    } finally {
-        if ($connection !== null && $connection !== false && function_exists('pg_close')) {
-            @pg_close($connection);
-        }
     }
 
     return $identity;
+}
+
+function pcv_read_npc_catalog(): array
+{
+    return pcv_with_read_connection(static function ($connection): array {
+        $result = @pg_query($connection, 'SELECT * FROM public.core_npc_master');
+        if ($result === false) {
+            throw new RuntimeException('Core NPC catalog lookup failed.');
+        }
+        try {
+            $rows = pg_fetch_all($result);
+            if (!is_array($rows)) {
+                throw new RuntimeException('Core NPC catalog lookup returned an invalid result.');
+            }
+            return $rows;
+        } finally {
+            @pg_free_result($result);
+        }
+    });
 }
 
 /** Return null when there is no unambiguous active profile and character identity. */

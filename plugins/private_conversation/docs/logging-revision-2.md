@@ -79,6 +79,12 @@ Health describes **this request**, not a historical guarantee that every worker 
 
 Logging is best-effort: contention, permissions, disk failure, process termination and temporary cleanup can lose records. The reader shows busy/unavailable states and bounded omissions; it cannot recover already lost history. There is no tamper-evident archive, remote collector, audio verification or unlimited transcript.
 
+## CHIM identity and NPC-catalog reads
+
+Since PCV 0.1.24, identity and NPC-catalog reads use the official `ptp_connect()` helper, which opens its own `PGSQL_CONNECT_FORCE_NEW` connection, and a read-only repeatable-read transaction. PCV caps lock waits at **2 seconds** and each SQL statement at **3 seconds**, retaining any shorter positive limit already configured for those reads. It commits or rolls back and closes only the connection it opened; the shared CHIM connection, its transaction, and other plugins’ settings are not changed. Catalog reads keep the full `core_npc_master` result shape and add no NPC-count cap.
+
+These bounds apply per lock wait and per SQL statement, not to the whole PHP request. A failed read stays a failure; it is not reported as a verified empty profile or roster. Wait for database contention to clear, then explicitly refresh before retrying. These database waits are separate from the JSONL writer’s **100 ms** lock-acquisition budget above.
+
 Debug routing details require administrator environment variable `PCV_LOG_DEBUG_UNTIL`, a Unix timestamp no more than one hour ahead. Normal operational records stay enabled. Raw dialogue, prompts, credentials, claim tokens, subtitle digests, caller URLs and arbitrary error strings remain excluded.
 
 The [operator acceptance checklist](operator-acceptance.md) is a manual procedure and has not been run. The design follows relevant [OWASP logging guidance](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html) and the [OpenTelemetry log data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/). It adds no logging dependency and makes no claim to be a complete OpenTelemetry exporter or to universally exceed every logging standard.

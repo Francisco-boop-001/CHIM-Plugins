@@ -66,6 +66,17 @@ declare(strict_types=1);
 
 function pcv_current_playthrough_key(): ?string { return 'fixture-playthrough'; }
 function pcv_current_player_name(): ?string { return 'Player'; }
+function pcv_read_npc_catalog(): array
+{
+    if (($GLOBALS['pcv_page_scenario'] ?? null) === 'end_catalog_failure') {
+        throw new RuntimeException('private catalog fixture details');
+    }
+    return [
+        ['id' => 101, 'npc_name' => 'Aela', 'profile_id' => 9],
+        ['id' => 202, 'npc_name' => 'Bryn', 'profile_id' => 10],
+        ['id' => 303, 'npc_name' => 'Lydia', 'profile_id' => 11],
+    ];
+}
 function pcv_valid_scene_card($card): bool
 {
     return !in_array($GLOBALS['pcv_page_scenario'], ['post_multiline_card', 'post_long_card'], true);
@@ -179,28 +190,6 @@ function chimRuntimeImportConfigVariables(array $variables): void
 PHP);
 file_put_contents($engine . '/conf/conf.sample.php', "<?php \$DBDRIVER = 'fixture_db';\n");
 file_put_contents($engine . '/conf/conf.php', "<?php // Isolated test configuration.\n");
-file_put_contents($engine . '/lib/fixture_db.class.php', <<<'PHP'
-<?php
-class sql {}
-PHP);
-file_put_contents($engine . '/lib/core/npc_master.class.php', <<<'PHP'
-<?php
-class NpcMaster
-{
-    public function getAll(): array
-    {
-        if (($GLOBALS['pcv_page_scenario'] ?? null) === 'end_catalog_failure') {
-            throw new RuntimeException('private catalog fixture details');
-        }
-        return [
-            ['id' => 101, 'npc_name' => 'Aela', 'profile_id' => 9],
-            ['id' => 202, 'npc_name' => 'Bryn', 'profile_id' => 10],
-            ['id' => 303, 'npc_name' => 'Lydia', 'profile_id' => 11],
-        ];
-    }
-}
-PHP);
-
 file_put_contents($server . DIRECTORY_SEPARATOR . 'request.php', <<<'PHP'
 <?php
 declare(strict_types=1);
