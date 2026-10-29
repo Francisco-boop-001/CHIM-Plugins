@@ -1,0 +1,1 @@
+PASS: manifest JSON parses and reports version 0.1.25.

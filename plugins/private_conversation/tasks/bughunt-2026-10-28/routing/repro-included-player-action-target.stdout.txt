@@ -1,0 +1,22 @@
+{
+    "included": {
+        "prompt_targets": [
+            "Aela",
+            "Bryn"
+        ],
+        "player_verdict": null,
+        "player_action_kept": true,
+        "bystander_verdict": "target_outside_scene",
+        "intimate_action_verdict": "action_not_allowed"
+    },
+    "excluded_control": {
+        "prompt_targets": [
+            "Aela",
+            "Bryn"
+        ],
+        "player_verdict": "target_outside_scene",
+        "player_action_kept": null,
+        "bystander_verdict": "target_outside_scene",
+        "intimate_action_verdict": "action_not_allowed"
+    }
+}

@@ -1054,8 +1054,17 @@ function pcvInGameCommand($raw, ?string $playerName): ?array
 function pcvWrapEndsScene(?array $state): bool
 {
     $status = $state['status'] ?? null;
-    $scope = $status === 'active' ? ($state['scope'] ?? null) : ($state['pending_scope'] ?? null);
-    return in_array($status, ['active', 'pending'], true) && is_array($scope) && ($scope['scene_mode'] ?? 'pair') === 'solo';
+    if (!in_array($status, ['active', 'pending'], true)) {
+        return false;
+    }
+    $activeScope = $status === 'active' ? ($state['scope'] ?? null) : null;
+    $pendingScope = $state['pending_scope'] ?? null;
+    foreach ([$activeScope, $pendingScope] as $scope) {
+        if (is_array($scope) && ($scope['scene_mode'] ?? 'pair') === 'solo') {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -1227,9 +1236,9 @@ function pcvSceneActionVerdict(string $code, string $parameter, array $resolvedS
 /**
  * Before CHIM rebuilds its action list (context_pre): switch actions on only for scenes with groups, narrow
  * ENABLED_FUNCTIONS to allowed codes CHIM/SHARMAT already enabled (never re-enable a gated one), narrow Brawl's
- * target list to the members, and register the post-filter once (after other plugins' filters).
+ * target list to scene members and an included player only when CHIM already offered them, then register the post-filter.
  */
-function pcvPrepareSceneActions(array $resolvedScope): bool
+function pcvPrepareSceneActions(array $resolvedScope, ?string $playerName): bool
 {
     $codes = pcvSceneAllowedActionCodes($resolvedScope);
     // A scene only narrows CHIM's own setting: actions switched off in CHIM stay off.
@@ -1243,6 +1252,11 @@ function pcvPrepareSceneActions(array $resolvedScope): bool
     $members = pcvScopeMembers($resolvedScope);
     if (is_array($GLOBALS['FUNCTION_PARM_INSPECT'] ?? null)) {
         $memberKeys = array_map('pcv_scope_name_key', $members);
+        if (($resolvedScope['scene_mode'] ?? 'pair') !== 'solo'
+            && ($resolvedScope['exclude_player'] ?? true) === false
+            && is_string($playerName) && trim($playerName) !== '') {
+            $memberKeys[] = pcv_scope_name_key(trim($playerName));
+        }
         $GLOBALS['FUNCTION_PARM_INSPECT'] = array_values(array_filter($GLOBALS['FUNCTION_PARM_INSPECT'],
             static fn($name) => is_string($name) && in_array(pcv_scope_name_key(trim((string)preg_replace('/\s*\[RefID:[^\]]*\]\s*/i', ' ', $name))), $memberKeys, true)));
     }

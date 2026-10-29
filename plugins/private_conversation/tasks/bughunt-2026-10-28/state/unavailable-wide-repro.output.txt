@@ -1,0 +1,53 @@
+{
+    "copied_source_sha256": {
+        "state.php": "49c2b53466572015e77117653739966377267b5b50ec4514155e53256bca7361",
+        "scope.php": "e21fd73985424c099332dcbb035e3587c72ab78a21e21781669978dc25e39686"
+    },
+    "close_report_state": "ready",
+    "strict_reader": {
+        "status": "ready",
+        "known_npcs": {
+            "101": "Aela",
+            "202": "Bryn"
+        }
+    },
+    "current_request_map": {
+        "101": "Aela",
+        "202": "Bryn"
+    },
+    "wide_report_present": false,
+    "active_reader": {
+        "error": false,
+        "missing": {
+            "303": "wide_unavailable",
+            "404": "wide_unavailable"
+        },
+        "known_npcs": {
+            "101": "Aela",
+            "202": "Bryn"
+        }
+    },
+    "production_caller_allow_drops": true,
+    "actual_begin_status": "active",
+    "actual_active_ids_after": [
+        "101",
+        "202"
+    ],
+    "actual_dropped_after": [
+        {
+            "id": "303",
+            "reason": "left_scene"
+        },
+        {
+            "id": "404",
+            "reason": "left_scene"
+        }
+    ],
+    "unreadable_control_begin_status": "unavailable",
+    "unreadable_control_active_ids_after": [
+        "101",
+        "202",
+        "303",
+        "404"
+    ]
+}

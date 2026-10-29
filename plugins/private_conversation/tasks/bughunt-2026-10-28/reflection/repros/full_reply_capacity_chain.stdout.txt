@@ -1,0 +1,6 @@
+
+Fatal error: Uncaught RuntimeException: Could not isolate PCV diagnostics. in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\full_reply_capacity_chain.php:60
+Stack trace:
+#0 K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\full_reply_capacity_chain.php(78): requireFixture(false, 'Could not isola...')
+#1 {main}
+  thrown in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\full_reply_capacity_chain.php on line 60

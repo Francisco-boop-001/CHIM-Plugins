@@ -1,0 +1,22 @@
+{
+    "active_pair_control": {
+        "stored_active_mode": "pair",
+        "stored_pending_mode": null,
+        "solo_end_predicate_before_activation": false,
+        "resolved_mode": "pair",
+        "wrap_close_turn": true,
+        "route": "scene_direction",
+        "prepared_request_type": "instruction",
+        "prepared_text": "Hawke: They part ways at dusk."
+    },
+    "active_pair_queued_solo": {
+        "stored_active_mode": "pair",
+        "stored_pending_mode": "solo",
+        "solo_end_predicate_before_activation": false,
+        "resolved_mode": "solo",
+        "wrap_close_turn": false,
+        "route": "solo_reflection",
+        "prepared_request_type": "instruction",
+        "prepared_text": "Hawke: wrap up: They part ways at dusk."
+    }
+}

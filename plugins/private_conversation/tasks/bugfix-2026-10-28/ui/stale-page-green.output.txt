@@ -1,0 +1,1 @@
+PASS: rendered ARM/END references, stale/missing/malformed rejection, CSRF and identity precedence, and valid controls.

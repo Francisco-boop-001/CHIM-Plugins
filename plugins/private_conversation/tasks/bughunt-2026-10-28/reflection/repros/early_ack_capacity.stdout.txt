@@ -1,0 +1,5 @@
+
+Fatal error: Uncaught RuntimeException: The receipt capacity behavior differed from the expected bounded result. in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\early_ack_capacity.php:111
+Stack trace:
+#0 {main}
+  thrown in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\early_ack_capacity.php on line 111

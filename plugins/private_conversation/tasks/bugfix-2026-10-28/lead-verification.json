@@ -1,0 +1,53 @@
+{
+  "scope": "Windows host fixtures only; no distro, HTTP, database, provider or gameplay access",
+  "checks": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "routing",
+        "command": "& 'K:\\ActorwrightExchange\\artifacts\\php-8.3.35-windows-cli\\runtime\\php.exe' -n 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tests\\routing_fix_hook_check.php'",
+        "chunk_id": "b859a6",
+        "wall_time_seconds": 0.2623194,
+        "exit_code": 0,
+        "original_token_count": 58,
+        "output": "Private Conversation logger: directory_unavailable request_id=02102256-8a1d-414c-8431-0425cd0d2e82 config_id=none\nPASS actual hooks: Pair and Solo wrap priority, clear failure, included-player Brawl offer, and exclusion controls.\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "stale_page",
+        "command": "& 'K:\\ActorwrightExchange\\artifacts\\php-8.3.35-windows-cli\\runtime\\php.exe' -n 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tests\\stale_page_reference_check.php'",
+        "chunk_id": "e10cd3",
+        "wall_time_seconds": 0.3725371,
+        "exit_code": 0,
+        "original_token_count": 30,
+        "output": "PASS: rendered ARM/END references, stale/missing/malformed rejection, CSRF and identity precedence, and valid controls.\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "ui_refresh",
+        "command": "& 'C:\\nodejs\\node.exe' --test 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tests\\ui_refresh_check.mjs'",
+        "chunk_id": "0521d9",
+        "wall_time_seconds": 0.3304648,
+        "exit_code": 0,
+        "original_token_count": 959,
+        "output": "TAP version 13\n# Subtest: refresh updates status and CSRF while preserving eligible drafts and clearing stale or cross-playthrough pairs\nok 1 - refresh updates status and CSRF while preserving eligible drafts and clearing stale or cross-playthrough pairs\n  ---\n  duration_ms: 9.8327\n  type: 'test'\n  ...\n# Subtest: group controls refresh with the roster, block duplicate members, and stay off in solo mode\nok 2 - group controls refresh with the roster, block duplicate members, and stay off in solo mode\n  ---\n  duration_ms: 1.7227\n  type: 'test'\n  ...\n# Subtest: page guidance matches the group range and follows the selected free cap\nok 3 - page guidance matches the group range and follows the selected free cap\n  ---\n  duration_ms: 2.0094\n  type: 'test'\n  ...\n# Subtest: malformed refresh controls preserve both actor drafts and fail closed\nok 4 - malformed refresh controls preserve both actor drafts and fail closed\n  ---\n  duration_ms: 1.7886\n  type: 'test'\n  ...\n# Subtest: refresh rejects hidden references that do not match the displayed identity atomically\nok 5 - refresh rejects hidden references that do not match the displayed identity atomically\n  ---\n  duration_ms: 3.3862\n  type: 'test'\n  ...\n# Subtest: same-identity refresh preserves Free draft, while identity change clears it and updates both form references\nok 6 - same-identity refresh preserves Free draft, while identity change clears it and updates both form references\n  ---\n  duration_ms: 1.994\n  type: 'test'\n  ...\n# Subtest: solo mode arms one eligible actor, preserves an eligible B draft across polling, and restores only a distinct B\nok 7 - solo mode arms one eligible actor, preserves an eligible B draft across polling, and restores only a distinct B\n  ---\n  duration_ms: 2.832\n  type: 'test'\n  ...\n# Subtest: one eligible NPC enables ARM only after selecting solo mode\nok 8 - one eligible NPC enables ARM only after selecting solo mode\n  ---\n  duration_ms: 1.7143\n  type: 'test'\n  ...\n# Subtest: solo mode discards a remembered B when it leaves the eligible roster during same-identity polling\nok 9 - solo mode discards a remembered B when it leaves the eligible roster during same-identity polling\n  ---\n  duration_ms: 2.0956\n  type: 'test'\n  ...\n# Subtest: polling is single-flight, pauses while hidden, and refreshes immediately on return\nok 10 - polling is single-flight, pauses while hidden, and refreshes immediately on return\n  ---\n  duration_ms: 1.9311\n  type: 'test'\n  ...\n# Subtest: timeout fails closed and the next poll can recover\nok 11 - timeout fails closed and the next poll can recover\n  ---\n  duration_ms: 2.2832\n  type: 'test'\n  ...\n# Subtest: refresh failure telemetry uses fixed codes, current CSRF, and never retries its own failure\nok 12 - refresh failure telemetry uses fixed codes, current CSRF, and never retries its own failure\n  ---\n  duration_ms: 8.4539\n  type: 'test'\n  ...\n# Subtest: a successful refresh re-arms telemetry for a new failure episode\nok 13 - a successful refresh re-arms telemetry for a new failure episode\n  ---\n  duration_ms: 1.64\n  type: 'test'\n  ...\n# Subtest: free scene disables every picker, forces the player out, and arms with two eligible NPCs\nok 14 - free scene disables every picker, forces the player out, and arms with two eligible NPCs\n  ---\n  duration_ms: 1.4707\n  type: 'test'\n  ...\n# Subtest: 0.1.14: free size follows the Free scene box and turn length is off for solo\nok 15 - 0.1.14: free size follows the Free scene box and turn length is off for solo\n  ---\n  duration_ms: 1.1931\n  type: 'test'\n  ...\n# Subtest: 0.1.16: the Physical scene-action box is off for solo\nok 16 - 0.1.16: the Physical scene-action box is off for solo\n  ---\n  duration_ms: 1.2566\n  type: 'test'\n  ...\n1..16\n# tests 16\n# suites 0\n# pass 16\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 132.8317\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "existing_controls",
+        "command": "& 'K:\\ActorwrightExchange\\artifacts\\php-8.3.35-windows-cli\\runtime\\php.exe' -n 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tests\\scene_actions_hook_check.php'\nif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }\n& 'K:\\ActorwrightExchange\\artifacts\\php-8.3.35-windows-cli\\runtime\\php.exe' -n 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tests\\in_game_end_hook_failure_check.php'",
+        "chunk_id": "2242b3",
+        "wall_time_seconds": 0.2947779,
+        "exit_code": 0,
+        "original_token_count": 59,
+        "output": "PASS scene actions hook: narrows enabled actions, never re-enables gated ones, members-only Brawl targets, post-filter registered\nPASS END failures block; solo/group wraps and active/pending END success plus unarmed input remain intact\n"
+      }
+    }
+  ]
+}

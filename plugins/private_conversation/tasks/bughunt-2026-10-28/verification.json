@@ -1,0 +1,30 @@
+{
+  "runtimeSource": "ce0a998773237a9fc91f6914725a327d9e621718",
+  "workspaceHead": "0c697793311b314e8158b122e3c2b718638ca9e0",
+  "productUnchanged": true,
+  "focusedSuccessfulReceipts": [
+    {
+      "exitReceipt": "state/stale-ui-profile-repro.exit.txt",
+      "exitCode": 0
+    },
+    {
+      "exitReceipt": "state/stale-ui-end-repro.exit.txt",
+      "exitCode": 0
+    },
+    {
+      "exitReceipt": "routing/repro-included-player-action-target.exit.txt",
+      "exitCode": 0
+    },
+    {
+      "exitReceipt": "routing/repro-pending-solo-wrap.exit.txt",
+      "exitCode": 0
+    },
+    {
+      "exitReceipt": "routing/repro-pending-solo-wrap-hook.exit.txt",
+      "exitCode": 0
+    }
+  ],
+  "reflectionIntegrated": "blocked_windows_private_mode",
+  "serverOrDistroAccess": false,
+  "reportSha256": "b6879bfe9adcceddc30d9c45d8270464a0df55d825918e2581782e932236e225"
+}

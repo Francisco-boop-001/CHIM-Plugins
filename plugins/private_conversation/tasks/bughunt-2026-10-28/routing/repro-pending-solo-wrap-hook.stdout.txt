@@ -1,0 +1,122 @@
+{
+    "pair_control": {
+        "state": {
+            "status": "off",
+            "scope": null,
+            "pending": false,
+            "pending_scope": null
+        },
+        "request": [
+            "instruction",
+            "1700000000",
+            "12345",
+            "Hawke: They part ways at dusk.",
+            "{}"
+        ],
+        "request_scope": {
+            "status": "active",
+            "scope": {
+                "enabled": true,
+                "scene_mode": "pair",
+                "actor_a": "Aela",
+                "actor_b": "Bryn",
+                "members": [
+                    "Aela",
+                    "Bryn"
+                ],
+                "opener": "Aela",
+                "exclude_player": true,
+                "bystander_mode": "exclude"
+            },
+            "profile_id_a": 101,
+            "config_id": "active-pair",
+            "actor_a_id": "11",
+            "actor_b_id": "12",
+            "reason": null,
+            "profiles": {
+                "Aela": 101,
+                "Bryn": 102
+            },
+            "member_ids": {
+                "Aela": "11",
+                "Bryn": "12"
+            },
+            "start": true,
+            "route": "scene_direction",
+            "origin_request_type": "inputtext",
+            "origin_mode": "STANDARD",
+            "origin_dialogue": "Hawke: They part ways at dusk.",
+            "baseline_utterance_id": null,
+            "baseline_output_log": "",
+            "opener_name": "Aela",
+            "opener_source": "picker",
+            "profile_id_opener": 101,
+            "wrap_up": true
+        },
+        "stage_calls": [
+            [
+                {
+                    "enabled": false
+                },
+                "wrapped_up"
+            ]
+        ]
+    },
+    "active_pair_queued_solo": {
+        "state": {
+            "status": "active",
+            "scope": {
+                "enabled": true,
+                "scene_mode": "solo",
+                "actor_a": "11",
+                "actor_b": null,
+                "exclude_player": true,
+                "bystander_mode": "exclude"
+            },
+            "pending": false,
+            "pending_scope": null,
+            "config_id": "promoted-solo"
+        },
+        "request": [
+            "instruction",
+            "1700000000",
+            "12345",
+            "Hawke: wrap up: They part ways at dusk.",
+            "{}"
+        ],
+        "request_scope": {
+            "status": "active",
+            "scope": {
+                "enabled": true,
+                "scene_mode": "solo",
+                "actor_a": "Aela",
+                "actor_b": null,
+                "exclude_player": true,
+                "bystander_mode": "exclude"
+            },
+            "profile_id_a": 101,
+            "config_id": "promoted-solo",
+            "actor_a_id": "11",
+            "actor_b_id": null,
+            "reason": null,
+            "profiles": {
+                "Aela": 101
+            },
+            "member_ids": {
+                "Aela": "11"
+            },
+            "start": true,
+            "route": "solo_reflection",
+            "origin_request_type": "inputtext",
+            "origin_mode": "STANDARD",
+            "origin_dialogue": "Hawke: wrap up: They part ways at dusk.",
+            "baseline_utterance_id": null,
+            "baseline_output_log": "",
+            "opener_name": "Aela",
+            "opener_source": "first",
+            "profile_id_opener": 101,
+            "wrap_up": false
+        },
+        "stage_calls": []
+    }
+}

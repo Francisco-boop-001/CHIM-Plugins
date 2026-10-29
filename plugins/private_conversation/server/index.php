@@ -83,12 +83,25 @@ function pcv_form_desired_state(array $post, string $csrfToken, array $knownNpcs
     return $desired;
 }
 
-function pcv_form_desired_state_core(array $post, string $csrfToken, array $knownNpcs): array
+function pcv_form_validate_csrf(array $post, string $csrfToken): void
 {
     $submittedToken = $post['csrf'] ?? null;
     if (!is_string($submittedToken) || $csrfToken === '' || !hash_equals($csrfToken, $submittedToken)) {
         throw new PcvUiFormRejection('csrf_failed', 'The form token is invalid.');
     }
+}
+
+function pcv_form_matches_playthrough_ref($submittedReference, string $currentReference): bool
+{
+    return is_string($submittedReference)
+        && preg_match('/\A[a-f0-9]{64}\z/', $submittedReference) === 1
+        && preg_match('/\A[a-f0-9]{64}\z/', $currentReference) === 1
+        && hash_equals($currentReference, $submittedReference);
+}
+
+function pcv_form_desired_state_core(array $post, string $csrfToken, array $knownNpcs): array
+{
+    pcv_form_validate_csrf($post, $csrfToken);
 
     $action = $post['action'] ?? null;
     if ($action === 'end') {
@@ -470,6 +483,7 @@ function pcv_render_page(
     $capDisabledAttr = $freeMode ? '' : ' disabled';
     $noticeHtml =$notice === '' ? '' : '<p role="status">' . pcv_html($notice) . '</p>';
     $csrf = pcv_html($csrfToken);
+    $reference = pcv_html($playthroughRef);
 
     return '<!doctype html>
 <html lang="en">
@@ -515,6 +529,7 @@ function pcv_render_page(
 <p class="small-note">Uses CHIM’s broader nearby range. AI observations expire after 45 seconds. NPCs sharing the same name cannot be distinguished.</p>
 <form method="post" class="scope-form">
 <input type="hidden" name="csrf" value="' . $csrf . '">
+<input type="hidden" name="playthrough_ref" value="' . $reference . '">
 <input type="hidden" name="action" value="arm">
 <p class="checkbox-field"><label><input type="checkbox" id="solo-mode" name="scene_mode" value="solo"' . $soloChecked . $soloDisabled . '> <span>Solo reflection</span></label></p>
 <p class="checkbox-field"><label><input type="checkbox" id="free-mode" name="scene_mode" value="free"' . $freeChecked . $freeDisabled . '> <span>Free scene (2–6 nearest eligible NPCs; player excluded)</span></label></p>
@@ -549,6 +564,7 @@ function pcv_render_page(
 <h2 id="end-heading">End</h2>
 <form method="post" class="end-form">
 <input type="hidden" name="csrf" value="' . $csrf . '">
+<input type="hidden" name="playthrough_ref" value="' . $reference . '">
 <input type="hidden" name="action" value="end">
 <button class="quiet-button" type="submit">End now</button>
 </form>
@@ -1106,11 +1122,17 @@ function pcv_run_page(): void
         }
     }
 
+    $playthroughRef = is_string($key) && $key !== '' ? hash('sha256', 'pcv-ui:' . $key) : '';
     $responseCode = 200;
     if ($method === 'POST') {
         $stageAction = ($_POST['action'] ?? null) === 'end' ? 'end' : 'enable';
         $operation = 'stage';
         try {
+            pcv_form_validate_csrf($_POST, $csrfToken);
+            if (is_string($key) && $key !== ''
+                && !pcv_form_matches_playthrough_ref($_POST['playthrough_ref'] ?? null, $playthroughRef)) {
+                throw new PcvUiFormRejection('playthrough_changed', 'The active CHIM playthrough changed.');
+            }
             $desired = pcv_form_desired_state($_POST, $csrfToken, $knownNpcs);
             if (!pcv_form_can_stage($desired, $key, $catalogAvailable)) {
                 pcv_log_event('ui.scope_stage_failed', 'error', 'failed', 'state_unavailable',
@@ -1149,7 +1171,11 @@ function pcv_run_page(): void
                 }
             }
         } catch (PcvUiFormRejection $error) {
-            if (!$catalogAvailable && $error->reasonCode === 'actor_unavailable') {
+            if ($error->reasonCode === 'playthrough_changed') {
+                pcv_log_event('ui.scope_stage_rejected', 'warning', 'rejected', 'playthrough_changed');
+                $responseCode = 409;
+                $notice = pcv_ui_failure_notice('This page is out of date or incomplete. Refresh the page before making this change.');
+            } elseif (!$catalogAvailable && $error->reasonCode === 'actor_unavailable') {
                 pcv_log_event('ui.scope_stage_failed', 'error', 'failed', 'state_unavailable',
                     ['action' => $stageAction, 'operation' => 'stage']);
                 $responseCode = 503;
@@ -1208,7 +1234,6 @@ function pcv_run_page(): void
 
     http_response_code($responseCode);
     header('Content-Type: text/html; charset=UTF-8');
-    $playthroughRef = is_string($key) && $key !== '' ? hash('sha256', 'pcv-ui:' . $key) : '';
     echo pcv_render_page($csrfToken, $state, $knownNpcs, $notice, $eligibilityStatus, $catalogAvailable, $displayNpcs, $playthroughRef);
 }
 

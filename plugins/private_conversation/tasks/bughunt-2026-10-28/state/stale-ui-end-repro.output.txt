@@ -1,0 +1,15 @@
+{
+    "page_a_ref_matches_a": true,
+    "a_page_showed_off_and_end": true,
+    "end_form_has_submitted_playthrough_identity": false,
+    "csrf_carried_from_a_page": true,
+    "profile_b_pre_stage_state": "active",
+    "profile_b_eligible_roster": [],
+    "stage_calls": 1,
+    "stage_target_key": "3e92d7c13b600fd844382e5c212447d0341f992413000db4ba40822ee3143081",
+    "stage_desired": {
+        "enabled": false
+    },
+    "post_response_code": 200,
+    "post_page_ref_matches_b": true
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "path": "server/index.php",
+    "sha256": "58310584871af7e1fc081da1908bc86bcb60afa6cf3c7fc9ad02b9d246c5dc4f"
+  },
+  {
+    "path": "server/assets/ui-refresh.js",
+    "sha256": "f6b08e8205c92ffa200d0b7c0d8e3d642da37313d2b8f6ebe29bb22b1c085fae"
+  },
+  {
+    "path": "server/scope.php",
+    "sha256": "e21fd73985424c099332dcbb035e3587c72ab78a21e21781669978dc25e39686"
+  },
+  {
+    "path": "server/preprocessing.php",
+    "sha256": "5a0d46d3b29ba5f1a986f90b1fa7bbc8ce41402dd6b8d30f49a2fcba7783d49c"
+  },
+  {
+    "path": "server/context_pre.php",
+    "sha256": "531e2e3e24bae4728e95e523800b53fbee76db0c91ac8d15756caf3481ae7201"
+  },
+  {
+    "path": "server/state.php",
+    "sha256": "49c2b53466572015e77117653739966377267b5b50ec4514155e53256bca7361"
+  },
+  {
+    "path": "server/reflection.php",
+    "sha256": "d33a41331638be653d7c94119043672d7142e73ac752f8adb7b7cfc090670540"
+  },
+  {
+    "path": "server/reflection_receipt.php",
+    "sha256": "f2fba808ec7f1153f059b4a919f855fa95f23761fb4eb5ac3ebc7173340a7f15"
+  }
+]

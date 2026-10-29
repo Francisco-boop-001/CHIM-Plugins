@@ -65,10 +65,12 @@ function makeSnapshot({ ref = 'same-playthrough', a = ['101', '202'], b = ['101'
         ['#arm-button', { disabled, dataset: { rosterReady: rosterReady ? '1' : '0' } }],
     ]);
     const csrfInputs = [{ value: csrf }, { value: csrf }];
+    const playthroughInputs = [{ value: ref }, { value: ref }];
     return {
         body: { dataset: { playthroughRef: ref } },
         querySelector: (selector) => values.get(selector) ?? null,
-        querySelectorAll: (selector) => selector === 'input[name="csrf"]' ? csrfInputs : [],
+        querySelectorAll: (selector) => selector === 'input[name="csrf"]' ? csrfInputs
+            : selector === 'input[name="playthrough_ref"]' ? playthroughInputs : [],
     };
 }
 
@@ -88,6 +90,7 @@ function createHarness(fetchQueue, { reportQueue = [], group = false, free = fal
     const actorB = makeSelect(['', '101', '202'], '202');
     const soloMode = makeCheckbox(false);
     const csrfInputs = [{ value: 'old-token' }, { value: 'old-token' }];
+    const playthroughInputs = [{ value: 'same-playthrough' }, { value: 'same-playthrough' }];
     const nodes = new Map([
         ['#actor-a', actorA],
         ['#actor-b', actorB],
@@ -115,7 +118,8 @@ function createHarness(fetchQueue, { reportQueue = [], group = false, free = fal
         body: { dataset: { playthroughRef: 'same-playthrough', refreshUrl: '?refresh=1', logsUrl: '?view=logs' } },
         visibilityState: 'visible',
         querySelector: (selector) => nodes.get(selector) ?? null,
-        querySelectorAll: (selector) => selector === 'input[name="csrf"]' ? csrfInputs : [],
+        querySelectorAll: (selector) => selector === 'input[name="csrf"]' ? csrfInputs
+            : selector === 'input[name="playthrough_ref"]' ? playthroughInputs : [],
         addEventListener: (name, callback) => listeners.set(name, callback),
     };
     const sandbox = {
@@ -168,6 +172,7 @@ function createHarness(fetchQueue, { reportQueue = [], group = false, free = fal
         reports,
         timeouts,
         csrfInputs,
+        playthroughInputs,
         poll: () => intervalCallback(),
         visibilityChanged: () => listeners.get('visibilitychange')(),
         response: (id, snapshot) => responseFor(fixtures, id, snapshot),
@@ -293,8 +298,60 @@ test('malformed refresh controls preserve both actor drafts and fail closed', as
     assert.equal(harness.nodes.get('#actor-a').value, '101');
     assert.equal(harness.nodes.get('#actor-b').value, '202');
     assert.equal(harness.document.body.dataset.playthroughRef, 'same-playthrough');
+    assert.deepEqual(harness.playthroughInputs.map((input) => input.value), ['same-playthrough', 'same-playthrough']);
     assert.equal(harness.nodes.get('#arm-button').disabled, true);
     assert.deepEqual(harness.reports.map(({ options }) => new URLSearchParams(options.body).get('code')), ['invalid_response']);
+});
+
+test('refresh rejects hidden references that do not match the displayed identity atomically', async () => {
+    const snapshot = makeSnapshot({ ref: 'new-playthrough', csrf: 'new-token' });
+    const querySelectorAll = snapshot.querySelectorAll;
+    snapshot.querySelectorAll = (selector) => selector === 'input[name="playthrough_ref"]'
+        ? [{ value: 'new-playthrough' }, { value: 'different-playthrough' }]
+        : querySelectorAll(selector);
+    const harness = createHarness([{ snapshot }]);
+
+    await flushPromises();
+
+    assert.equal(harness.document.body.dataset.playthroughRef, 'same-playthrough');
+    assert.deepEqual(harness.playthroughInputs.map((input) => input.value), ['same-playthrough', 'same-playthrough']);
+    assert.deepEqual(harness.csrfInputs.map((input) => input.value), ['old-token', 'old-token']);
+    assert.equal(harness.nodes.get('#actor-a').value, '101');
+    assert.equal(harness.nodes.get('#arm-button').disabled, true);
+    assert.deepEqual(harness.reports.map(({ options }) => new URLSearchParams(options.body).get('code')), ['invalid_response']);
+});
+
+test('same-identity refresh preserves Free draft, while identity change clears it and updates both form references', async () => {
+    const harness = createHarness([
+        { snapshot: makeSnapshot({ ref: 'same-playthrough', csrf: 'token-one' }) },
+        { snapshot: makeSnapshot({ ref: 'same-playthrough', csrf: 'token-two', label: 'Same playthrough' }) },
+        { snapshot: makeSnapshot({ ref: 'other-playthrough', csrf: 'token-three', label: 'Other playthrough' }) },
+    ], { free: true });
+    await flushPromises();
+
+    const freeMode = harness.nodes.get('#free-mode');
+    const playerCheckbox = harness.nodes.get('input[name="exclude_player"]');
+    playerCheckbox.checked = false;
+    freeMode.checked = true;
+    freeMode.dispatchChange();
+    harness.nodes.get('#actor-a').value = '202';
+
+    harness.poll();
+    await flushPromises();
+    assert.equal(freeMode.checked, true);
+    assert.equal(harness.nodes.get('#actor-a').value, '202');
+    assert.deepEqual(harness.playthroughInputs.map((input) => input.value), ['same-playthrough', 'same-playthrough']);
+
+    harness.poll();
+    await flushPromises();
+    assert.equal(harness.document.body.dataset.playthroughRef, 'other-playthrough');
+    assert.deepEqual(harness.playthroughInputs.map((input) => input.value), ['other-playthrough', 'other-playthrough']);
+    assert.equal(harness.nodes.get('#actor-a').value, '');
+    assert.equal(harness.nodes.get('#actor-b').value, '');
+    assert.equal(harness.nodes.get('#solo-mode').checked, false);
+    assert.equal(freeMode.checked, false);
+    assert.equal(playerCheckbox.checked, false);
+    assert.deepEqual(harness.csrfInputs.map((input) => input.value), ['token-three', 'token-three']);
 });
 
 test('solo mode arms one eligible actor, preserves an eligible B draft across polling, and restores only a distinct B', async () => {

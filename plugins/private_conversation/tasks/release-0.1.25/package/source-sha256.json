@@ -1,0 +1,26 @@
+{
+  "captured_utc": "2026-10-29T01:32:07.1682832Z",
+  "files": {
+    ".htaccess": "ccd754e3ccb7ac8b8a8eafd60f087d6e5a4b936c17459720d5c512b5b927c05a",
+    "assets/private-conversation-scene.png": "e104c8c2d8fec85185855eeb5026d582e9caa3795534e3720eb661173f6d76af",
+    "assets/style.css": "25c99aa25a2e637a91b42f2b09dd61b58cb7d1843a7a48a79a95e898fc511158",
+    "assets/ui-refresh.js": "69106c5b0b757ddf1d0e6fd0685229f8750e51bf38b5411c22e47de7433934a8",
+    "context_pre.php": "945e09957584c49356f7e9482d9f10ea3fd026836e650eefc1d00948aae371ab",
+    "context.php": "2b7a4128c4718b296cecd63c903f17d5b5ba2a6c2a87a77c531437ab00a3d5bf",
+    "diagnostics.php": "89166188fd86b7b656a90b4e014f49213c1a1829da90d74e30b5f6dad1fb6e87",
+    "index.php": "4c20b994877918a8b844cb24dce3d57ac896e51bd3b1e9c1d7e50c94febe8df9",
+    "installation_guard.php": "082cb9534bb3c8570faa384c5050d5193f2fbe19a58534381bb7f1b47e2a607d",
+    "json_response_custom.php": "f1304985ee29663365cebb87bf11846edbc2dc68c77b1e981ab2b7e7a95eebd1",
+    "log_reader.php": "9fbe50d46ecbc9064df80d258439d77cafcbadf38b0d9b4b6ea83577f2498c97",
+    "log.php": "5ce07e9b834dba51ea5552d923c3a83f97dd3fa5dce7131db773d16813612a8c",
+    "manifest.json": "198a242e4e85cd418aca588fd7583e1643437ffe069c3eaa6070b53d2eff4a3c",
+    "postrequest.php": "ef872ff00160d0403d856dfde6606e4c639c716bb624601641ef9a3118adef21",
+    "prepostrequest.php": "3b92bd8825ae0770b49fe01646a90758e8a22b4870cffed3872c19882af7e380",
+    "preprocessing.php": "5a0d46d3b29ba5f1a986f90b1fa7bbc8ce41402dd6b8d30f49a2fcba7783d49c",
+    "prerequest.php": "b229411c6f6d6f78403890041f6f2a3fa43ded3feb199f3a590aa397fd019434",
+    "reflection_receipt.php": "f2fba808ec7f1153f059b4a919f855fa95f23761fb4eb5ac3ebc7173340a7f15",
+    "reflection.php": "d33a41331638be653d7c94119043672d7142e73ac752f8adb7b7cfc090670540",
+    "scope.php": "75a2d61d9f223bae2d5bef32d1d2bbd88cf15dc4764f8759f8d763c236c1af2f",
+    "state.php": "49c2b53466572015e77117653739966377267b5b50ec4514155e53256bca7361"
+  }
+}

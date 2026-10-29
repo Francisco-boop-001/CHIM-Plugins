@@ -350,7 +350,7 @@ function pcv_log_reason_allowed(string $event, ?string $reason, ?string $outcome
         return $reason === 'presence_stale';
     }
     if ($event === 'ui.scope_stage_rejected') {
-        return in_array($reason, ['invalid_configuration', 'actor_unavailable', 'actor_ambiguous', 'missing_settings', 'state_unavailable', 'access_denied', 'csrf_failed', 'internal_error', 'presence_missing', 'presence_stale', 'presence_unavailable', 'presence_invalid', 'presence_key_mismatch'], true);
+        return in_array($reason, ['invalid_configuration', 'actor_unavailable', 'actor_ambiguous', 'missing_settings', 'state_unavailable', 'access_denied', 'csrf_failed', 'internal_error', 'playthrough_changed', 'presence_missing', 'presence_stale', 'presence_unavailable', 'presence_invalid', 'presence_key_mismatch'], true);
     }
     if ($event === 'ui.unavailable') {
         return in_array($reason, ['session_unavailable', 'identity_unavailable', 'catalog_unavailable', 'state_unavailable'], true);

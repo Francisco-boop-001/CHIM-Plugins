@@ -1,0 +1,1 @@
+PASS: production logger accepts playthrough_changed for UI scope rejection.

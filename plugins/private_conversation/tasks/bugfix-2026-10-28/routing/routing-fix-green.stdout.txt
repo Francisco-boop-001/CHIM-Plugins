@@ -1,0 +1,1 @@
+PASS actual hooks: Pair and Solo wrap priority, clear failure, included-player Brawl offer, and exclusion controls.

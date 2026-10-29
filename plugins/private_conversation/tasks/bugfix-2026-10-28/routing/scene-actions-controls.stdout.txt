@@ -1,0 +1,1 @@
+PASS scene actions hook: narrows enabled actions, never re-enables gated ones, members-only Brawl targets, post-filter registered

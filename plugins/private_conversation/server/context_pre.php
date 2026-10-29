@@ -101,7 +101,7 @@ try {
 }
 $GLOBALS['PROMPT_NEARBY_SECTIONS'] = $nearbyContext;
 // 0.1.16: opt-in scene actions narrow CHIM's enabled list (never widen it); without groups the scene stays talk-only.
-$actionsOn = pcvPrepareSceneActions($scope);
+$actionsOn = pcvPrepareSceneActions($scope, $playerName);
 if (!$actionsOn) {
     $GLOBALS['PROMPT_ACTIONS_LIST'] = '';
     $GLOBALS['actionsList'] = '';

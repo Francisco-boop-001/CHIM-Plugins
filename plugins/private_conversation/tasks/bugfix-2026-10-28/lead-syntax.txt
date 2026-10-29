@@ -1,0 +1,8 @@
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\server\index.php
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\server\log.php
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\server\scope.php
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\server\context_pre.php
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tests\page_check.php
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tests\scene_actions_hook_check.php
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tests\routing_fix_hook_check.php
+No syntax errors detected in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tests\stale_page_reference_check.php

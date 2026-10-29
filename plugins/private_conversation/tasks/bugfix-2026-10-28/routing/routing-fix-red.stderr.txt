@@ -1,0 +1,4 @@
+Private Conversation logger: directory_unavailable request_id=184fb690-4dd8-4127-b7ea-e10006d801a1 config_id=none
+FAIL: A queued Solo wrap must end before the queued Solo is promoted or generated.
+FAIL: A failed Solo clear must block without claiming END success or generating a response.
+FAIL: An originally offered included-player target must match the validated output-verdict identity.

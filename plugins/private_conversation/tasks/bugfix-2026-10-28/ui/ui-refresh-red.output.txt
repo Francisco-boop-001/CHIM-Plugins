@@ -1,0 +1,150 @@
+TAP version 13
+# Subtest: refresh updates status and CSRF while preserving eligible drafts and clearing stale or cross-playthrough pairs
+ok 1 - refresh updates status and CSRF while preserving eligible drafts and clearing stale or cross-playthrough pairs
+  ---
+  duration_ms: 8.3618
+  type: 'test'
+  ...
+# Subtest: group controls refresh with the roster, block duplicate members, and stay off in solo mode
+ok 2 - group controls refresh with the roster, block duplicate members, and stay off in solo mode
+  ---
+  duration_ms: 1.703
+  type: 'test'
+  ...
+# Subtest: page guidance matches the group range and follows the selected free cap
+ok 3 - page guidance matches the group range and follows the selected free cap
+  ---
+  duration_ms: 1.8353
+  type: 'test'
+  ...
+# Subtest: malformed refresh controls preserve both actor drafts and fail closed
+ok 4 - malformed refresh controls preserve both actor drafts and fail closed
+  ---
+  duration_ms: 1.7492
+  type: 'test'
+  ...
+# Subtest: refresh rejects hidden references that do not match the displayed identity atomically
+not ok 5 - refresh rejects hidden references that do not match the displayed identity atomically
+  ---
+  duration_ms: 3.7792
+  type: 'test'
+  location: 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tests\\ui_refresh_check.mjs:306:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'new-playthrough'
+    - 'same-playthrough'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'same-playthrough'
+  actual: 'new-playthrough'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///K:/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/ui_refresh_check.mjs:316:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: same-identity refresh preserves Free draft, while identity change clears it and updates both form references
+not ok 6 - same-identity refresh preserves Free draft, while identity change clears it and updates both form references
+  ---
+  duration_ms: 2.6836
+  type: 'test'
+  location: 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tests\\ui_refresh_check.mjs:324:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+    +   'same-playthrough',
+    +   'same-playthrough'
+    -   'other-playthrough',
+    -   'other-playthrough'
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0: 'other-playthrough'
+    1: 'other-playthrough'
+  actual:
+    0: 'same-playthrough'
+    1: 'same-playthrough'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///K:/ActorwrightExchange/projects/CHIM-PrivateConversation-dev/tests/ui_refresh_check.mjs:348:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: solo mode arms one eligible actor, preserves an eligible B draft across polling, and restores only a distinct B
+ok 7 - solo mode arms one eligible actor, preserves an eligible B draft across polling, and restores only a distinct B
+  ---
+  duration_ms: 4.077
+  type: 'test'
+  ...
+# Subtest: one eligible NPC enables ARM only after selecting solo mode
+ok 8 - one eligible NPC enables ARM only after selecting solo mode
+  ---
+  duration_ms: 3.3818
+  type: 'test'
+  ...
+# Subtest: solo mode discards a remembered B when it leaves the eligible roster during same-identity polling
+ok 9 - solo mode discards a remembered B when it leaves the eligible roster during same-identity polling
+  ---
+  duration_ms: 2.3828
+  type: 'test'
+  ...
+# Subtest: polling is single-flight, pauses while hidden, and refreshes immediately on return
+ok 10 - polling is single-flight, pauses while hidden, and refreshes immediately on return
+  ---
+  duration_ms: 1.8903
+  type: 'test'
+  ...
+# Subtest: timeout fails closed and the next poll can recover
+ok 11 - timeout fails closed and the next poll can recover
+  ---
+  duration_ms: 2.2307
+  type: 'test'
+  ...
+# Subtest: refresh failure telemetry uses fixed codes, current CSRF, and never retries its own failure
+ok 12 - refresh failure telemetry uses fixed codes, current CSRF, and never retries its own failure
+  ---
+  duration_ms: 7.8175
+  type: 'test'
+  ...
+# Subtest: a successful refresh re-arms telemetry for a new failure episode
+ok 13 - a successful refresh re-arms telemetry for a new failure episode
+  ---
+  duration_ms: 1.4754
+  type: 'test'
+  ...
+# Subtest: free scene disables every picker, forces the player out, and arms with two eligible NPCs
+ok 14 - free scene disables every picker, forces the player out, and arms with two eligible NPCs
+  ---
+  duration_ms: 1.5493
+  type: 'test'
+  ...
+# Subtest: 0.1.14: free size follows the Free scene box and turn length is off for solo
+ok 15 - 0.1.14: free size follows the Free scene box and turn length is off for solo
+  ---
+  duration_ms: 1.4313
+  type: 'test'
+  ...
+# Subtest: 0.1.16: the Physical scene-action box is off for solo
+ok 16 - 0.1.16: the Physical scene-action box is off for solo
+  ---
+  duration_ms: 1.4088
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 14
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 129.7646

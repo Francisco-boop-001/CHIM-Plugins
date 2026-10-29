@@ -41,6 +41,10 @@ function pageCheckSessionId(string $scenario): string
     return 'pagecheck-' . str_replace('_', '-', $scenario);
 }
 
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . 'server' . DIRECTORY_SEPARATOR . 'log.php';
+pageCheck(pcv_log_rule_matches('ui.scope_stage_rejected', 'warning', 'rejected', 'playthrough_changed'),
+    'The fixed stale-playthrough UI rejection reason must be accepted by the production event allowlist.');
+
 $root = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'pcv-page-check-' . bin2hex(random_bytes(8));
 $server = $root . DIRECTORY_SEPARATOR . 'webroot' . DIRECTORY_SEPARATOR . 'HerikaServer' . DIRECTORY_SEPARATOR . 'ext' . DIRECTORY_SEPARATOR . 'private_conversation';
 $engine = $root . DIRECTORY_SEPARATOR . 'webroot' . DIRECTORY_SEPARATOR . 'HerikaServer';
@@ -64,7 +68,10 @@ file_put_contents($server . DIRECTORY_SEPARATOR . 'state.php', <<<'PHP'
 <?php
 declare(strict_types=1);
 
-function pcv_current_playthrough_key(): ?string { return 'fixture-playthrough'; }
+function pcv_current_playthrough_key(): ?string
+{
+    return ($GLOBALS['pcv_page_scenario'] ?? null) === 'post_identity_unavailable' ? null : 'fixture-playthrough';
+}
 function pcv_current_player_name(): ?string { return 'Player'; }
 function pcv_read_npc_catalog(): array
 {
@@ -220,6 +227,7 @@ require_once __DIR__ . '/index.php';
 $_SERVER['REQUEST_METHOD'] = str_starts_with($scenario, 'get_') ? 'GET' : 'POST';
 $basePost = [
     'csrf' => str_repeat('a', 64),
+    'playthrough_ref' => hash('sha256', 'pcv-ui:fixture-playthrough'),
     'action' => 'arm',
     'actor_a' => '101',
     'actor_b' => '202',
@@ -227,9 +235,16 @@ $basePost = [
     'bystander_mode' => 'silent',
 ];
 $post = match ($scenario) {
-    'end_catalog_failure' => ['csrf' => str_repeat('a', 64), 'action' => 'end'],
+    'end_catalog_failure' => ['csrf' => str_repeat('a', 64), 'playthrough_ref' => hash('sha256', 'pcv-ui:fixture-playthrough'), 'action' => 'end'],
+    'post_ref_mismatch' => array_replace($basePost, ['playthrough_ref' => str_repeat('b', 64)]),
+    'post_ref_missing' => array_diff_key($basePost, ['playthrough_ref' => true]),
+    'post_ref_malformed' => array_replace($basePost, ['playthrough_ref' => ['not-a-reference']]),
+    'post_end_ref_mismatch' => ['csrf' => str_repeat('a', 64), 'playthrough_ref' => str_repeat('b', 64), 'action' => 'end'],
+    'post_bad_csrf_stale_ref' => array_replace($basePost, ['csrf' => str_repeat('b', 64), 'playthrough_ref' => str_repeat('c', 64)]),
+    'post_identity_unavailable' => array_diff_key($basePost, ['playthrough_ref' => true]),
     'post_solo' => [
-        'csrf' => str_repeat('a', 64), 'action' => 'arm', 'scene_mode' => 'solo', 'actor_a' => '101',
+        'csrf' => str_repeat('a', 64), 'playthrough_ref' => hash('sha256', 'pcv-ui:fixture-playthrough'),
+        'action' => 'arm', 'scene_mode' => 'solo', 'actor_a' => '101',
         'actor_b' => ['untrusted'], 'exclude_player' => '0', 'bystander_mode' => 'silent',
     ],
     'post_multiline_card' => $basePost + ['card' => "two\nlines"],
@@ -267,6 +282,8 @@ $scenarios = [
     'get_ready', 'get_refresh', 'get_single', 'get_empty', 'get_missing', 'get_stale',
     'get_end_members_gone', 'get_end_evidence_unavailable', 'post_stale', 'post_single',
     'post_solo', 'post_multiline_card', 'post_long_card', 'post_unicode_card', 'post_blank_card', 'end_catalog_failure',
+    'post_ref_mismatch', 'post_ref_missing', 'post_ref_malformed', 'post_end_ref_mismatch',
+    'post_bad_csrf_stale_ref', 'post_identity_unavailable',
 ];
 try {
     $responses = [];
@@ -321,6 +338,7 @@ try {
     pageCheck(($refresh['status'] ?? null) === 200 && count($refresh['eligibility_calls'] ?? []) === 1
         && ($refresh['stage_calls'] ?? null) === 0 && $refreshPageOpen === [] && ($refresh['session_closed'] ?? false) === true
         && str_contains((string)$refresh['body'], 'data-playthrough-ref="' . $refreshRef . '"')
+        && substr_count((string)$refresh['body'], 'name="playthrough_ref" value="' . $refreshRef . '"') === 2
         && !str_contains((string)$refresh['body'], 'fixture-playthrough')
         && str_contains((string)$refresh['body'], 'assets/ui-refresh.js')
         && str_contains((string)$refresh['body'], 'name="csrf" value="' . str_repeat('a', 64) . '"'),
@@ -373,6 +391,25 @@ try {
     pageCheck(str_contains((string)$responses['post_stale']['body'], 'Fresh nearby and AI activity could not be confirmed; current eligibility is unknown')
         && str_contains((string)$responses['post_single']['body'], 'Pair mode requires two distinct nearby CHIM-AI-active characters'),
         'POST rejection did not distinguish stale from insufficient eligibility.');
+
+    foreach (['post_ref_mismatch', 'post_ref_missing', 'post_ref_malformed', 'post_end_ref_mismatch'] as $scenario) {
+        $rejected = $responses[$scenario];
+        $rejections = array_values(array_filter($rejected['entries'], static fn(array $entry): bool =>
+            ($entry['event'] ?? null) === 'ui.scope_stage_rejected'));
+        pageCheck(($rejected['status'] ?? null) === 409 && ($rejected['stage_calls'] ?? null) === 0
+            && count($rejections) === 1 && ($rejections[0]['reason'] ?? null) === 'playthrough_changed'
+            && str_contains((string)$rejected['body'], 'Refresh the page before making this change.'),
+            'ARM and END must reject a missing, malformed, or changed rendered playthrough reference before staging.');
+    }
+    $badCsrf = $responses['post_bad_csrf_stale_ref'];
+    $badCsrfRejections = array_values(array_filter($badCsrf['entries'], static fn(array $entry): bool =>
+        ($entry['event'] ?? null) === 'ui.scope_stage_rejected'));
+    pageCheck(($badCsrf['status'] ?? null) === 400 && ($badCsrf['stage_calls'] ?? null) === 0
+        && count($badCsrfRejections) === 1 && ($badCsrfRejections[0]['reason'] ?? null) === 'csrf_failed',
+        'An invalid CSRF token must retain precedence over a stale playthrough reference.');
+    $identityUnavailable = $responses['post_identity_unavailable'];
+    pageCheck(($identityUnavailable['status'] ?? null) === 503 && ($identityUnavailable['stage_calls'] ?? null) === 0,
+        'A missing current identity must remain unavailable rather than being treated as a stale page reference.');
 
     foreach (['post_multiline_card' => "two\nlines", 'post_long_card' => str_repeat('x', 301)] as $scenario => $rawCard) {
         $rejected = $responses[$scenario];

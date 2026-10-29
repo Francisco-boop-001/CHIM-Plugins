@@ -27,13 +27,13 @@ try {
     $GLOBALS['FUNCTION_PARM_INSPECT'] = ['Lidia', 'Bruce', 'Aelva', 'Hawke'];
     $GLOBALS['action_post_process_fnct_ex'] = ['someOtherPluginFilter'];
     $GLOBALS['FUNCTIONS_ARE_ENABLED'] = true;
-    $enabled = pcvPrepareSceneActions($resolved);
+    $enabled = pcvPrepareSceneActions($resolved, 'Hawke');
     shCheck($enabled === true && $GLOBALS['FUNCTIONS_ARE_ENABLED'] === true, 'Actions are switched on for a scene with groups.');
     shCheck($GLOBALS['ENABLED_FUNCTIONS'] === ['Drink', 'Brawl', 'ExtCmdKiss'], 'Only allowed and already-enabled codes remain.');
     shCheck(!in_array('ExtCmdStartSex', $GLOBALS['ENABLED_FUNCTIONS'], true), 'SHARMAT-gated actions are never re-enabled.');
     shCheck($GLOBALS['FUNCTION_PARM_INSPECT'] === ['Lidia', 'Bruce'], 'Brawl targets are narrowed to the members.');
     shCheck($GLOBALS['action_post_process_fnct_ex'] === ['someOtherPluginFilter', 'pcvSceneActionPostFilter'], 'The post-filter is registered after others.');
-    pcvPrepareSceneActions($resolved);
+    pcvPrepareSceneActions($resolved, 'Hawke');
     shCheck(count(array_keys($GLOBALS['action_post_process_fnct_ex'], 'pcvSceneActionPostFilter', true)) === 1, 'The post-filter is registered once.');
 
     // After CHIM's rebuild: only allowed actions or Talk.
@@ -44,13 +44,13 @@ try {
     // CHIM actions switched off by the user: a scene never switches them on.
     $GLOBALS['ENABLED_FUNCTIONS'] = ['Drink', 'Brawl'];
     $GLOBALS['FUNCTIONS_ARE_ENABLED'] = false;
-    shCheck(pcvPrepareSceneActions($resolved) === false && $GLOBALS['FUNCTIONS_ARE_ENABLED'] === false, 'A global actions-off setting is respected.');
+    shCheck(pcvPrepareSceneActions($resolved, 'Hawke') === false && $GLOBALS['FUNCTIONS_ARE_ENABLED'] === false, 'A global actions-off setting is respected.');
 
     // No groups: talk only, unchanged behaviour.
     $GLOBALS['ENABLED_FUNCTIONS'] = ['Drink', 'Attack'];
     $GLOBALS['FUNCTIONS_ARE_ENABLED'] = true;
     $plain = pcvResolveScopeNames($pair, $known, 'Hawke');
-    shCheck(pcvPrepareSceneActions($plain) === false && $GLOBALS['FUNCTIONS_ARE_ENABLED'] === false, 'Without groups actions stay off.');
+    shCheck(pcvPrepareSceneActions($plain, 'Hawke') === false && $GLOBALS['FUNCTIONS_ARE_ENABLED'] === false, 'Without groups actions stay off.');
     shCheck(!pcvSceneActionListAllowed(['Drink'], $plain) && pcvSceneActionListAllowed(['Talk'], $plain), 'Without groups only Talk passes.');
 
     // Guidance line.
@@ -69,7 +69,7 @@ try {
     $GLOBALS['ENABLED_FUNCTIONS'] = ['Drink', 'Brawl', 'Surrender', 'Attack', 'ExtCmdKiss', 'ExtCmdStartSex',
         'ExtCmdStartSelfMasturbation', 'ExtCmdPutOnClothes', 'ExtCmdRemoveClothes', 'Toast', 'Consume', 'TakeASeat', 'Relax'];
     $GLOBALS['FUNCTIONS_ARE_ENABLED'] = true;
-    shCheck(pcvPrepareSceneActions($soloWithAllGroups) === true, 'Solo scene actions remain enabled when already enabled in CHIM.');
+    shCheck(pcvPrepareSceneActions($soloWithAllGroups, 'Hawke') === true, 'Solo scene actions remain enabled when already enabled in CHIM.');
     shCheck($GLOBALS['ENABLED_FUNCTIONS'] === ['Drink', 'ExtCmdStartSelfMasturbation', 'ExtCmdPutOnClothes',
         'ExtCmdRemoveClothes', 'Toast', 'Consume', 'TakeASeat', 'Relax'],
         'Solo preparation narrows already-enabled actions without widening CHIM or SHARMAT gates.');

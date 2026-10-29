@@ -1,0 +1,8 @@
+preflight_request=eligible mp_api=yes reply_api=yes
+registration_status=registry_corrupt registry_kind=missing
+
+Fatal error: Uncaught RuntimeException: The real PCV registration helper did not persist a readable record. in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\full_reply_capacity_chain.php:60
+Stack trace:
+#0 K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\full_reply_capacity_chain.php(145): requireFixture(false, 'The real PCV re...')
+#1 {main}
+  thrown in K:\ActorwrightExchange\projects\CHIM-PrivateConversation-dev\tasks\bughunt-2026-10-28\reflection\repros\full_reply_capacity_chain.php on line 60

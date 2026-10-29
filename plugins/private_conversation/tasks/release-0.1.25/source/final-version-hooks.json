@@ -1,0 +1,24 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "file": "routing_fix_hook_check.php",
+      "chunk_id": "0edd9d",
+      "wall_time_seconds": 0.1966593,
+      "exit_code": 0,
+      "original_token_count": 58,
+      "output": "Private Conversation logger: directory_unavailable request_id=5679b8c0-8d3a-4810-bc7e-6e09dc35fbe3 config_id=none\nPASS actual hooks: Pair and Solo wrap priority, clear failure, included-player Brawl offer, and exclusion controls.\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "file": "stale_page_reference_check.php",
+      "chunk_id": "96e8fe",
+      "wall_time_seconds": 0.3012322,
+      "exit_code": 0,
+      "original_token_count": 30,
+      "output": "PASS: rendered ARM/END references, stale/missing/malformed rejection, CSRF and identity precedence, and valid controls.\n"
+    }
+  }
+]

@@ -1,0 +1,7 @@
+FAIL: GET must render the opaque current reference into both ARM and END forms.
+FAIL: ARM from profile A must be refused before staging after the server switches to profile B.
+FAIL: A stale ARM must show the fixed refresh notice.
+FAIL: A stale ARM must use the fixed playthrough_changed rejection reason.
+FAIL: END from profile A must be refused before staging after the server switches to profile B.
+FAIL: END must reject a missing or malformed reference before staging.
+FAIL: END must reject a missing or malformed reference before staging.

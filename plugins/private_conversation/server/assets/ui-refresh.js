@@ -269,12 +269,17 @@
         const nextArm = snapshot.querySelector('#arm-button');
         const nextCsrfInputs = snapshot.querySelectorAll('input[name="csrf"]');
         const currentCsrfInputs = documentRef.querySelectorAll('input[name="csrf"]');
+        const nextPlaythroughInputs = snapshot.querySelectorAll('input[name="playthrough_ref"]');
+        const currentPlaythroughInputs = documentRef.querySelectorAll('input[name="playthrough_ref"]');
 
         if (!isSelectElement(currentA) || !isSelectElement(currentB) || !currentSoloMode || !isSelectElement(nextA)
             || !isSelectElement(nextB) || !nextBadge || !nextStatus
             || !nextNote || !nextNotice || !currentBadge || !currentStatus || !currentNote
             || !currentNotice || !currentArm || !nextArm || nextCsrfInputs.length === 0
-            || currentCsrfInputs.length === 0 || typeof snapshot.body.dataset.playthroughRef !== 'string') {
+            || currentCsrfInputs.length === 0 || currentPlaythroughInputs.length === 0
+            || nextPlaythroughInputs.length !== currentPlaythroughInputs.length
+            || typeof snapshot.body.dataset.playthroughRef !== 'string'
+            || Array.from(nextPlaythroughInputs).some((input) => input.value !== snapshot.body.dataset.playthroughRef)) {
             throw new Error('Incomplete refresh response.');
         }
 
@@ -282,16 +287,25 @@
         const actorBOptions = Array.from(nextB.options, (option) => option.cloneNode(true));
         const identityChanged = documentRef.body.dataset.playthroughRef !== snapshot.body.dataset.playthroughRef;
         if (identityChanged) {
+            const currentFreeMode = documentRef.querySelector('#free-mode');
+            const playerCheckbox = documentRef.querySelector('input[name="exclude_player"]');
             if (currentSoloMode.checked) {
-                const playerCheckbox = documentRef.querySelector('input[name="exclude_player"]');
                 if (playerCheckbox && rememberedPlayerExclusion !== null) {
                     playerCheckbox.checked = rememberedPlayerExclusion;
                 }
             }
+            if (currentFreeMode?.checked && playerCheckbox && rememberedFreePlayerExclusion !== null) {
+                playerCheckbox.checked = rememberedFreePlayerExclusion;
+            }
             currentSoloMode.checked = false;
+            if (currentFreeMode) {
+                currentFreeMode.checked = false;
+            }
             rememberedActorB = '';
             rememberedPlayerExclusion = null;
+            rememberedFreePlayerExclusion = null;
             lastSoloMode = false;
+            lastFreeMode = false;
         }
         const selectedA = identityChanged ? '' : currentA.value;
         const selectedB = identityChanged || currentSoloMode.checked ? '' : currentB.value;
@@ -335,6 +349,9 @@
         currentNotice.innerHTML = nextNotice.innerHTML;
         for (const input of currentCsrfInputs) {
             input.value = nextCsrfInputs[0].value;
+        }
+        for (const input of currentPlaythroughInputs) {
+            input.value = snapshot.body.dataset.playthroughRef;
         }
         documentRef.body.dataset.playthroughRef = snapshot.body.dataset.playthroughRef;
         serverAllowsArm = nextArm.dataset.rosterReady === '1';
