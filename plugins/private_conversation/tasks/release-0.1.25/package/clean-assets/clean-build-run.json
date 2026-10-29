@@ -1,0 +1,95 @@
+{
+  "captured_utc": "2026-10-29T01:52:08.6379736Z",
+  "result": "PASS",
+  "tag": "private_conversation-v0.1.25",
+  "commit": "886a54967db7c6c08725c8bec8854ea3919ea532",
+  "tag_commit_verification": {
+    "command": "git -C 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev' -c safe.directory='K:/ActorwrightExchange/projects/CHIM-PrivateConversation-dev' rev-parse 'private_conversation-v0.1.25^{commit}'",
+    "exit_code": 0,
+    "output": "886a54967db7c6c08725c8bec8854ea3919ea532"
+  },
+  "archive_command": "git -C 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev' -c safe.directory='K:/ActorwrightExchange/projects/CHIM-PrivateConversation-dev' archive --format=tar --output='K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\clean-source\\private_conversation-v0.1.25.tar' 'private_conversation-v0.1.25'",
+  "archive_exit_code": 0,
+  "archive_sha256": "29b9e42e17f5cc0a6ad6d6ccc2d1bdf748dc76ffacf98c131f013220e1fab416",
+  "archive_unpack": {
+    "runtime": "Python 3.12.4, explicit python.exe -B",
+    "method": "validated every tar member as relative POSIX path with no traversal/backslash, accepted only regular files/directories, extracted with tarfile filter=data",
+    "exit_code": 0,
+    "member_count": 1171,
+    "file_count": 1083,
+    "receipt": "tasks/release-0.1.25/package/clean-source/export-receipt.json"
+  },
+  "build_command": "& 'C:\\Program Files\\Python312\\python.exe' -B 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\clean-assets\\build-root\\scripts\\build-package.py' --format release --release-dir 'release-v0.1.25-clean'",
+  "build_exit_code": 0,
+  "build_output": [
+    "Built and verified release-v0.1.25-clean\\SHA256SUMS.txt (381 bytes, sha256 5850351814f91293ca357427952acf9cf2c9876f1a18fd5aa8bdaaa32469e840)",
+    "Built and verified release-v0.1.25-clean\\chim-plugin.tar.gz (3055133 bytes, sha256 8b6b1618d09ecc9c24413a6909e1ac9dc141c14fd9b6693f2d74eb2893786567)",
+    "Built and verified release-v0.1.25-clean\\private_conversation-0.1.25-mo2.zip (3058334 bytes, sha256 0ecf7ebf31ca69261395b040dc802cd62bff4b17c26306a5c68183496e3c1cdd)",
+    "Built and verified release-v0.1.25-clean\\private_conversation-0.1.25.dwpkg (3484443 bytes, sha256 05fdec89855062d1dfe7f64ac745f4bcb9d1ddf7a2414a7a4ed45107e4fde3be)",
+    "Built and verified release-v0.1.25-clean\\private_conversation.tar.gz (3055206 bytes, sha256 1d3d209670ac92c038546c218d9e48ccaf255a6ec7ab63584cdad578dec2b93e)"
+  ],
+  "build_source_comparison": {
+    "all_bytes_identical": true,
+    "build_root_source_file_count": 1083,
+    "source_file_count": 1083,
+    "status": "PASS"
+  },
+  "independent_inventory": {
+    "command": "& 'C:\\Program Files\\Python312\\python.exe' -B 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\independent_inventory.py' --source-root 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\clean-source\\tree' --release-dir 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\clean-assets\\build-root\\release-v0.1.25-clean' --report 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\clean-assets\\independent-inventory.json'",
+    "exit_code": 0,
+    "result": "PASS",
+    "checks": [
+      "exact five regular candidate assets",
+      "DWPkg safe exact member list and CRC",
+      "DWPkg schema/version/mutable-path manifest",
+      "DWPkg internal checksums",
+      "all DWPkg payload bytes equal current server source",
+      "wrapped TAR exact wrapper and deterministic metadata",
+      "flat TAR exact allowlisted files",
+      "MO2 meta.ini and embedded DWPkg",
+      "outer SHA256SUMS covers four assets",
+      "text payload LF-only",
+      "no mutable state file embedded"
+    ],
+    "output_path": "tasks/release-0.1.25/package/clean-assets/independent-inventory.json"
+  },
+  "candidate_comparison": {
+    "asset_count": 5,
+    "assets": [
+      {
+        "byte_identical": true,
+        "bytes": 381,
+        "name": "SHA256SUMS.txt",
+        "sha256": "5850351814f91293ca357427952acf9cf2c9876f1a18fd5aa8bdaaa32469e840"
+      },
+      {
+        "byte_identical": true,
+        "bytes": 3055133,
+        "name": "chim-plugin.tar.gz",
+        "sha256": "8b6b1618d09ecc9c24413a6909e1ac9dc141c14fd9b6693f2d74eb2893786567"
+      },
+      {
+        "byte_identical": true,
+        "bytes": 3058334,
+        "name": "private_conversation-0.1.25-mo2.zip",
+        "sha256": "0ecf7ebf31ca69261395b040dc802cd62bff4b17c26306a5c68183496e3c1cdd"
+      },
+      {
+        "byte_identical": true,
+        "bytes": 3484443,
+        "name": "private_conversation-0.1.25.dwpkg",
+        "sha256": "05fdec89855062d1dfe7f64ac745f4bcb9d1ddf7a2414a7a4ed45107e4fde3be"
+      },
+      {
+        "byte_identical": true,
+        "bytes": 3055206,
+        "name": "private_conversation.tar.gz",
+        "sha256": "1d3d209670ac92c038546c218d9e48ccaf255a6ec7ab63584cdad578dec2b93e"
+      }
+    ],
+    "commit": "886a54967db7c6c08725c8bec8854ea3919ea532",
+    "status": "PASS",
+    "tag": "private_conversation-v0.1.25"
+  },
+  "publication_or_installation": "not performed"
+}

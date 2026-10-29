@@ -1,0 +1,95 @@
+{
+  "assets": [
+    {
+      "auth_or_cookie_headers_sent": false,
+      "content_length_header": "3055133",
+      "downloaded_bytes": 3055133,
+      "downloaded_sha256": "8b6b1618d09ecc9c24413a6909e1ac9dc141c14fd9b6693f2d74eb2893786567",
+      "final_host": "release-assets.githubusercontent.com",
+      "http_status": 200,
+      "matches_public_metadata": true,
+      "name": "chim-plugin.tar.gz",
+      "request_headers": [],
+      "request_method": "GET",
+      "success": true,
+      "url": "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.25/chim-plugin.tar.gz"
+    },
+    {
+      "auth_or_cookie_headers_sent": false,
+      "content_length_header": "3058334",
+      "downloaded_bytes": 3058334,
+      "downloaded_sha256": "0ecf7ebf31ca69261395b040dc802cd62bff4b17c26306a5c68183496e3c1cdd",
+      "final_host": "release-assets.githubusercontent.com",
+      "http_status": 200,
+      "matches_public_metadata": true,
+      "name": "private_conversation-0.1.25-mo2.zip",
+      "request_headers": [],
+      "request_method": "GET",
+      "success": true,
+      "url": "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.25/private_conversation-0.1.25-mo2.zip"
+    },
+    {
+      "auth_or_cookie_headers_sent": false,
+      "content_length_header": "3484443",
+      "downloaded_bytes": 3484443,
+      "downloaded_sha256": "05fdec89855062d1dfe7f64ac745f4bcb9d1ddf7a2414a7a4ed45107e4fde3be",
+      "final_host": "release-assets.githubusercontent.com",
+      "http_status": 200,
+      "matches_public_metadata": true,
+      "name": "private_conversation-0.1.25.dwpkg",
+      "request_headers": [],
+      "request_method": "GET",
+      "success": true,
+      "url": "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.25/private_conversation-0.1.25.dwpkg"
+    },
+    {
+      "auth_or_cookie_headers_sent": false,
+      "content_length_header": "3055206",
+      "downloaded_bytes": 3055206,
+      "downloaded_sha256": "1d3d209670ac92c038546c218d9e48ccaf255a6ec7ab63584cdad578dec2b93e",
+      "final_host": "release-assets.githubusercontent.com",
+      "http_status": 200,
+      "matches_public_metadata": true,
+      "name": "private_conversation.tar.gz",
+      "request_headers": [],
+      "request_method": "GET",
+      "success": true,
+      "url": "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.25/private_conversation.tar.gz"
+    },
+    {
+      "auth_or_cookie_headers_sent": false,
+      "content_length_header": "381",
+      "downloaded_bytes": 381,
+      "downloaded_sha256": "5850351814f91293ca357427952acf9cf2c9876f1a18fd5aa8bdaaa32469e840",
+      "final_host": "release-assets.githubusercontent.com",
+      "http_status": 200,
+      "matches_public_metadata": true,
+      "name": "SHA256SUMS.txt",
+      "request_headers": [],
+      "request_method": "GET",
+      "success": true,
+      "url": "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/download/private_conversation-v0.1.25/SHA256SUMS.txt"
+    }
+  ],
+  "clean_tag_byte_comparison": {
+    "all_five_identical": true,
+    "path": "tasks/release-0.1.25/publication/hub-public-clean-comparison.json",
+    "sha256": "0b4bd337907f036d4beea941c0de08c492bc0623e4e608175ba374759722f46e",
+    "status": "PASS"
+  },
+  "download_directory": "tasks/release-0.1.25/publication/hub-public-downloads",
+  "download_method": "Python 3.12 urllib; direct HTTPS opener with proxy handler disabled; no cookie processor, Authorization header, Cookie header, GitHub CLI, or credentials supplied",
+  "downloaded_directory_file_count": 5,
+  "independent_inventory": {
+    "path": "tasks/release-0.1.25/publication/hub-public-download-inventory.json",
+    "sha256": "e966f1854073d4383bb60872fe3f18f46bcfc36981786a4e8ffb8a35a614600d",
+    "status": "PASS"
+  },
+  "prerelease": false,
+  "public_page_url_matches_tag": true,
+  "published": true,
+  "release_page_url": "https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.25",
+  "release_tag": "private_conversation-v0.1.25",
+  "status": "PASS",
+  "target_commit": "2816e66fba2f4c3cc24b4489f44af79d35b212bc"
+}

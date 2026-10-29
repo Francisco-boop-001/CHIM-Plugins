@@ -1,0 +1,9 @@
+{
+  "stage": "after scoped evidence attributes and targeted renormalization",
+  "checked_files": 41,
+  "mismatches": [],
+  "recorded_input_sha256": "cafaf3ea8be9f5ee42140e8998f37845f8625c1695dcfaf4412b451b5fe17086",
+  "staged_sha256": "cafaf3ea8be9f5ee42140e8998f37845f8625c1695dcfaf4412b451b5fe17086",
+  "staged_matches_recorded": true,
+  "runtime_payload_changed": false
+}

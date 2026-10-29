@@ -1,0 +1,10 @@
+{
+  "attemptedPublicationFlag": "--latest=false",
+  "transientLatestTag": "private_conversation-v0.1.25",
+  "restoration": "PATCH existing previous release make_latest=true only",
+  "restoredTag": "private_conversation-v0.1.24",
+  "restoredReleaseId": 424760356,
+  "previousBodyAndIdentityUnchanged": true,
+  "previousAssetIdsSizesDigestsUnchanged": true,
+  "mainAdvancedDuringIncident": false
+}

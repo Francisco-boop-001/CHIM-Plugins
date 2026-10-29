@@ -1,0 +1,5 @@
+# PCV 0.1.25 publication-docs review
+
+The README, player guide, and release note now distinguish canonical publication proof from gameplay and installation evidence. The public tag `private_conversation-v0.1.25` resolves to `886a54967db7c6c08725c8bec8854ea3919ea532`; five anonymous public asset downloads match the clean-tag build and tested candidate. Four focused PHP fixtures, 16/16 Node UI checks, and four package checks passed. The POSIX-guarded broad page fixture remains unperformed; no fresh provider request, installation, or Skyrim gameplay is claimed. The early-ACK capacity candidate remains unconfirmed.
+
+The publication record is linked from all three documents. The versioned [CHIM-Plugins bridge release](https://github.com/Francisco-boop-001/CHIM-Plugins/releases/tag/private_conversation-v0.1.25) is public, and its five anonymous assets match the canonical clean build. After a transient selection of 0.1.25 as global latest, the `private_conversation-v0.1.24` selector was restored; the prior release body and assets remain unchanged. Department's existing PCV 0.1.24 pin remains unchanged; the PCV 0.1.25 release does not claim a Department pairing.

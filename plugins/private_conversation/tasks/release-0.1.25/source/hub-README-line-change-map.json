@@ -1,0 +1,37 @@
+{
+  "changed_lines": [
+    {
+      "after": "### Private Conversation 0.1.25 — BETA",
+      "before": "### Private Conversation 0.1.24 — BETA",
+      "line": 34
+    },
+    {
+      "after": "The public 0.1.25 BETA release contains 21 server payload files and changes runtime code. Four focused PHP behavior fixtures and a 16/16 Node UI run passed; the POSIX-guarded broad page fixture is unperformed on the review host. A clean build from the immutable tag produced five assets byte-identical to the tested candidate. No provider request, installation, or Skyrim gameplay is claimed. See [current beta evidence and limits](plugins/private_conversation/docs/operator-acceptance.md) and the [0.1.25 release note](plugins/private_conversation/distribution/private_conversation-v0.1.25.md).",
+      "before": "The public 0.1.24 BETA release contains 21 server payload files and changes runtime code. Its [focused verification record](plugins/private_conversation/tasks/read-timeouts-2026-10-26/verification.md) records five focused PHP fixtures, eight syntax checks, an 18/18 owner PostgreSQL suite, a 6/6 exact Department-overlay suite, and four package checks. A clean build from committed source produced five assets byte-identical to the tested candidate. No fresh provider request, installation, or Skyrim gameplay is claimed. See [current beta evidence and limits](plugins/private_conversation/docs/operator-acceptance.md) and the [0.1.24 release note](plugins/private_conversation/distribution/private_conversation-v0.1.24.md).",
+      "line": 40
+    },
+    {
+      "after": "[Release and checksums](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/tag/private_conversation-v0.1.25) · [Release notes](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.25/distribution/private_conversation-v0.1.25.md) · [Source](https://github.com/Francisco-boop-001/CHIM-PrivateConversation) · [Player guide](plugins/private_conversation/docs/player-guide.md) · [Current README and installation](plugins/private_conversation/README.md#install-and-update) · [Logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.25/docs/logging-revision-2.md)",
+      "before": "[Release and checksums](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/tag/private_conversation-v0.1.24) · [Release notes](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.24/distribution/private_conversation-v0.1.24.md) · [Source](https://github.com/Francisco-boop-001/CHIM-PrivateConversation) · [Player guide](plugins/private_conversation/docs/player-guide.md) · [Current README and installation](plugins/private_conversation/README.md#install-and-update) · [Logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.24/docs/logging-revision-2.md)",
+      "line": 42
+    },
+    {
+      "after": "| Private Conversation 0.1.25 BETA | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.25/private_conversation-0.1.25-mo2.zip) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.25/private_conversation-0.1.25.dwpkg) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.25/private_conversation.tar.gz) |",
+      "before": "| Private Conversation 0.1.24 BETA | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/private_conversation-0.1.24-mo2.zip) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/private_conversation-0.1.24.dwpkg) | [Download](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/private_conversation.tar.gz) |",
+      "line": 67
+    },
+    {
+      "after": "Private Conversation’s discovery asset is the flat [`chim-plugin.tar.gz`](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.25/chim-plugin.tar.gz). The table entry above is the wrapped legacy `private_conversation.tar.gz` route; CHIM’s repository installer strips that configured wrapper, so users should not unpack it by hand. The published BETA release has `prerelease=false` so CHIM can discover it; that flag is a filter, not a maturity certification.",
+      "before": "Private Conversation’s discovery asset is the flat [`chim-plugin.tar.gz`](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/releases/download/private_conversation-v0.1.24/chim-plugin.tar.gz). The table entry above is the wrapped legacy `private_conversation.tar.gz` route; CHIM’s repository installer strips that configured wrapper, so users should not unpack it by hand. The published BETA release has `prerelease=false` so CHIM can discover it; that flag is a filter, not a maturity certification.",
+      "line": 72
+    },
+    {
+      "after": "For Mind Poisoning, open CHIM Plugin Manager → Plugin Page → Logs → Download filtered plugin log. For Private Conversation, follow its [tagged logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.25/docs/logging-revision-2.md); for Sworn & Scorned, follow its [tagged guide](https://github.com/Francisco-boop-001/CHIM-SwornAndScorned/blob/sworn_and_scorned-v0.1.5/README.md). Each plugin has its own logging instructions.",
+      "before": "For Mind Poisoning, open CHIM Plugin Manager → Plugin Page → Logs → Download filtered plugin log. For Private Conversation, follow its [tagged logging guide](https://github.com/Francisco-boop-001/CHIM-PrivateConversation/blob/private_conversation-v0.1.24/docs/logging-revision-2.md); for Sworn & Scorned, follow its [tagged guide](https://github.com/Francisco-boop-001/CHIM-SwornAndScorned/blob/sworn_and_scorned-v0.1.5/README.md). Each plugin has its own logging instructions.",
+      "line": 90
+    }
+  ],
+  "hub_base": "2cf4d1740052e09b379a81acdd96c432f7054477",
+  "non_pcv_lines_unchanged": true,
+  "source_commit": "886a54967db7c6c08725c8bec8854ea3919ea532"
+}

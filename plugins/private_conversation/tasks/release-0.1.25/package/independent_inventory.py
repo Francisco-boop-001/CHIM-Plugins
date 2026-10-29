@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import configparser
 import hashlib
 import json
@@ -9,8 +10,13 @@ import tarfile
 import zipfile
 from pathlib import Path, PurePosixPath
 
-ROOT = Path(__file__).resolve().parents[3]
-RELEASE = Path(__file__).resolve().parent / "candidate"
+parser = argparse.ArgumentParser()
+parser.add_argument("--source-root", type=Path)
+parser.add_argument("--release-dir", type=Path)
+parser.add_argument("--report", type=Path)
+options = parser.parse_args()
+ROOT = options.source_root.resolve() if options.source_root else Path(__file__).resolve().parents[3]
+RELEASE = options.release_dir.resolve() if options.release_dir else Path(__file__).resolve().parent / "candidate"
 VERSION = "0.1.25"
 
 def digest(data: bytes) -> str:
@@ -122,6 +128,6 @@ report = {
     "checks": ["exact five regular candidate assets", "DWPkg safe exact member list and CRC", "DWPkg schema/version/mutable-path manifest", "DWPkg internal checksums", "all DWPkg payload bytes equal current server source", "wrapped TAR exact wrapper and deterministic metadata", "flat TAR exact allowlisted files", "MO2 meta.ini and embedded DWPkg", "outer SHA256SUMS covers four assets", "text payload LF-only", "no mutable state file embedded"],
     "assets": asset_records,
 }
-report_path = Path(__file__).resolve().parent / "independent-inventory.json"
+report_path = options.report.resolve() if options.report else Path(__file__).resolve().parent / "independent-inventory.json"
 report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 print(json.dumps(report, sort_keys=True))

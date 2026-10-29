@@ -1,0 +1,9 @@
+{
+  "commit": "2816e66fba2f4c3cc24b4489f44af79d35b212bc",
+  "tag": "private_conversation-v0.1.25",
+  "baseline": "2cf4d1740052e09b379a81acdd96c432f7054477",
+  "serverTree": "d78d1ae17fe3034c851baade0619d2d88b1fa76a",
+  "canonicalSource": "886a54967db7c6c08725c8bec8854ea3919ea532",
+  "matchesCanonicalServerTree": true,
+  "protectedPathsChanged": 0
+}

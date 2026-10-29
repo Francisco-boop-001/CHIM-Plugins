@@ -1,0 +1,10 @@
+{
+  "canonicalMain": "886a54967db7c6c08725c8bec8854ea3919ea532\trefs/heads/main",
+  "hubMain": "2816e66fba2f4c3cc24b4489f44af79d35b212bc\trefs/heads/main",
+  "canonicalPublicGate": "PASS",
+  "hubPublicGate": "PASS",
+  "canonicalRuntimeSource": "886a54967db7c6c08725c8bec8854ea3919ea532",
+  "hubSource": "2816e66fba2f4c3cc24b4489f44af79d35b212bc",
+  "sourceTagsUnchanged": true,
+  "futureDocumentationChangesOnly": true
+}

@@ -1,0 +1,22 @@
+{
+  "candidate_verifier_invocation": "& 'C:\\Program Files\\Python312\\python.exe' -B 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\independent_inventory.py'",
+  "classification": "host-side release evidence tooling; not a server runtime payload or package-builder change",
+  "current_host_verifier": {
+    "bytes": 8029,
+    "sha256": "3ee50409e85fb87cb1c08dff9f39da73e437d11eff27801f297cf361cb1a7af4",
+    "working_tree_differs_from_tag": true
+  },
+  "hash_commands": [
+    "git -C 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev' -c safe.directory='K:/ActorwrightExchange/projects/CHIM-PrivateConversation-dev' show 'private_conversation-v0.1.25:tasks/release-0.1.25/package/independent_inventory.py'",
+    "Get-FileHash -LiteralPath 'K:\\ActorwrightExchange\\projects\\CHIM-PrivateConversation-dev\\tasks\\release-0.1.25\\package\\independent_inventory.py' -Algorithm SHA256"
+  ],
+  "later_gate_invocations": "Same script with --source-root, --release-dir, and --report for clean-source/draft/public assets.",
+  "revision_note": "The candidate inventory used the verifier in its original default-path form before the post-tag CLI extension. After the tag, optional --source-root, --release-dir, and --report arguments were added so clean-source, canonical draft, and public-download inventories could be run without modifying the tagged source or placing reports in download directories. The release review confirmed the change is limited to input/output locations; archive and checksum assertions are unchanged.",
+  "tag": "private_conversation-v0.1.25",
+  "tag_commit": "886a54967db7c6c08725c8bec8854ea3919ea532",
+  "tagged_verifier": {
+    "bytes": 7512,
+    "sha256": "5154813bd47e29b73004179059b2fbf7ffd5ae24cc01149b4aa73c03587f7924"
+  },
+  "verifier_path": "tasks/release-0.1.25/package/independent_inventory.py"
+}

@@ -1,0 +1,21 @@
+{
+  "component": "Department interface",
+  "requestedByUser": true,
+  "ownerSource": "886a54967db7c6c08725c8bec8854ea3919ea532",
+  "ownerTag": "private_conversation-v0.1.25",
+  "publishedOwnerAssetsVerified": true,
+  "phase": "Owner-reported source-only preflight complete; separate implementation and release authorization pending",
+  "existingPcvPin": "0.1.24",
+  "interfacePinAdvanced": false,
+  "runtimeGrant": false,
+  "liveAccess": false,
+  "requiredBoundaries": [
+    "Preserve state and identity ownership",
+    "Preserve canonical Solo null slot and inert setup hook",
+    "Validate required playerName argument and action offerings",
+    "Preserve active or queued Solo wrap priority",
+    "Verify mixed-version refusal and actual loader paths"
+  ],
+  "scope": "Private Conversation publication does not qualify a new interface pairing",
+  "mixedVersionRefusalEvidence": "Source inspected only, not executed"
+}

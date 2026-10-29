@@ -1,0 +1,1299 @@
+{
+  "captured_at_utc": "2026-10-29T02:00:20.086294+00:00",
+  "hub_base": "2cf4d1740052e09b379a81acdd96c432f7054477",
+  "matches_before_snapshot": true,
+  "protected_entries": [
+    {
+      "blob": "e5c41bd35a5ba299883b17c55d8611e470990a03",
+      "mode": "100644",
+      "path": ".gitattributes"
+    },
+    {
+      "blob": "f0db88279e8db3515abc9bdca96de3d9049da38d",
+      "mode": "100644",
+      "path": ".gitignore"
+    },
+    {
+      "blob": "54ec62f3311bfa88840c4d2aee82fd3d7523f2a1",
+      "mode": "100644",
+      "path": ".superpowers/sdd/reflection-reply-fixes-2026-10-02/task-1-report.md"
+    },
+    {
+      "blob": "3c2050f08968686a48c335b0e24767259927fcbb",
+      "mode": "100644",
+      "path": ".superpowers/sdd/reflection-reply-fixes-2026-10-02/task-2-report.md"
+    },
+    {
+      "blob": "4b55a22a3b0530acda9f3fd10d11a8245eab41a0",
+      "mode": "100644",
+      "path": ".superpowers/sdd/reflection-reply-fixes-2026-10-02/task-3-report.md"
+    },
+    {
+      "blob": "4297fc15c082d7d45ce23d8c04a07977d65805ab",
+      "mode": "100644",
+      "path": "AGENTS.md"
+    },
+    {
+      "blob": "d4a104463706b91809f8e5a4ad66db255ec75a74",
+      "mode": "100644",
+      "path": "assets/dashboard-art-source.png"
+    },
+    {
+      "blob": "292210ea783fad30e594ce8264bda93451cce4c0",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.0.md"
+    },
+    {
+      "blob": "dc1af06eedefc2615b1a692895ad75b318ffd1fc",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.10.md"
+    },
+    {
+      "blob": "44696a2cd982fa4110c569a5fe383c34f37cdd25",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.11.md"
+    },
+    {
+      "blob": "ef07f8e278352cff561026f6ae5e174635f5d22b",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.12.md"
+    },
+    {
+      "blob": "4ff12bc3e9a36f634565a95e306545af4f6b95db",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.13.md"
+    },
+    {
+      "blob": "34c0de0d3a46702a217d97fa27fb44372fa259d1",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.14.md"
+    },
+    {
+      "blob": "dadac5df1183b2425e80d289fda499074169a904",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.15.md"
+    },
+    {
+      "blob": "d6cbeacd3ed77b5804ab8d2dbdd89d5c3dbf10ef",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.16.md"
+    },
+    {
+      "blob": "09538d79638224de6ac3de13a8ebc8480ded7acb",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.17.md"
+    },
+    {
+      "blob": "aad2715789ac5f462ee9e7a0082d26a64027e9d5",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.18.md"
+    },
+    {
+      "blob": "2ceb6454f5db7e67c39d8b208f97c9305727eded",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.19.md"
+    },
+    {
+      "blob": "049c8c7265abab734238ad54b5921ace93a7c2dd",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.20.md"
+    },
+    {
+      "blob": "bc9ec2ea9926eddcaf37ef229ffe0f46da83268c",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.21.md"
+    },
+    {
+      "blob": "2159679dc7072f94b25cd09e79df347f9a55eb7a",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.22.md"
+    },
+    {
+      "blob": "e8d3504b4017103508a27538af0ea3e2ef808595",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.23.md"
+    },
+    {
+      "blob": "065511778e82305aba76f343fdc7a904813733e4",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.24.md"
+    },
+    {
+      "blob": "8040df88e194360d016a3948eb8725161f48be09",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.25.md"
+    },
+    {
+      "blob": "17b2e1e23a85efafa1148d898d13598f03223705",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.3.md"
+    },
+    {
+      "blob": "acebb994c1babb32dd3b6134c5e27d92e3f78406",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.4.md"
+    },
+    {
+      "blob": "46312e2e7686f9cb514a346e84d1b3a5407645a2",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.5-installer.1.md"
+    },
+    {
+      "blob": "5b8cb91b15e9d544d6b6c1f51d909b4779a66a44",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.5.md"
+    },
+    {
+      "blob": "acbf07acae872100e45c10c33651ee22cdbc7a7b",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.6.md"
+    },
+    {
+      "blob": "734171e846ad4ebeb24ed370f0200f52bc4ad99a",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.7.md"
+    },
+    {
+      "blob": "4a4f28396dd6b173b4b8f174897239a512a76564",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.8.md"
+    },
+    {
+      "blob": "83e10f268b7ed44dbcad1249f242950463a22077",
+      "mode": "100644",
+      "path": "distribution/mind_poisoning-v0.1.9.md"
+    },
+    {
+      "blob": "50f7b7a633039fee1ee4e482352ecc7a91b67515",
+      "mode": "100644",
+      "path": "distribution/plugin_repository_entry.json"
+    },
+    {
+      "blob": "971e44e965c0aba75192eb9f9cbf8ac2ff92120c",
+      "mode": "100644",
+      "path": "distribution/private_conversation-v0.1.12.md"
+    },
+    {
+      "blob": "f190eb760e626ff1e01f640cbf77e7d5612678ee",
+      "mode": "100644",
+      "path": "distribution/private_conversation-v0.1.14.md"
+    },
+    {
+      "blob": "a58b78de0b7bcac4ac8397c49e03ef33dd2505e6",
+      "mode": "100644",
+      "path": "distribution/private_conversation-v0.1.15.md"
+    },
+    {
+      "blob": "1b8a90da8244f2dddb19b80384e25b268b909061",
+      "mode": "100644",
+      "path": "distribution/private_conversation-v0.1.5.md"
+    },
+    {
+      "blob": "f7f452163cece2347b5f2976af30f030a3efea3c",
+      "mode": "100644",
+      "path": "distribution/private_conversation-v0.1.6.md"
+    },
+    {
+      "blob": "d1ba5a0de55922c7fcbd649b58c67a05382ab389",
+      "mode": "100644",
+      "path": "distribution/private_conversation-v0.1.7.md"
+    },
+    {
+      "blob": "6c7615bfd8e436e52252e7b8e406a01f0722a7e6",
+      "mode": "100644",
+      "path": "distribution/private_conversation-v0.1.8.md"
+    },
+    {
+      "blob": "def10f8d46cb0c44897df070e8ddef9cffa74d8f",
+      "mode": "100644",
+      "path": "distribution/submission/mind-poisoning.json"
+    },
+    {
+      "blob": "e8ce9d6423dda5fa0720bb4e57c071874054b688",
+      "mode": "100644",
+      "path": "docs/beta-candidate-evidence.md"
+    },
+    {
+      "blob": "5d4d9fbd7c1e5a01d7b38ac8393be1073f1e4c36",
+      "mode": "100644",
+      "path": "docs/chim-plugin-development.md"
+    },
+    {
+      "blob": "b12d7070157068456f4616f8372d00fd8b6dff06",
+      "mode": "100644",
+      "path": "docs/dashboard.md"
+    },
+    {
+      "blob": "e07d75239c4791c97e6b9deafd509b8d6a76517c",
+      "mode": "100644",
+      "path": "docs/deployment-migration.md"
+    },
+    {
+      "blob": "97e05076c52c26e82141d54e383e0a59aa0c7007",
+      "mode": "100644",
+      "path": "docs/development.md"
+    },
+    {
+      "blob": "29b79c2c9fbd8f6d5f77d6ced3baaf4d4e46bc03",
+      "mode": "100644",
+      "path": "docs/integration-api.md"
+    },
+    {
+      "blob": "bd53d3263cf59dad3cf3ef74c688c1a70b527a1e",
+      "mode": "100644",
+      "path": "docs/live-acceptance-summary.md"
+    },
+    {
+      "blob": "6c3e9ce47b5755e6f395f741f9719186e4ea0f06",
+      "mode": "100644",
+      "path": "docs/local-candidate-v0.1.5.md"
+    },
+    {
+      "blob": "fdc78d5950dde3ae8bc799050931a3e0445cf84a",
+      "mode": "100644",
+      "path": "docs/mind-poisoning.md"
+    },
+    {
+      "blob": "d9b0fa0510913c3187564b9facbde4ab8ca8f4d0",
+      "mode": "100644",
+      "path": "docs/mo2-wrapper-correction.md"
+    },
+    {
+      "blob": "d522eae8a4ef9cb7347ad3cb784607aebf19244a",
+      "mode": "100644",
+      "path": "docs/restore-policy.md"
+    },
+    {
+      "blob": "4bf897c1cb3235e1ae6dc3421101811725fa50fe",
+      "mode": "100644",
+      "path": "docs/verification-v0.1.22.md"
+    },
+    {
+      "blob": "dc6b4dfd2dacd22d5351c3282b98332f8aa468d8",
+      "mode": "100644",
+      "path": "docs/verification-v0.1.23.md"
+    },
+    {
+      "blob": "8ff425924dcfe193ce76239ab7ee4cb81ea1ef1a",
+      "mode": "100644",
+      "path": "docs/verification-v0.1.24.md"
+    },
+    {
+      "blob": "bde46e53f00eb386dbc3b359b41fc1171ce8369d",
+      "mode": "100644",
+      "path": "docs/verification-v0.1.25.md"
+    },
+    {
+      "blob": "cfd55992f678985b91bd550082b82cd0af3acbe9",
+      "mode": "100644",
+      "path": "scripts/package.py"
+    },
+    {
+      "blob": "50f0a2e82036bcefb85a14cc61ded25ad46c79d3",
+      "mode": "100644",
+      "path": "server/AGENTS.md"
+    },
+    {
+      "blob": "e5b75e7ce5e4511cf9aa2babcb627c02dca1682a",
+      "mode": "100644",
+      "path": "server/README.md"
+    },
+    {
+      "blob": "d1e04cefacdcf9f06313160f35142b82f3bc7ea6",
+      "mode": "100644",
+      "path": "server/controls.php"
+    },
+    {
+      "blob": "ac62d55e7915b0e232efca82283d90bb5506b83d",
+      "mode": "100644",
+      "path": "server/dashboard-art.webp"
+    },
+    {
+      "blob": "b99d9c5e5ead059733a77bfde3fea13e9cc60a55",
+      "mode": "100644",
+      "path": "server/dashboard.css"
+    },
+    {
+      "blob": "48374fcdae1215848bc7da749dae3970cf8fe3b8",
+      "mode": "100644",
+      "path": "server/dashboard.js"
+    },
+    {
+      "blob": "d64b64d7fb19257103413bfbba9aeb29f59135f0",
+      "mode": "100644",
+      "path": "server/dashboard.php"
+    },
+    {
+      "blob": "07e35a349d44b5b31ddadc00f878fd3df0887b1d",
+      "mode": "100644",
+      "path": "server/dashboard_data.php"
+    },
+    {
+      "blob": "e6331bdef4c91dcbbd3dfe02cc844beb51683453",
+      "mode": "100644",
+      "path": "server/dashboard_view.php"
+    },
+    {
+      "blob": "d6fd81f2d65033fec3387c066c7fe59a81cbc91e",
+      "mode": "100644",
+      "path": "server/globals.php"
+    },
+    {
+      "blob": "3f8e701fa8725435a2613dd40f16eb6db7b57f22",
+      "mode": "100644",
+      "path": "server/index.php"
+    },
+    {
+      "blob": "61b05cf67492228e52bad7e13f63815ac475451f",
+      "mode": "100644",
+      "path": "server/influence.php"
+    },
+    {
+      "blob": "78d07cf5f57ac8bb78ff49d592683a6b3f6e0afa",
+      "mode": "100644",
+      "path": "server/logging.php"
+    },
+    {
+      "blob": "6f5c8bbe5d064a583a0fbb7e4ab9a6741e01b995",
+      "mode": "100644",
+      "path": "server/manifest.json"
+    },
+    {
+      "blob": "62d02d4c6a918d91f9f15a226240aa0677242fc9",
+      "mode": "100644",
+      "path": "server/model.php"
+    },
+    {
+      "blob": "34bfdaec5337dc75df417f7898638fffe29946d1",
+      "mode": "100644",
+      "path": "server/postrequest.php"
+    },
+    {
+      "blob": "4f9d745d7ca567d593fb2e062574397738953263",
+      "mode": "100644",
+      "path": "server/prerequest.php"
+    },
+    {
+      "blob": "839e57c184cc8370c17234387f64fee2624ef0f7",
+      "mode": "100644",
+      "path": "server/reflection.php"
+    },
+    {
+      "blob": "e5fd6468d8e4d714a9f512f57e98b26afcd5f652",
+      "mode": "100644",
+      "path": "server/restore_policy.php"
+    },
+    {
+      "blob": "731eea21c52eb7bad0808df7944aac8e48fe7c51",
+      "mode": "100644",
+      "path": "server/store.php"
+    },
+    {
+      "blob": "ad48894cda114fb62ac7de53101d4984dcc0c56b",
+      "mode": "100644",
+      "path": "tasks/ack-diagnostics-report.md"
+    },
+    {
+      "blob": "77edf661854a6e2b59b2f5e0bbac8de2fcf79ec5",
+      "mode": "100644",
+      "path": "tasks/bug-hunt-reflection-api-2026-09-30.md"
+    },
+    {
+      "blob": "42e65fe3ed2b87ffcfd09b79b1d402d21a59f664",
+      "mode": "100644",
+      "path": "tasks/bughunt-dashboard.md"
+    },
+    {
+      "blob": "84ac23e986c98b451bc82c444d2541702d1f7b11",
+      "mode": "100644",
+      "path": "tasks/bughunt-packaging.md"
+    },
+    {
+      "blob": "59ebf10b254909e2a26b90806a2916bafacafb7d",
+      "mode": "100644",
+      "path": "tasks/bughunt-runtime.md"
+    },
+    {
+      "blob": "ff0e7c16d79c3113a74f894de91dcfde41cb6695",
+      "mode": "100644",
+      "path": "tasks/conservative-type-changes-plan-2026-10-15.md"
+    },
+    {
+      "blob": "23e3cb779bd265a08246181d7f8e8e5c997b400c",
+      "mode": "100644",
+      "path": "tasks/critique-client-evidence.md"
+    },
+    {
+      "blob": "4cc1472017981648e8dc691a31f5368447a03db4",
+      "mode": "100644",
+      "path": "tasks/critique-influence-fixes.md"
+    },
+    {
+      "blob": "a5c7e358636aa698f1d733056781996c6876e47d",
+      "mode": "100644",
+      "path": "tasks/critique-package-report.md"
+    },
+    {
+      "blob": "f4d3e2f073f42b6d01410ae4241c57f19cea9c51",
+      "mode": "100644",
+      "path": "tasks/critique-runtime-fixes.md"
+    },
+    {
+      "blob": "cf5c5ac158f9f06101a81bd14e94ae843eec3637",
+      "mode": "100644",
+      "path": "tasks/d01-access.md"
+    },
+    {
+      "blob": "3ca839c5967e4f063a641576312f4aa778d730cd",
+      "mode": "100644",
+      "path": "tasks/d02-recency.md"
+    },
+    {
+      "blob": "e3c153a73358087fe5cac4492440abef92d20206",
+      "mode": "100644",
+      "path": "tasks/d03-image.md"
+    },
+    {
+      "blob": "e4399ced09caab6909378616c08efed3454ba5f3",
+      "mode": "100644",
+      "path": "tasks/d03-side-by-side.png"
+    },
+    {
+      "blob": "60bf54d6265a40ad43ef74ce547f80576f30ba2b",
+      "mode": "100644",
+      "path": "tasks/dashboard-affinity-fix-2026-10-15.md"
+    },
+    {
+      "blob": "4b5f1ada017ff71ca1dd0a6d8f5035f3dfb12a2e",
+      "mode": "100644",
+      "path": "tasks/dashboard-data-integration-review.md"
+    },
+    {
+      "blob": "efed21fd405bc9e26670ad6b7d4e5710c6861d4f",
+      "mode": "100644",
+      "path": "tasks/dashboard-data.md"
+    },
+    {
+      "blob": "b70c6ec08556c0918305a70c64853404f12d85a2",
+      "mode": "100644",
+      "path": "tasks/dashboard-plan.md"
+    },
+    {
+      "blob": "d566ee282b92ac5bfd61ee94fe86c9234d5f2dd3",
+      "mode": "100644",
+      "path": "tasks/dashboard-platform.md"
+    },
+    {
+      "blob": "6368c31df14e8f057f8edcbcd54014bfeb107864",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-desktop-day.jpg"
+    },
+    {
+      "blob": "9db68db7cc619f56fe1e88a17de1fa305e269693",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-desktop-night.jpg"
+    },
+    {
+      "blob": "adea5979e3496bd2d67bf2290ce57e86af87d372",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-mobile-390-day.jpg"
+    },
+    {
+      "blob": "89a6619f74a335f00681b9d3d26a1ed5a73080a0",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-mobile-390-night-logs.jpg"
+    },
+    {
+      "blob": "6114cb85ba98fd72babc3e31ab875421a7b0eae9",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-mobile-390-night.jpg"
+    },
+    {
+      "blob": "cfb7c1353c9a0981df02792e51d5948bdd2edbd0",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-package-review.md"
+    },
+    {
+      "blob": "05782a187d3df202888f9866135844231623dda4",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-review.md"
+    },
+    {
+      "blob": "155d07dce929af2471d8426955fdb51d04a9cfd9",
+      "mode": "100644",
+      "path": "tasks/dashboard-poster-tablet-700-night-logs.jpg"
+    },
+    {
+      "blob": "ee7872cd14e041058405f08d34faa6ed3c223d4f",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-database-unavailable.jpg"
+    },
+    {
+      "blob": "d50f62e2db14eb3461eeb4c59470556cfee66f20",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-design.md"
+    },
+    {
+      "blob": "fa167ddd3de6cee756bcad6a7da40dbab49e2779",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-desktop-diagnostics.jpg"
+    },
+    {
+      "blob": "4f8f5016b5505b7d8215a970341cbf37f1187519",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-desktop-interactions.jpg"
+    },
+    {
+      "blob": "5f1f206be5bd986ea36238acd9a7278bc0f584c9",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-desktop.jpg"
+    },
+    {
+      "blob": "fc0faa89ba5db1dcd9e84b4bcd25d53b9de83db7",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-diagnostics.jpg"
+    },
+    {
+      "blob": "03f64ff41c954788ababbff6fb13866a4b1d162b",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-empty.jpg"
+    },
+    {
+      "blob": "d10960d58d8203fca7f3ee0ee7a04d6b71a34157",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-logs-unavailable.jpg"
+    },
+    {
+      "blob": "40e9f3dce969eb6965cdecbdd074bfe36dff016b",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-mobile-diagnostics.jpg"
+    },
+    {
+      "blob": "00ef9a2b7c41ce7ea2d8c3495fb36868a4a5cc9d",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-mobile-interactions.jpg"
+    },
+    {
+      "blob": "825dee7d8b491fe3342c904554ea6b916a02159f",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-mobile-viewport.jpg"
+    },
+    {
+      "blob": "66e903384bfac4340a1a206beb0de0bfa4967c6f",
+      "mode": "100644",
+      "path": "tasks/dashboard-ui-review.md"
+    },
+    {
+      "blob": "a148dff85605701d5b8a840b038ae42c07afcac5",
+      "mode": "100644",
+      "path": "tasks/debug-bootstrap.md"
+    },
+    {
+      "blob": "51fd83f54cdad76f2716d005573796eb0e3c206a",
+      "mode": "100644",
+      "path": "tasks/debug-influence.md"
+    },
+    {
+      "blob": "b2d47346c62b0577fd87d78d67547a19896ffd3c",
+      "mode": "100644",
+      "path": "tasks/debug-logging-helper.md"
+    },
+    {
+      "blob": "bea8c5168ec1b4ce6ebf0e247d731176faa17575",
+      "mode": "100644",
+      "path": "tasks/debug-logging-hook.md"
+    },
+    {
+      "blob": "b3639ac650ca2c8af16cc0279bc96631388ea7e1",
+      "mode": "100644",
+      "path": "tasks/debug-logging-store.md"
+    },
+    {
+      "blob": "42a07897a88d69daabe7c7a12cfd8e0f04eaca2e",
+      "mode": "100644",
+      "path": "tasks/debug-runtime.md"
+    },
+    {
+      "blob": "2f17e80fbec2041f00d7f5e7e23e8bd6a4283c69",
+      "mode": "100644",
+      "path": "tasks/defensive-programming-review-2026-10-03.md"
+    },
+    {
+      "blob": "c73273b8e196b6de28380489d305da1aa42d3136",
+      "mode": "100644",
+      "path": "tasks/design.md"
+    },
+    {
+      "blob": "8b04b686f7e338f922202bc7793a826b125a306a",
+      "mode": "100644",
+      "path": "tasks/evidence/dashboard-refresh-night.png"
+    },
+    {
+      "blob": "365b2473b5d56003d0eabcecbf6a18e009d5820c",
+      "mode": "100644",
+      "path": "tasks/hub-overview-2026-10-04.md"
+    },
+    {
+      "blob": "21aa3b88f33baa1467ae4daa4855e3f445e2f666",
+      "mode": "100644",
+      "path": "tasks/hub-pcv-0.1.12-2026-10-03.md"
+    },
+    {
+      "blob": "ecdde0d7727db0e3eefa7efed5515e0f11bdc0c4",
+      "mode": "100644",
+      "path": "tasks/hub-pcv-0.1.14-2026-10-03.md"
+    },
+    {
+      "blob": "6db25b2834acda0b56278deecdd547efe6b752d7",
+      "mode": "100644",
+      "path": "tasks/hub-pcv-0.1.15-2026-10-04.md"
+    },
+    {
+      "blob": "80b25aae81a1f856cdd451d43157fd69c11ba834",
+      "mode": "100644",
+      "path": "tasks/influence-brief.md"
+    },
+    {
+      "blob": "396844cfdced23e6c58d7b6082b97121d5f742c2",
+      "mode": "100644",
+      "path": "tasks/influence-report.md"
+    },
+    {
+      "blob": "71b462b283f720a146ceee1e5112b2c37461c817",
+      "mode": "100644",
+      "path": "tasks/l01-boundaries.md"
+    },
+    {
+      "blob": "e1cd29f03620735da37f0ff2aa12817f5933f669",
+      "mode": "100644",
+      "path": "tasks/l01-docs.md"
+    },
+    {
+      "blob": "14a595a1551e04698ee9bc441b013f089043b17f",
+      "mode": "100644",
+      "path": "tasks/l01-runtime.md"
+    },
+    {
+      "blob": "2f67c10d1f5b0c6ef3e7c68f8e2be7e32aa6066e",
+      "mode": "100644",
+      "path": "tasks/lessons.md"
+    },
+    {
+      "blob": "44eefd73d99a4d759bb1a7b6f1f36393492ba2f7",
+      "mode": "100644",
+      "path": "tasks/live-acceptance-v0.1.10.md"
+    },
+    {
+      "blob": "95ff6f2ae96dd809ae736599224cb60488df7573",
+      "mode": "100644",
+      "path": "tasks/logging-package.md"
+    },
+    {
+      "blob": "22aba065a29c2e9c56c602cd40a09fbcdfa71d7d",
+      "mode": "100644",
+      "path": "tasks/logging-platform.md"
+    },
+    {
+      "blob": "fb6aa8aeffaff5fe1e1f0bde3d89747bcbea4839",
+      "mode": "100644",
+      "path": "tasks/logging-runtime.md"
+    },
+    {
+      "blob": "f29077a2830ab445debd66a1cbc5ce2f82939861",
+      "mode": "100644",
+      "path": "tasks/logging-store.md"
+    },
+    {
+      "blob": "3350ca03aa4d27ad4b1c791afae875f4f4b69bd0",
+      "mode": "100644",
+      "path": "tasks/manifest-update-review.md"
+    },
+    {
+      "blob": "6dd80d260db7fb75c4fb32bc20ec79eb7a8d2279",
+      "mode": "100644",
+      "path": "tasks/mo2-usability-2026-10-08.md"
+    },
+    {
+      "blob": "cb749075d6d69b7c5179458b6597ac91544719ca",
+      "mode": "100644",
+      "path": "tasks/mo2-wrapper-correction.md"
+    },
+    {
+      "blob": "826cdd9b7b69f27479f9991fd45c75a18615b47e",
+      "mode": "100644",
+      "path": "tasks/model-report.md"
+    },
+    {
+      "blob": "c70f4a2e99de784dcababece114f54ada5e55bc1",
+      "mode": "100644",
+      "path": "tasks/mp06-review.md"
+    },
+    {
+      "blob": "6cf1dc096155cb93d46395560e62375907278a0a",
+      "mode": "100644",
+      "path": "tasks/overheard-gossip-2026-10-03.md"
+    },
+    {
+      "blob": "0b861681d5351f21786d66fbd385df3e4d9a8331",
+      "mode": "100644",
+      "path": "tasks/overhearing-worker-2026-10-03.md"
+    },
+    {
+      "blob": "5defd4ea1f4ebea2ec965bea4c64adebcb7a580e",
+      "mode": "100644",
+      "path": "tasks/package-brief.md"
+    },
+    {
+      "blob": "d508be228822477375f8734b123b0db124cc6a76",
+      "mode": "100644",
+      "path": "tasks/package-report.md"
+    },
+    {
+      "blob": "8d58bb2257ec23dfc77a32480bca98fcdeb18305",
+      "mode": "100644",
+      "path": "tasks/pattern-gap-audit-2026-09-29.md"
+    },
+    {
+      "blob": "26afa10ac417e2fea32d040604a2726aee88cc00",
+      "mode": "100644",
+      "path": "tasks/pause-control-report.md"
+    },
+    {
+      "blob": "dedd8a4bbc166db57d6f7b6ebc4bbe3b9655a7c4",
+      "mode": "100644",
+      "path": "tasks/pause-runtime-report.md"
+    },
+    {
+      "blob": "03695e3981e6515bd68cfb1742da1a3aced90f00",
+      "mode": "100644",
+      "path": "tasks/pcv-reflection-timing-follow-up-2026-09-30.md"
+    },
+    {
+      "blob": "5597e50bca32db91a5d642fcadd5bd5c8018a544",
+      "mode": "100644",
+      "path": "tasks/plan.md"
+    },
+    {
+      "blob": "8b8bee7e108da106b5cdae28b9b6c6a194e92acb",
+      "mode": "100644",
+      "path": "tasks/publication-v0.1.21.md"
+    },
+    {
+      "blob": "04e1791ef493457ea01867e0413ad7b939c6143c",
+      "mode": "100644",
+      "path": "tasks/publication-v0.1.22.md"
+    },
+    {
+      "blob": "cc7a46fba285ec7bf8ff8adde622b9327085e40c",
+      "mode": "100644",
+      "path": "tasks/publication-v0.1.23.md"
+    },
+    {
+      "blob": "f3dd43e044c449a94ec9b4b5ebe70f183ad0afcf",
+      "mode": "100644",
+      "path": "tasks/reflection-diagnostics-api-2026-09-30.md"
+    },
+    {
+      "blob": "26ac89075c7ab3a76d2b4cacaf403e7e2cf04f69",
+      "mode": "100644",
+      "path": "tasks/reflection-reply-cap-2026-10-02-worker.md"
+    },
+    {
+      "blob": "bb3ed687dbf137156cd0100d380fd937deb557e9",
+      "mode": "100644",
+      "path": "tasks/reflection-reply-cap-2026-10-02.md"
+    },
+    {
+      "blob": "db454a46f2d820d74d4af4056a3314b7d44f1140",
+      "mode": "100644",
+      "path": "tasks/reflection-reply-fixes-2026-10-02.md"
+    },
+    {
+      "blob": "f6ceb79d018935105ab35dd3185435bb72828a40",
+      "mode": "100644",
+      "path": "tasks/reflection-reply-review-2026-10-02.md"
+    },
+    {
+      "blob": "a1b571721ecb74febcfd42f3549d9a1b81404810",
+      "mode": "100644",
+      "path": "tasks/reflection-reply-v2-contract-2026-10-02.md"
+    },
+    {
+      "blob": "b6749515720b08370bf7880eab1d770775f27438",
+      "mode": "100644",
+      "path": "tasks/relationship-compatibility-2026-10-04/adapters-report.md"
+    },
+    {
+      "blob": "ffbc94ee9cc235c1299f7bdce08d3791e78a65b0",
+      "mode": "100644",
+      "path": "tasks/relationship-compatibility-2026-10-04/core-report.md"
+    },
+    {
+      "blob": "7a992481a261e5832981a238ffac70bd57dc7737",
+      "mode": "100644",
+      "path": "tasks/relationship-compatibility-2026-10-04/plan.md"
+    },
+    {
+      "blob": "723f30df86d1aeb612d6ee45421d7993677b25dd",
+      "mode": "100644",
+      "path": "tasks/relationship-compatibility-2026-10-04/verification.md"
+    },
+    {
+      "blob": "56182640c941b970adbb6a77cd81d3188abb86a9",
+      "mode": "100644",
+      "path": "tasks/relationship-compatibility-review-2026-10-04.md"
+    },
+    {
+      "blob": "a5b47c5815bec848063a07ca930e2a526bafbd9d",
+      "mode": "100644",
+      "path": "tasks/release-readme-review.md"
+    },
+    {
+      "blob": "fb5044b92fc3b0b1d5dd9b9da155e19c82d708ce",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.1.md"
+    },
+    {
+      "blob": "44cc8267d9b1454c52c9e86f155e7742525e24c0",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.10.md"
+    },
+    {
+      "blob": "7486566ce92e67ee5bef054828a013c0dc3f743e",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.11.md"
+    },
+    {
+      "blob": "7ca8f7060607a7d0c057741c5275f8504c29676f",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.12-preparation.md"
+    },
+    {
+      "blob": "86a954cb0cd3bad0b3bb75f31760412d37fe0303",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.13.md"
+    },
+    {
+      "blob": "c9857404a90c9bfcc907fcc9462b09753f16ca91",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.14-pcv-v0.1.6.md"
+    },
+    {
+      "blob": "5f3b4cbcdce7886dc29ebb3cc41c45437305a848",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.15-merged-verification.md"
+    },
+    {
+      "blob": "f3fb9b3ca0fdc6793ff138b7132f36f3c9621924",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.15-metadata-review.md"
+    },
+    {
+      "blob": "b161ce685c0dc0c752e72926a334e5ebda4fb764",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.15-metadata.md"
+    },
+    {
+      "blob": "972459251c916543c194388ffb524817d04bd19a",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.15-plan.md"
+    },
+    {
+      "blob": "39eb83ef4737118834937d0776bb64c98f862872",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.15.md"
+    },
+    {
+      "blob": "574b16314b6ba47b4eb69376e0eb9e63c51040fc",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.16-metadata.md"
+    },
+    {
+      "blob": "f49a36adc63e44a0fb21498e824ccb323d00b036",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.16-plan.md"
+    },
+    {
+      "blob": "151847c87ffcd072398e18fec526ce3e09f91796",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.16.md"
+    },
+    {
+      "blob": "7d61408d8dfddf9461055070d282349ae30749fe",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.17-metadata.md"
+    },
+    {
+      "blob": "23bfe75e137d40e0193a4a071e4f67ff57197529",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.17-plan.md"
+    },
+    {
+      "blob": "ff5a9c9d6807df3e313dae06780fa3e138571e46",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.17.md"
+    },
+    {
+      "blob": "66bff4a49e26d7d4d56506a87a2a1278611f6ffd",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.18-metadata.md"
+    },
+    {
+      "blob": "8ac6154b1a70074ab4fc995aa0c376dd6d596eb2",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.18-plan.md"
+    },
+    {
+      "blob": "12d1c4a76336f28c74ed69c3e641bdaf520cf184",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.18-review.md"
+    },
+    {
+      "blob": "3d7af874166e0fe2fef7846723218ab54d6d4343",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.18.md"
+    },
+    {
+      "blob": "8887056eab872c76cac9414ec009e21ece601a6d",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.19-plan.md"
+    },
+    {
+      "blob": "98f0c4f40e38f44ba5858e3189c5922ccb089f7f",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.19.md"
+    },
+    {
+      "blob": "d55745d8f269c7db57b1410f250194e4f996549d",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.20-plan.md"
+    },
+    {
+      "blob": "ffce5e96a0e34b0cb94b1d83fca37f4c529a0cda",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.20.md"
+    },
+    {
+      "blob": "3ec293b8ab100c536c2735c6a82e094f09b2ffed",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.6.md"
+    },
+    {
+      "blob": "efe148e5282126b8d5f7d0a5d83f3014d5eab851",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.7.md"
+    },
+    {
+      "blob": "c0fe2f12f2a17546d28074a476d8d6a1897f656a",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.8.md"
+    },
+    {
+      "blob": "2fec5a5ecd1526a9151df6026a6e56fd2aed9875",
+      "mode": "100644",
+      "path": "tasks/release-v0.1.9.md"
+    },
+    {
+      "blob": "a50d969964230ec7050cc851f72180a3f9af7e1d",
+      "mode": "100644",
+      "path": "tasks/repository-docs-report.md"
+    },
+    {
+      "blob": "addacc59c7d92a792e6950a7cbcfd380d32d93d4",
+      "mode": "100644",
+      "path": "tasks/repository-package-report.md"
+    },
+    {
+      "blob": "7122d35dcdd05b54ab6190ceffd3fa10a62576b5",
+      "mode": "100644",
+      "path": "tasks/restore-policy-compatibility-2026-10-18.md"
+    },
+    {
+      "blob": "d0cc8399f5e1609b786caea8086f54cb6c985c66",
+      "mode": "100644",
+      "path": "tasks/runtime-brief.md"
+    },
+    {
+      "blob": "104cd9c6ccbc61cf7b9baa0f8b6b0a638cb980be",
+      "mode": "100644",
+      "path": "tasks/runtime-install-review.md"
+    },
+    {
+      "blob": "d1153a7a19b829cf98a929a469d04aacb0f760ff",
+      "mode": "100644",
+      "path": "tasks/runtime-reference-review.md"
+    },
+    {
+      "blob": "0dca40fa1e645ac4ba50c11da017a2b09b76aebb",
+      "mode": "100644",
+      "path": "tasks/runtime-report.md"
+    },
+    {
+      "blob": "cbda8594045e2b095a0f01ac672707a1f5ca401f",
+      "mode": "100644",
+      "path": "tasks/sentinel-and-reflection-review-2026-10-04.md"
+    },
+    {
+      "blob": "18d979f89591e21f06fdb0e4ce8a1078d98c5617",
+      "mode": "100644",
+      "path": "tasks/sql-check.sql"
+    },
+    {
+      "blob": "f8a3079ddcad11c9f5f58b4bbd1b9219ef8a8a3f",
+      "mode": "100644",
+      "path": "tasks/storage-api-review.md"
+    },
+    {
+      "blob": "de261bbc9e48b27cb91bd8b84812c32d229cd7b5",
+      "mode": "100644",
+      "path": "tasks/store-timeout-report.md"
+    },
+    {
+      "blob": "19cd370488fa92e704dae58b70c93d9a172c62e3",
+      "mode": "100644",
+      "path": "tasks/todo.md"
+    },
+    {
+      "blob": "ee90ff29a27dd5c3ea846f927cf950e4474bca3d",
+      "mode": "100644",
+      "path": "tasks/upstream-plugin-identity-report.md"
+    },
+    {
+      "blob": "0046440666d461b63c5f637122e8ce0ff5b78826",
+      "mode": "100644",
+      "path": "tasks/verification.md"
+    },
+    {
+      "blob": "976e3989114396675602841384f7d6e151a54c8e",
+      "mode": "100644",
+      "path": "tasks/world-of-drama-llama-publication-2026-09-30.md"
+    },
+    {
+      "blob": "05e71b523aeecf68dcbe66b5696fb983f2656e3d",
+      "mode": "100644",
+      "path": "tasks/world-of-drama-llama-release-review.md"
+    },
+    {
+      "blob": "aa2fa7fdcbd88914c42fc6bf9295ad055d531a2d",
+      "mode": "100644",
+      "path": "tasks/x-api-test-evidence-2026-09-30.md"
+    },
+    {
+      "blob": "ec4f741f4d7a7a0540bd336acde1e342e5a3f909",
+      "mode": "100644",
+      "path": "tasks/x-clean-source-verification-2026-09-30.md"
+    },
+    {
+      "blob": "8fc3b4cf63e695d8a34207c7dae6057b3ef2968c",
+      "mode": "100644",
+      "path": "tasks/x-cross-plugin-lead-review-2026-09-30.md"
+    },
+    {
+      "blob": "1cf47915497c41a93242befe750848bb1d61ffe5",
+      "mode": "100644",
+      "path": "tasks/x-release-metadata-evidence-2026-09-30.md"
+    },
+    {
+      "blob": "2bd67214b4a81649b64d3bd618a8fd3e48f96bdf",
+      "mode": "100644",
+      "path": "tests/dashboard_current_bounds_test.php"
+    },
+    {
+      "blob": "8b1768d63a7ad4f4d5e258c93a7be94b2e4121ad",
+      "mode": "100644",
+      "path": "tests/dashboard_data_test.php"
+    },
+    {
+      "blob": "e170f0486d1c2e916c7ee347f4b070dfac338891",
+      "mode": "100644",
+      "path": "tests/dashboard_empty_log_test.php"
+    },
+    {
+      "blob": "5c7ed6a24b84ae70300dfe92dc9a77dca0142da0",
+      "mode": "100644",
+      "path": "tests/dashboard_http_test.php"
+    },
+    {
+      "blob": "bcca30839788ccd15ab993a93a540be8704eb82c",
+      "mode": "100644",
+      "path": "tests/dashboard_integration_test.php"
+    },
+    {
+      "blob": "47ab1f2867ce886bf4cab630c6f9293533f5fc80",
+      "mode": "100644",
+      "path": "tests/dashboard_preview.php"
+    },
+    {
+      "blob": "0b7f72e2c7dac527621b7bdd853d1d29302cf90b",
+      "mode": "100644",
+      "path": "tests/dashboard_recency_test.php"
+    },
+    {
+      "blob": "4c2c901a3f5c6e87d7d2eacba61d15a9e4354e63",
+      "mode": "100644",
+      "path": "tests/dashboard_refresh_test.js"
+    },
+    {
+      "blob": "8fe7aadd23546f24c76ef991afd1ccc010fcc1a6",
+      "mode": "100644",
+      "path": "tests/dashboard_restore_policy_test.php"
+    },
+    {
+      "blob": "55880f39b1cc2ff01c897b5f6da9b41700a79b67",
+      "mode": "100644",
+      "path": "tests/dashboard_standalone_relationship_bootstrap_test.php"
+    },
+    {
+      "blob": "c9f02aaf0ecf803285ad7a6cc2e2bb4c487ac1c7",
+      "mode": "100644",
+      "path": "tests/dashboard_type_changes_test.php"
+    },
+    {
+      "blob": "b86153a5380e68b48e973a4940ea8ad2757261ff",
+      "mode": "100644",
+      "path": "tests/fixtures/README.md"
+    },
+    {
+      "blob": "e688a22fc29324a21b028e1afb0fb2a71898a853",
+      "mode": "100644",
+      "path": "tests/fixtures/mp-install-recovery/campaign.py"
+    },
+    {
+      "blob": "82de4979250903f1217f429eea7d6d5d8f372eac",
+      "mode": "100644",
+      "path": "tests/fixtures/mp-native-db/commit_ack_proxy.py"
+    },
+    {
+      "blob": "273dc8f18ecd0bfdfbccc054f132d9d081e5a3b6",
+      "mode": "100644",
+      "path": "tests/fixtures/mp-native-db/eventlog-base-ddl.sql"
+    },
+    {
+      "blob": "868b2ea4cb7ebf5b2069c1b3a7303fec028472c8",
+      "mode": "100644",
+      "path": "tests/fixtures/relationship_manager.cf5030f15781637498be86debe26fcf102f5690d.php"
+    },
+    {
+      "blob": "d2dafa0dc9715ef3f23d7df00b74ff6fdce2153c",
+      "mode": "100644",
+      "path": "tests/influence_test.php"
+    },
+    {
+      "blob": "4374e507ee38322bf5ca576d10f3bc1ff5f15cf5",
+      "mode": "100644",
+      "path": "tests/install_recovery_integration_test.php"
+    },
+    {
+      "blob": "37fc2271e5a8e8ae7837169e73f11a457c47567b",
+      "mode": "100644",
+      "path": "tests/logging_test.php"
+    },
+    {
+      "blob": "2a1bd0e108e35340c62a715f64e729c471309ade",
+      "mode": "100644",
+      "path": "tests/manifest_update_check.php"
+    },
+    {
+      "blob": "3e7e90c3c3392e957dc4c6328eadb1ef4bbe7229",
+      "mode": "100644",
+      "path": "tests/model_test.php"
+    },
+    {
+      "blob": "fe86fbf79a99fb9b3cc65628936b31a0ba116bec",
+      "mode": "100644",
+      "path": "tests/native_persistence_integration_test.php"
+    },
+    {
+      "blob": "30bc2903e717cf7a6b9ca7cd875fd85d20ec43b8",
+      "mode": "100644",
+      "path": "tests/overhearing_test.php"
+    },
+    {
+      "blob": "95bc3e30374c22d73ea9844d93f2c0b977388507",
+      "mode": "100644",
+      "path": "tests/package_manager_check.php"
+    },
+    {
+      "blob": "1a9ada5226886560e35eb31c89d570a6266d2ec9",
+      "mode": "100644",
+      "path": "tests/player_store_test.php"
+    },
+    {
+      "blob": "ac5520f75e6782736102054b329aa137b15d1796",
+      "mode": "100644",
+      "path": "tests/reflection_diagnostics_test.php"
+    },
+    {
+      "blob": "2e6540e179b605c17325aaea7aba0462c2bccae7",
+      "mode": "100644",
+      "path": "tests/reflection_observer_test.php"
+    },
+    {
+      "blob": "fecbd591f55918ccde6d53516f2c86583ac04816",
+      "mode": "100644",
+      "path": "tests/reflection_reply_test.php"
+    },
+    {
+      "blob": "d82952054eb2acda8f73d6d8b70e003e91b2f3e3",
+      "mode": "100644",
+      "path": "tests/reflection_test.php"
+    },
+    {
+      "blob": "73358d1bc016aec88f5a17093a0b8094051ccea5",
+      "mode": "100644",
+      "path": "tests/relationship_context_test.php"
+    },
+    {
+      "blob": "22658ff3e1d1c624b4d385a6bd82b2c71a87159c",
+      "mode": "100644",
+      "path": "tests/relationship_type_judgments_test.php"
+    },
+    {
+      "blob": "ac9d0506d8416ebd173c246b210de7305cbcbfdb",
+      "mode": "100644",
+      "path": "tests/repository_tar_check.py"
+    },
+    {
+      "blob": "9ee163f60b09ec0ccd0b81fe64d32c569ee6e6ba",
+      "mode": "100644",
+      "path": "tests/restore_policy_integration_test.php"
+    },
+    {
+      "blob": "c14658958318d7c413e1be944694da9a710809df",
+      "mode": "100644",
+      "path": "tests/restore_policy_test.php"
+    },
+    {
+      "blob": "416d93caf587a1044d73c688d1e4c348a306c845",
+      "mode": "100644",
+      "path": "tests/runtime_test.php"
+    },
+    {
+      "blob": "7bc8e92a6e6f7a051303ba70763c86fc7670dbf5",
+      "mode": "100644",
+      "path": "tests/site_entrypoint_check.php"
+    },
+    {
+      "blob": "4025e125dee4c3ad12e4f95a819552e7b660035f",
+      "mode": "100644",
+      "path": "tests/site_runtime_compatibility_test.php"
+    },
+    {
+      "blob": "52c935754e7772675e2348316f28f2de4cdad4c3",
+      "mode": "100644",
+      "path": "tests/store_logging_test.php"
+    },
+    {
+      "blob": "8f53ca5a8da4efd220ff273f1a477ffb0071ad14",
+      "mode": "100644",
+      "path": "tests/store_timeout_test.php"
+    },
+    {
+      "blob": "7a4faf0eda609b74bda062c69f8638dbceb513a4",
+      "mode": "100644",
+      "path": "tests/test_package.py"
+    }
+  ],
+  "protected_path_count": 258,
+  "protected_scope": "All tracked paths outside plugins/private_conversation/** and root README.md"
+}

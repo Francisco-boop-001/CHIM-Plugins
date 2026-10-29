@@ -7,3 +7,7 @@
 .htaccess text eol=lf
 *.sh text eol=lf
 *.ps1 text eol=crlf
+
+# Keep release receipts and the executed verifier byte-exact for recorded hashes.
+/tasks/release-0.1.25/**/*.json -text
+/tasks/release-0.1.25/package/independent_inventory.py -text

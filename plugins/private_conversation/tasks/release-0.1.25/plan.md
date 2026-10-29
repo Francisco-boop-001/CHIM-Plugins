@@ -16,10 +16,10 @@ Baseline: canonical main/HEAD 0c697793311b314e8158b122e3c2b718638ca9e0; latest p
 - [x] Inspect status, baseline/remote refs and exact publication conventions; preserve prior edits; review release metadata/docs.
 - [x] Finish metadata and bounded source checks; independently audit current package builder/layout and compatibility limits. Existing sufficient source evidence may be reused.
 - [x] Build 0.1.25 candidate and run existing package checks plus independent inventory/source comparison. No new product behavior or builder changes.
-- [ ] Lead reviews all changes/verification, explicitly stages scoped source/tests/docs/evidence, commits and tags; export clean source, rebuild all five assets and compare exact bytes before upload.
-- [ ] Push source/tag on release branch; create draft with exact verified assets/checksums, download and compare all draft bytes; then publish canonical release and anonymously verify all public bytes.
-- [ ] Only after public-byte proof advance canonical main/updater. Mirror PCV-only source/docs and identical five assets on CHIM-Plugins; verify full non-PCV scope and draft/public bytes before its updater/source branch advances.
-- [ ] Record exact commit/tag/release URLs, public hashes, protected scope and test limits. No live installation or gameplay claim.
+- [x] Lead reviews all changes/verification, explicitly stages scoped source/tests/docs/evidence, commits and tags; export clean source, rebuild all five assets and compare exact bytes before upload.
+- [x] Push source/tag on release branch; create draft with exact verified assets/checksums, download and compare all draft bytes; then publish canonical release and anonymously verify all public bytes.
+- [x] Only after public-byte proof advance canonical main/updater. Mirror PCV-only source/docs and identical five assets on CHIM-Plugins; verify full non-PCV scope and draft/public bytes before its updater/source branch advances.
+- [x] Record exact commit/tag/release URLs, public hashes, protected scope and test limits. No live installation or gameplay claim.
 
 ## Preflight and rulings
 
@@ -39,7 +39,7 @@ Department and other components remain separately owned. A newer standalone PCV 
 
 ## Review
 
-Pending.
+All source, deterministic package, clean-tag, authenticated draft and anonymous public-byte gates passed, with separate independent and lead review. Both update feeds advanced only after public proofs. The selector-only hub correction and unchanged older release assets are recorded. Interface compatibility was handed off separately with no PCV runtime grant or pin change. See publication/record.md; closing documentation preserves source tags/assets and all protected component paths.
 
 ## Coordination and sequencing rulings
 

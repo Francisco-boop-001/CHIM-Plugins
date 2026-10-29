@@ -1,0 +1,46 @@
+{
+  "assets": [
+    {
+      "bytes": 3055133,
+      "name": "chim-plugin.tar.gz",
+      "sha256": "8b6b1618d09ecc9c24413a6909e1ac9dc141c14fd9b6693f2d74eb2893786567"
+    },
+    {
+      "bytes": 3058334,
+      "name": "private_conversation-0.1.25-mo2.zip",
+      "sha256": "0ecf7ebf31ca69261395b040dc802cd62bff4b17c26306a5c68183496e3c1cdd"
+    },
+    {
+      "bytes": 3484443,
+      "name": "private_conversation-0.1.25.dwpkg",
+      "sha256": "05fdec89855062d1dfe7f64ac745f4bcb9d1ddf7a2414a7a4ed45107e4fde3be"
+    },
+    {
+      "bytes": 3055206,
+      "name": "private_conversation.tar.gz",
+      "sha256": "1d3d209670ac92c038546c218d9e48ccaf255a6ec7ab63584cdad578dec2b93e"
+    },
+    {
+      "bytes": 381,
+      "name": "SHA256SUMS.txt",
+      "sha256": "5850351814f91293ca357427952acf9cf2c9876f1a18fd5aa8bdaaa32469e840"
+    }
+  ],
+  "candidate_asset_count": 5,
+  "checks": [
+    "exact five regular candidate assets",
+    "DWPkg safe exact member list and CRC",
+    "DWPkg schema/version/mutable-path manifest",
+    "DWPkg internal checksums",
+    "all DWPkg payload bytes equal current server source",
+    "wrapped TAR exact wrapper and deterministic metadata",
+    "flat TAR exact allowlisted files",
+    "MO2 meta.ini and embedded DWPkg",
+    "outer SHA256SUMS covers four assets",
+    "text payload LF-only",
+    "no mutable state file embedded"
+  ],
+  "release_version": "0.1.25",
+  "source_file_count": 21,
+  "status": "PASS"
+}

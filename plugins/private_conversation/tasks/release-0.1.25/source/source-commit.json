@@ -1,0 +1,12 @@
+{
+  "sourceCommit": "886a54967db7c6c08725c8bec8854ea3919ea532",
+  "tag": "private_conversation-v0.1.25",
+  "previousMain": "0c697793311b314e8158b122e3c2b718638ca9e0",
+  "sourceBranch": "release/private-conversation-0.1.25",
+  "version": "0.1.25",
+  "maturity": "BETA",
+  "liveAccess": false,
+  "componentsChanged": [
+    "Private Conversation"
+  ]
+}

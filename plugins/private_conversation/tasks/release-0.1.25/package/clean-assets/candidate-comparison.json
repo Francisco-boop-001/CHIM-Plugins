@@ -1,0 +1,38 @@
+{
+  "asset_count": 5,
+  "assets": [
+    {
+      "byte_identical": true,
+      "bytes": 381,
+      "name": "SHA256SUMS.txt",
+      "sha256": "5850351814f91293ca357427952acf9cf2c9876f1a18fd5aa8bdaaa32469e840"
+    },
+    {
+      "byte_identical": true,
+      "bytes": 3055133,
+      "name": "chim-plugin.tar.gz",
+      "sha256": "8b6b1618d09ecc9c24413a6909e1ac9dc141c14fd9b6693f2d74eb2893786567"
+    },
+    {
+      "byte_identical": true,
+      "bytes": 3058334,
+      "name": "private_conversation-0.1.25-mo2.zip",
+      "sha256": "0ecf7ebf31ca69261395b040dc802cd62bff4b17c26306a5c68183496e3c1cdd"
+    },
+    {
+      "byte_identical": true,
+      "bytes": 3484443,
+      "name": "private_conversation-0.1.25.dwpkg",
+      "sha256": "05fdec89855062d1dfe7f64ac745f4bcb9d1ddf7a2414a7a4ed45107e4fde3be"
+    },
+    {
+      "byte_identical": true,
+      "bytes": 3055206,
+      "name": "private_conversation.tar.gz",
+      "sha256": "1d3d209670ac92c038546c218d9e48ccaf255a6ec7ab63584cdad578dec2b93e"
+    }
+  ],
+  "commit": "886a54967db7c6c08725c8bec8854ea3919ea532",
+  "status": "PASS",
+  "tag": "private_conversation-v0.1.25"
+}
